@@ -1,0 +1,147 @@
+# Actualización diaria del simulador.
+#
+# Cada día: descarga las encuestas de Wikipedia, las valida, recalcula la media (que también cambia con la
+# fecha, porque las encuestas pierden peso con los días), reconstruye la página y la publica en GitHub Pages.
+#
+# Respaldo, en tres capas:
+#   1. Si Wikipedia falla o devuelve algo raro, modelo/actualizar.py no toca datos/polls.csv (el último fichero
+#      bueno) y el workflow NO publica nada: la página en línea sigue siendo la del último día correcto.
+#   2. Antes de sustituir polls.csv se guarda una copia fechada en datos/respaldo/ (las 30 últimas), además del
+#      historial de git.
+#   3. Si falla cualquier paso posterior (cálculo, comprobación de datos, compilación), no hay commit ni despliegue.
+# En cualquiera de los casos se abre (o se comenta) un issue con la etiqueta «fallo-datos»; GitHub avisa por
+# correo. Cuando vuelve a ir bien, el issue se cierra solo.
+name: Actualizar encuestas
+
+on:
+  schedule:
+    - cron: '17 7 * * *'     # 07:17 UTC = 08:17 en Madrid en invierno (09:17 en verano)
+  workflow_dispatch: {}       # botón «Run workflow» para lanzarlo a mano
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+
+concurrency:
+  group: actualizar-encuestas
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      estado: ${{ steps.datos.outputs.estado }}
+      cambios: ${{ steps.datos.outputs.cambios }}
+      motivo: ${{ steps.datos.outputs.motivo }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r modelo/requirements.txt
+
+      - name: Tests del lector de Wikipedia
+        run: python modelo/tests/test_fetch_polls.py
+
+      - name: Descargar y validar encuestas
+        id: datos
+        run: python modelo/actualizar.py
+
+      - name: Aviso si se usa el respaldo
+        if: steps.datos.outputs.estado == 'respaldo'
+        env:
+          MOTIVO: ${{ steps.datos.outputs.motivo }}   # texto que viene de Wikipedia: siempre por variable, nunca dentro del script
+        run: echo "::warning title=Encuestas no actualizadas::$MOTIVO. Se mantiene el último fichero bueno y la página publicada."
+
+      # A partir de aquí solo si los datos son buenos. Se reconstruye cada día aunque no haya encuestas nuevas,
+      # porque la media se calcula para la fecha del día.
+      - name: Recalcular media y proyección
+        if: steps.datos.outputs.estado == 'ok'
+        run: python modelo/export.py
+
+      - name: Comprobar los datos de la app
+        if: steps.datos.outputs.estado == 'ok'
+        run: python modelo/comprobar.py
+
+      - uses: actions/setup-node@v4
+        if: steps.datos.outputs.estado == 'ok'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Construir la página
+        if: steps.datos.outputs.estado == 'ok'
+        working-directory: app
+        run: |
+          npm ci
+          npm run data
+          npm run check
+          npm run build
+          test "$(wc -c < ../index.html)" -gt 300000   # una página vacía o rota pesaría mucho menos
+
+      - name: Commit
+        if: steps.datos.outputs.estado == 'ok'
+        env:
+          MOTIVO: ${{ steps.datos.outputs.motivo }}
+        run: |
+          git config user.name "simulador-29n[bot]"
+          git config user.email "simulador-29n@users.noreply.github.com"
+          git add datos/polls.csv datos/respaldo datos/app_data.json app/src/lib/data/app_data.json index.html
+          git diff --cached --quiet || git commit -m "Datos del $(date -u +%Y-%m-%d): $MOTIVO"
+          git push
+
+      - name: Preparar GitHub Pages
+        if: steps.datos.outputs.estado == 'ok'
+        run: mkdir -p _site && cp index.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.datos.outputs.estado == 'ok'
+        with:
+          path: _site
+
+  publicar:
+    needs: actualizar
+    if: needs.actualizar.outputs.estado == 'ok'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  avisar:
+    needs: [actualizar, publicar]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      ESTADO: ${{ needs.actualizar.outputs.estado }}
+      MOTIVO: ${{ needs.actualizar.outputs.motivo }}
+    steps:
+      - name: Abrir o comentar el issue de fallo
+        if: needs.actualizar.result == 'failure' || needs.publicar.result == 'failure' || needs.actualizar.outputs.estado == 'respaldo'
+        run: |
+          gh label create fallo-datos --color B60205 --description "La actualización diaria no se ha publicado" --force
+          if [ "$ESTADO" = "respaldo" ]; then
+            MSG="Las encuestas no se han actualizado y se mantiene el último fichero bueno. Motivo: $MOTIVO"
+          else
+            MSG="Ha fallado un paso del cálculo, la compilación o la publicación; la página en línea sigue siendo la del último día correcto."
+          fi
+          BODY="$(date -u +'%Y-%m-%d %H:%M UTC') — $MSG
+          Ejecución: $RUN_URL"
+          N=$(gh issue list --label fallo-datos --state open --json number --jq '.[0].number')
+          if [ -n "$N" ]; then gh issue comment "$N" --body "$BODY"; else gh issue create --title "La actualización diaria del simulador ha fallado" --label fallo-datos --body "$BODY"; fi
+      - name: Cerrar el issue si todo ha ido bien
+        if: needs.actualizar.result == 'success' && needs.publicar.result == 'success'
+        run: |
+          for N in $(gh issue list --label fallo-datos --state open --json number --jq '.[].number'); do
+            gh issue close "$N" --comment "Resuelto: la actualización del $(date -u +%Y-%m-%d) ha funcionado. $RUN_URL"
+          done

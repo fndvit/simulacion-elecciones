@@ -1,0 +1,21 @@
+import fs from 'fs';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const topo = require('./node_modules/es-atlas/es/provinces.json');
+const { feature } = require('topojson-client');
+const { presimplify, simplify, quantile } = require('topojson-simplify');
+const d3 = await import('d3-geo');
+const t2 = presimplify(JSON.parse(JSON.stringify(topo)));
+const s = simplify(t2, quantile(t2, 0.10));
+const fc = feature(s, s.objects.provinces);
+const CAN = new Set(['35','38']);
+const main = { type:'FeatureCollection', features: fc.features.filter(f=>!CAN.has(f.id)) };
+const can = { type:'FeatureCollection', features: fc.features.filter(f=>CAN.has(f.id)) };
+const W = 640, H = 540;
+const pm = d3.geoConicConformal().rotate([3.5,0]).parallels([35,43]).fitExtent([[150,6],[W-6,H-60]], main);
+const pc = d3.geoConicConformal().rotate([15.5,0]).parallels([27,29]).fitExtent([[8,H-120],[230,H-8]], can);
+const out = {};
+for (const f of fc.features) { const p = d3.geoPath(CAN.has(f.id)?pc:pm).digits(1); out[f.id] = { n: f.properties.name, d: p(f), c: p.centroid(f).map(v=>Math.round(v)), a: Math.round(p.area(f)) }; }
+const bb = d3.geoPath(pc).bounds(can);
+fs.writeFileSync('../datos/geo.json', JSON.stringify({ W, H, p: out, canBox: bb.flat().map(Math.round) }));
+console.log(Object.keys(out).length, JSON.stringify(out).length, bb, out['51'], out['52'].c);

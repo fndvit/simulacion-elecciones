@@ -1,0 +1,13 @@
+import fs from 'fs';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const topo = require('./node_modules/es-atlas/es/provinces.json');
+const { feature } = require('topojson-client');
+const d3 = await import('d3-geo');
+const fc = feature(topo, topo.objects.provinces);
+const main = { type:'FeatureCollection', features: fc.features.filter(f=>!['35','38','07','51','52','54'].includes(f.id)) };
+const pm = d3.geoConicConformal().rotate([3.5,0]).parallels([35,43]).fitSize([1000, 1000], main);
+const P = f => { const g = f.geometry; const polys = g.type==='Polygon'?[g.coordinates]:g.coordinates; return polys.map(p=>p.map(r=>r.map(c=>pm(c).map(v=>+v.toFixed(2))))); };
+const out = {}; for (const f of fc.features) if (f.id !== '54') out[f.id] = P(f);
+fs.writeFileSync('../data/proj_polys.json', JSON.stringify(out));
+console.log(Object.keys(out).length);

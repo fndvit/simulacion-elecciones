@@ -1,0 +1,78 @@
+/* Tokens from the Local Elections Atlas (app/src/app.css), plus a dark theme. */
+:root {
+  --font-ui: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-display: 'Bodoni Moda', Didot, 'Bodoni MT', Georgia, serif; /* atlas nav title */
+
+  --bg: #fffefa;          /* warm off-white page background */
+  --fg: #575052;          /* warm dark grey — headings + main body text */
+  --ink: #000000;         /* strongest text (title, values) */
+  --muted: #816c5a;       /* warm brown — secondary text */
+  --highlight: #ffefad;   /* pale yellow — active control */
+  --hl-ink: #000000;
+  --line: #e7e2da;
+  --panel: #f7f4ef;
+  --menu: rgba(251, 243, 235, 0.96);
+  --up: #1a7f37; --up-bg: rgba(26, 127, 55, 0.1);
+  --down: #b3261e; --down-bg: rgba(179, 38, 30, 0.1);
+  --knob: #16181d;
+  --map-empty: #efebe4;
+  --stroke: #16181d;
+  --halo: #fffefa;
+  --glass: rgba(255, 254, 250, 0.78);
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+
+  --s1: 20px; --s2: 24px; --s3: 40px; --s4: 54px;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1b1612; --fg: #d9d3d4; --ink: #f8f2ea; --muted: #bca896; --highlight: #5b4a10; --hl-ink: #fff4c7;
+    --line: #3a3129; --panel: #261f19; --menu: rgba(38, 31, 25, 0.97);
+    --up: #62c77f; --up-bg: rgba(98, 199, 127, 0.14); --down: #f2847a; --down-bg: rgba(242, 132, 122, 0.14);
+    --knob: #efe6da; --map-empty: #2e2620; --stroke: #f8f2ea; --halo: #1b1612; --glass: rgba(27, 22, 18, 0.8);
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #1b1612; --fg: #d9d3d4; --ink: #f8f2ea; --muted: #bca896; --highlight: #5b4a10; --hl-ink: #fff4c7;
+  --line: #3a3129; --panel: #261f19; --menu: rgba(38, 31, 25, 0.97);
+  --up: #62c77f; --up-bg: rgba(98, 199, 127, 0.14); --down: #f2847a; --down-bg: rgba(242, 132, 122, 0.14);
+  --knob: #efe6da; --map-empty: #2e2620; --stroke: #f8f2ea; --halo: #1b1612; --glass: rgba(27, 22, 18, 0.8);
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-body); font-weight: 300; color: var(--fg); background: var(--bg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { font-family: var(--font-ui); font-weight: 300; margin: 0; text-wrap: balance; }
+button, input, select { font: inherit; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+/* shared bits used across components */
+.hd { font-size: 24px; line-height: 32px; font-weight: 200; color: var(--ink); }
+.hd strong { font-weight: 700; }
+.sub { font-family: var(--font-ui); font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 640px; font-weight: 400; }
+.sub b { color: var(--fg); }
+.lede { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); margin: 0; max-width: 62ch; }
+.note { font-family: var(--font-ui); font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0; font-weight: 400; }
+.method { font-family: var(--font-ui); font-size: 13px; color: var(--muted); margin: 6px 0 0; font-weight: 400; line-height: 1.5; }
+.scrollx { overflow-x: auto; }
+.up { color: var(--up); } .down { color: var(--down); }
+.chip { display: inline-flex; gap: 4px; align-items: center; padding: 1px 6px; border-radius: 4px; background: var(--panel); color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; font-family: var(--font-ui); font-size: 12px; }
+.chip i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+input[type='range'] { width: 100%; accent-color: var(--knob); cursor: pointer; margin: 2px 0 0; }
+
+/* glassy tooltip (atlas .chart-tip) */
+.tip { position: absolute; z-index: 40; pointer-events: none; transform: translate(14px, 12px); width: max-content; max-width: 260px; padding: 10px 12px; border-radius: 10px; background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--shadow); font-family: var(--font-ui); font-size: 12px; color: var(--fg); line-height: 1.45; font-weight: 400; }
+.tip h4 { margin: 0 0 4px; font-size: 14px; color: var(--ink); font-weight: 700; }
+.tip .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
