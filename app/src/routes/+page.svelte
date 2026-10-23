@@ -43,7 +43,7 @@
 </script>
 
 <header class="mast">
-  <div class="brand"><VitLogo height={26} /><h1 class="brand-title">Proyección elecciones 29N</h1></div>
+  <div class="brand"><VitLogo height={26} /><h1 class="brand-title">TresCincuenta.es</h1></div>
   <div class="share-top"><ShareButton {entries} {st} {cur} /></div>
 </header>
 
@@ -92,7 +92,7 @@
   .block { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .narrow { max-width: 560px; }
   .brand { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
-  .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: 21px; line-height: 1.3; color: var(--fg); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
+  .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: 21px; line-height: 1.3; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 480px) { .brand-title { font-size: 17px; } }
   .intro { margin-bottom: calc(var(--s2) - var(--s4)); }
   /* the deck: same size as the h2s of the centre column, light sans */

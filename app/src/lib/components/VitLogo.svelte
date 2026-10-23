@@ -21,9 +21,9 @@
 </a>
 
 <style>
-  .vitlogo { display: inline-flex; line-height: 0; color: #9b9496; }
+  .vitlogo { display: inline-flex; line-height: 0; color: #5f585a; }
   .vitlogo:hover { opacity: 0.72; }
   svg { display: block; width: auto; }
-  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .vitlogo { color: #b3acae; } }
-  :global(:root[data-theme='dark']) .vitlogo { color: #b3acae; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .vitlogo { color: #d6d0d2; } }
+  :global(:root[data-theme='dark']) .vitlogo { color: #d6d0d2; }
 </style>
