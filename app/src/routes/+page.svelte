@@ -13,6 +13,8 @@
   import VitLogo from '$lib/components/VitLogo.svelte';
   import ShareButton from '$lib/components/ShareButton.svelte';
   import { blank, run, historyEntries } from '$lib/model';
+  import { DATA } from '$lib/data';
+  import { longDate } from '$lib/format';
   import { scenarioFromUrl } from '$lib/share';
   import type { Scenario } from '$lib/types';
 
@@ -53,6 +55,7 @@
   <main class="center">
     <section class="block intro">
       <p class="lede">Este simulador <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={toBase}><strong>media ponderada de encuestas</strong></a> nacionales, repartida por provincias según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.</p>
+      <p class="updated">Datos actualizados a {longDate(DATA.today)}</p>
     </section>
     <section class="block"><SeatBar {cur} {scope} /></section>
     <section class="block"><HexMap {cur} bind:scope bind:focusParty /></section>
@@ -95,6 +98,10 @@
   /* the deck: same size as the h2s of the centre column, light sans */
   .intro .lede { max-width: 40em; font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: var(--ink); }
   .intro .lede strong { font-weight: 700; }
+  /* same size as the seat bar caption; date of the last good data (the page is only rebuilt with good data) */
+  .updated { margin: -6px 0 0; font-family: var(--font-ui); font-size: 14px; font-weight: 400; color: #c4314b; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .updated { color: #f2847a; } }
+  :global(:root[data-theme='dark']) .updated { color: #f2847a; }
   .jump { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .jump:hover { text-decoration-thickness: 2px; }
   :global(#la-base) { scroll-margin-top: calc(var(--nav-h) + 16px); }
