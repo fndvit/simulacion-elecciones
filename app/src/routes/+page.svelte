@@ -73,7 +73,7 @@
 
 <style>
   /* sticky title bar, as in trees.fndvit.org: the page fades out under it (gradient + slight blur, masked) */
-  .mast { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; padding-inline: max(16px, calc((100% - 1440px) / 2 + 16px)); }
+  .mast { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 8px; padding-inline: max(16px, calc((100% - 1440px) / 2 + 16px)); }
 
   /* atlas grid: rail · gap · centre · gutter · history */
   .scn { max-width: 1440px; margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -91,9 +91,12 @@
   .center { grid-column: 3; display: flex; flex-direction: column; gap: var(--s4); min-width: 0; padding-top: 14px; }
   .block { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .narrow { max-width: 560px; }
-  .brand { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
-  .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: 21px; line-height: 1.3; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
-  @media (max-width: 480px) { .brand-title { font-size: 17px; } }
+  /* the name is as tall as the logo: Bodoni Moda's capitals are 0.75 em high, so font-size = logo height / 0.75,
+     and the baseline sits on the logo's bottom edge (a flex item with no text aligns by its bottom) */
+  .brand { --logo-h: 26px; display: inline-flex; align-items: baseline; gap: 12px; min-width: 0; }
+  .brand :global(.vitlogo svg) { height: var(--logo-h); }
+  .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: calc(var(--logo-h) / 0.75); line-height: 1.2; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 480px) { .brand { --logo-h: 20px; } }
   .intro { margin-bottom: calc(var(--s2) - var(--s4)); }
   /* the deck: same size as the h2s of the centre column, light sans */
   .intro .lede { max-width: 40em; font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: var(--ink); }
@@ -105,7 +108,7 @@
   .jump { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .jump:hover { text-decoration-thickness: 2px; }
   :global(#la-base) { scroll-margin-top: calc(var(--nav-h) + 16px); }
-  :global(:root) { --nav-h: 50px; }
+  :global(:root) { --nav-h: 60px; }
 
   @media (max-width: 1380px) {
     .scn { grid-template-columns: 290px 40px minmax(0, 1fr); }
