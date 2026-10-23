@@ -76,6 +76,8 @@
     const top = ca === '04' ? [Math.min(...hs.map((h) => GEO.cells[h.i].ring.reduce((m, p) => Math.min(m, p[1]), 1e9))), Math.min(...hs.map((h) => h.y))] : null;
     return { ca, lines: CA_N[ca], out: ca === '04', g: top ? [gx / A, top[0] - 14] : [gx / A, gy / A], h: top ? [hx, top[1] - HEX.R - 10] : [hx, hy] };
   }).filter((c) => c.ca !== '05');
+  // pointer over the sea, a gap or the inset box: no province is hovered any more
+  function offCell(e: MouseEvent) { if (tip && !(e.target as Element).classList?.contains('hx')) tip = null; }
   function clear(e: MouseEvent) { if (!(e.target as Element).classList?.contains('hx')) { scope = 'ES'; tip = null; } }
   function lbl(id: string) { const h = HEX.byProv[id][0], g = GEO.cells[h.i].c; return { x: lerp(g[0], h.x), y: lerp(g[1], h.y) }; }
 
@@ -129,7 +131,7 @@
 </div>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="mapwrap" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onclick={clear}>
+<div class="mapwrap" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
     <defs>{#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}</defs>
     <path class="canbox" d="M{cb[0]},{cb[1]}H{cb[2]}V{cb[3]}" />
