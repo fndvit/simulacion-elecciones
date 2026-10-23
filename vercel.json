@@ -1,7 +1,21 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "npm ci --prefix app",
-  "buildCommand": "npm run build --prefix app",
-  "outputDirectory": "app/build"
+  "services": {
+    "app": {
+      "root": "app",
+      "framework": "sveltekit-1"
+    },
+    "modelo": {
+      "root": "modelo",
+      "runtime": "python"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "app"
+      }
+    }
+  ]
 }
