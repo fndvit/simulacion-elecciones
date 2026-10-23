@@ -1,0 +1,5 @@
+# Vercel solo necesita la app. El modelo en Python lo ejecuta GitHub Actions, no Vercel:
+# si se sube, Vercel lo detecta como un servicio Python y pide un «entrypoint».
+modelo/
+datos/
+.github/
