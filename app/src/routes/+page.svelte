@@ -99,7 +99,7 @@
   .intro .lede { max-width: 40em; font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: var(--ink); }
   .intro .lede strong { font-weight: 700; }
   /* same size as the seat bar caption; date of the last good data (the page is only rebuilt with good data) */
-  .updated { margin: -6px 0 0; font-family: var(--font-ui); font-size: 14px; font-weight: 400; color: #c4314b; }
+  .updated { margin: -6px 0 0; font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: #c4314b; }
   @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .updated { color: #f2847a; } }
   :global(:root[data-theme='dark']) .updated { color: #f2847a; }
   .jump { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
