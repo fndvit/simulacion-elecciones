@@ -18,12 +18,12 @@
 
 1. Tests del lector de Wikipedia.
 2. `modelo/actualizar.py` descarga las encuestas (tres intentos) y las **valida** contra el último fichero bueno: al menos 50 encuestas, no pierde más del 10 %, la más reciente no retrocede, sin fechas futuras, PP y PSOE con valores razonables, ninguna encuesta que sume más del 115 %.
-3. Si son válidas: copia fechada del `polls.csv` anterior en `datos/respaldo/` (las 30 últimas), nuevo `polls.csv`, recálculo de la media y la proyección para la fecha del día (`export.py`), comprobación de cordura (`comprobar.py`: 52 circunscripciones, 350 escaños, media que suma ~100 %), compilación, commit y publicación en GitHub Pages.
+3. Si son válidas: copia fechada del `polls.csv` anterior en `datos/respaldo/` (las 30 últimas), nuevo `polls.csv`, recálculo de la media y la proyección para la fecha del día (`export.py`), comprobación de cordura (`comprobar.py`: 52 circunscripciones, 350 escaños, media que suma ~100 %), compilación y commit. **Vercel** publica cada commit de `main` según `vercel.json` (instala y compila `app/`, sirve `app/build/`).
 
 **Si algo falla, nunca se publica nada a medias:**
 
 - Wikipedia caída, cambio de formato o datos raros → no se toca `datos/polls.csv` (el último bueno) ni la página publicada.
-- Falla el cálculo, la comprobación o la compilación → no hay commit ni despliegue; la página sigue siendo la del último día correcto.
+- Falla el cálculo, la comprobación o la compilación → no hay commit, así que Vercel no despliega nada nuevo; la página sigue siendo la del último día correcto. Si fallara la compilación en Vercel, Vercel mantiene el despliegue anterior.
 - En ambos casos se abre un issue con la etiqueta `fallo-datos` (o se comenta el que ya esté abierto), y GitHub te avisa. Cuando vuelve a funcionar, el issue se cierra solo.
 - Para volver atrás a mano: copia el fichero que quieras de `datos/respaldo/` sobre `datos/polls.csv` y lanza el workflow, o usa el historial de git.
 
