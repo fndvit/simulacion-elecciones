@@ -85,7 +85,7 @@
     </section>
     <section class="sec">
       <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> a día de hoy.{/if}</h2>
-      <div class="f"><SeatBar {cur} {scope} projection={!sim} /></div>
+      <div class="f"><SeatBar {cur} bind:scope projection={!sim} /></div>
     </section>
     <section class="sec">
       <h2 class="hd w">{#if sim}Así quedaría <strong>el reparto por provincias</strong> en tu escenario.{:else}Así quedaría <strong>el reparto por provincias</strong> según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.{/if}</h2>

@@ -10,7 +10,7 @@
   import { sgnInt } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
-  let { cur, scope, projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
+  let { cur, scope = $bindable(), projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
   let W = $state(800);
 
   const isES = $derived(scope === 'ES');
@@ -74,7 +74,7 @@
 </script>
 
 <div class="seatbar" bind:clientWidth={W}>
-  <div class="cap"><b>{isES ? 'Congreso' : BYID[scope].n}</b> · {n} {n === 1 ? 'escaño' : 'escaños'}{isES ? ' · mayoría absoluta, 176' : ''}</div>
+  <div class="cap"><b>{isES ? 'Congreso' : BYID[scope].n}</b> · {n} {n === 1 ? 'escaño' : 'escaños'}{isES ? ' · mayoría absoluta, 176' : ''}{#if !isES}<button class="back" onclick={() => (scope = 'ES')} aria-label="Volver a toda España"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M9.5 4.75 6.25 8l3.25 3.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>Toda España</button>{/if}</div>
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="bars" class:hovering={hov} bind:this={barsEl} onpointerleave={() => (hov = null)}>
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
@@ -127,6 +127,10 @@
   .seatbar { display: flex; flex-direction: column; gap: 7px; }
   .cap { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; }
   .cap b { color: var(--fg); }
+  /* back to the national view: small, next to the province name */
+  .back { display: inline-flex; align-items: center; gap: 4px; margin-left: 12px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: var(--muted); vertical-align: -2px; }
+  .back:hover { color: var(--ink); }
+  .back svg { flex: none; }
   .bars { position: relative; display: flex; flex-direction: column; gap: 0; margin-top: 16px; }
   .band { display: block; overflow: visible; }
   .band text { font-family: var(--font-ui); font-size: 11px; font-weight: 700; fill: var(--muted); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; font-variant-numeric: tabular-nums; }
