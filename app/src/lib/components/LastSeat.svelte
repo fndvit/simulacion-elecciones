@@ -8,7 +8,8 @@
   import { fmtN, pct } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
-  let { cur, scope = $bindable() }: { cur: RunResult; scope: string } = $props();
+  let { cur, scope = $bindable(), projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
+  const of = $derived(projection ? 'de la proyección' : 'de tu escenario');
   const nm = (k: string) => PARTY[k as PartyKey].n, col = (k: string) => PARTY[k as PartyKey].c;
 
   const list = $derived(
@@ -22,14 +23,14 @@
 <h2 class="hd">
   En <span class="sel"><LibDrop bind:value={() => focus.p.id, (v) => (scope = v)} options={provOpts} label="Provincia" filter /></span>{#if focus.r.last && focus.r.chal}, el último escaño se disputa entre <strong>{nm(focus.r.last.k)}</strong> y <strong>{nm(focus.r.chal.k)}</strong>{/if}
 </h2>
-{#if scope === 'ES'}<p class="note">Sin provincia elegida se muestra la más ajustada de tu escenario.</p>{/if}
+{#if scope === 'ES'}<p class="note">Sin provincia elegida se muestra la más ajustada {of}.</p>{/if}
 <p class="sub">
   {#if focus.r.chal}{nm(focus.r.chal.k)} necesita <b>{fmtN(focus.r.chal.need)} votos</b> más para quitárselo (un {pct(focus.r.chal.need / focus.r.valid, 2)} del voto válido de la provincia).{/if}
   Cada columna es un partido y cada fila un divisor D'Hondt; el recuadro marca el escaño más frágil y el siguiente en la cola.
 </p>
 <SeatDiagram r={focus.r} />
 
-<h3 class="hd" style="margin-top:12px">Los <strong>escaños más ajustados</strong> de tu escenario</h3>
+<h3 class="hd" style="margin-top:12px">Los <strong>escaños más ajustados</strong> {of}</h3>
 <p class="sub">Votos que le faltan al aspirante para arrebatar el último escaño, en proporción al voto válido de cada circunscripción. Pulsa una fila para ir a esa provincia.</p>
 <div class="tight">
   {#each list.slice(0, 10) as x (x.p.id)}

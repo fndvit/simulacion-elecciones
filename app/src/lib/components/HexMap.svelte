@@ -14,10 +14,12 @@
   import { pct, fmtN } from '$lib/format';
   import type { RunResult } from '$lib/types';
 
-  let { cur, scope = $bindable(), focusParty = $bindable() }: { cur: RunResult; scope: string; focusParty: string } = $props();
+  let { cur, scope = $bindable(), focusParty = $bindable(), projection = false }: { cur: RunResult; scope: string; focusParty: string; projection?: boolean } = $props();
 
   let mode = $state<'seats' | 'party'>('seats');
-  let compare = $state<'scenario' | '2023'>('scenario');
+  let compareSel = $state<'scenario' | '2023'>('scenario');
+  // the projection has no scenario of its own: changes are always counted from 2023
+  const compare = $derived(projection ? '2023' : compareSel);
   let view = $state<'geo' | 'hex'>('geo');
   // 0 = geographic map, 1 = hexagons; in between, every cell morphs into its hexagon
   const T = new Tween(0, { duration: 1100, easing: cubicInOut });
@@ -95,6 +97,7 @@
   });
 </script>
 
+<div class="c7w stickyui mapui">
 <div class="map-top">
   <div class="toggle" role="group" aria-label="Cómo colorear el mapa">
     <button class:on={mode === 'seats'} aria-pressed={mode === 'seats'} onclick={() => (mode = 'seats')}>Escaños</button>
@@ -113,14 +116,16 @@
     <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="none" stroke="currentColor" stroke-width="3" /></svg>
     Escaños que cambian de manos{#if nChg}&nbsp;({nChg}){/if}
   </span>
+  {#if projection}<span class="since">desde 2023</span>{:else}
   <div class="toggle small" role="group" aria-label="Escaños que cambian de manos: respecto a">
-    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compare = 'scenario')}>en tu escenario</button>
-    <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compare = '2023')}>desde 2023</button>
-  </div>
+    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en tu escenario</button>
+    <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compareSel = '2023')}>desde 2023</button>
+  </div>{/if}
+</div>
 </div>
 
 
-<div class="legend">
+<div class="legend c7w">
   {#if mode === 'seats'}
     <span>Cada {view === 'hex' ? 'hexágono' : 'celda'} es un escaño. Líneas finas: provincias; gruesas: comunidades autónomas.</span>
     {#each BLOC.filter((P) => cur.seats[P]) as P}<span><i style="background:{PARTY[P].c}"></i>{PARTY[P].n} {cur.seats[P]}</span>{/each}
@@ -131,7 +136,7 @@
 </div>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="mapwrap" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
+<div class="mapwrap c7" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
     <defs>{#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}</defs>
     <path class="canbox" d="M{cb[0]},{cb[1]}H{cb[2]}V{cb[3]}" />
@@ -178,7 +183,7 @@
   {/if}
 </div>
 
-<p class="sub">
+<p class="sub w">
   {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid cuenta también el escaño nuevo).{/if}
   Pulsa una provincia para seleccionarla en todo el simulador.
 </p>
@@ -189,6 +194,8 @@
   .toggle { display: inline-flex; padding: 2px; border-radius: var(--radius); background: var(--panel); }
   .toggle button { font-family: var(--font-ui); font-weight: 300; font-size: 17px; line-height: 26px; cursor: pointer; border: 0; border-radius: 5px; padding: 2px 12px; background: transparent; color: var(--muted); }
   .toggle button.on { background: var(--highlight); color: var(--hl-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+  .mapui { display: flex; flex-direction: column; gap: 10px; }
+  .since { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; margin-left: -4px; }
   .chg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: -4px; }
   .toggle.small { border-radius: 999px; }
   .toggle.small button { font-size: 14px; line-height: 20px; padding: 2px 12px; border-radius: 999px; }

@@ -9,7 +9,7 @@
   import { sgnInt } from '$lib/format';
   import type { RunResult } from '$lib/types';
 
-  let { cur, scope }: { cur: RunResult; scope: string } = $props();
+  let { cur, scope, projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
   let W = $state(800);
 
   const isES = $derived(scope === 'ES');
@@ -68,17 +68,18 @@
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
       {#each segs as s (s.P)}{#if s.s}<span style="width:{s.s * 100}%;background:{PARTY[s.P].c}" title="{PARTY[s.P].n}: {s23[s.P] || 0} en 2023"></span>{/if}{/each}
     </div>
-    <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label="De los escaños de 2023 a los de tu escenario">
+    <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label={projection ? "De los escaños de 2023 a los de la proyección" : "De los escaños de 2023 a los de tu escenario"}>
       {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity="0.28" />{/each}
       {#each band as b (b.P)}{#if b.show}<text x={b.lx} y={BAND - 7} text-anchor="middle" class:up={b.d > 0} class:down={b.d < 0}>{sgnInt(b.d)}</text>{/if}{/each}
     </svg>
-    <div class="bar fat" role="img" aria-label="Escaños en tu escenario">
+    <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : "Escaños en tu escenario"}>
       {#each segs as s (s.P)}{#if s.f}<span style="width:{s.f * 100}%;background:{PARTY[s.P].c}" title="{PARTY[s.P].n}: {sC[s.P] || 0}"></span>{/if}{/each}
     </div>
     {#if isES}<div class="maj" aria-hidden="true"></div>{/if}
   </div>
-  <div class="note">Barra fina: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra gruesa: tu escenario. En 2023, Frente Amplio es Sumar.</div>
+  <div class="note">Barra fina: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra gruesa: {projection ? 'la proyección' : 'tu escenario'}. En 2023, Frente Amplio es Sumar.</div>
 
+  {#if !projection}
   <div class="deltas" class:stack style="min-height:{Math.max(64, layout.rows * 62) + (stack ? 26 : 0)}px">
     <div class="dhead">Cambios en tu escenario</div>
     {#if layout.items.length}
@@ -92,6 +93,7 @@
       <div class="none">Mueve los controles: aquí verás los escaños que tus cambios mueven respecto a la proyección de las encuestas.</div>
     {/if}
   </div>
+  {/if}
 
   {#if isES}
     <div class="sums">

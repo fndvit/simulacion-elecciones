@@ -115,11 +115,11 @@
   });
 </script>
 
-<h2 class="hd">Transferencia de voto <strong>de 2023 a tu escenario</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
-<p class="sub">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: tu escenario. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
-<div class="sankey">
+<h2 class="hd w">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
+<p class="sub w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
+<div class="sankey c7">
   <div class="fig" bind:this={host} bind:clientWidth={figW}
-    role="img" aria-label="Transferencias de voto en el escenario"></div>
+    role="img" aria-label="Transferencias de voto de 2023 a la proyección"></div>
   {#if !model}
     <p class="empty">No hay datos para este ámbito.</p>
   {/if}
