@@ -20,6 +20,9 @@
   import PollSection from './PollSection.svelte';
   import HistoryRail from './HistoryRail.svelte';
   import VitLogo from './VitLogo.svelte';
+  // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
+  import logo350 from '$lib/assets/logo-350.svg?raw';
+  const favicon = 'data:image/svg+xml,' + encodeURIComponent(logo350.replace(/viewBox="[^"]*"/, 'viewBox="0 -170.475 799.31 799.31"'));
   import ShareButton from './ShareButton.svelte';
   import { blank, run, historyEntries, BASE } from '$lib/model';
   import { DATA } from '$lib/data';
@@ -63,9 +66,10 @@
   });
 </script>
 
+<svelte:head><link rel="icon" type="image/svg+xml" href={favicon} /></svelte:head>
 {#snippet icon(d: string)}<svg class="ti" viewBox="0 -960 960 960" aria-hidden="true"><path {d} /></svg>{/snippet}
 <header class="mast" class:sim>
-  <div class="brand"><VitLogo height={26} /><h1 class="brand-title">TresCincuenta.es</h1></div>
+  <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio">{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
   <nav class="tabs" aria-label="Secciones">
     <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>{@render icon(ICON.proj)}Proyección</a>
     <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
@@ -141,6 +145,9 @@
      and the baseline sits on the logo's bottom edge (a flex item with no text aligns by its bottom) */
   .brand { --logo-h: 26px; display: inline-flex; align-items: baseline; gap: 12px; min-width: 0; }
   .brand :global(.vitlogo svg) { height: var(--logo-h); }
+  /* as in the atlas nav: ViT logo · project mark · title, all the same height */
+  .l350 { display: inline-flex; line-height: 0; align-self: baseline; }
+  .l350 :global(svg) { height: var(--logo-h); width: auto; display: block; }
   .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: calc(var(--logo-h) / 0.75); line-height: 1.2; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
 
   /* tabs */
