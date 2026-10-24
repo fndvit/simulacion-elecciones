@@ -81,18 +81,33 @@
     await tick();
     fly(v ? head350 : hero350, from);
   }
+  // the tabs ride up with the intro until they are level with their place in the bar; there they stick
+  // and slide sideways into position (scaling from the intro's larger size, centred vertically)
+  // the links' own extent (the bar's nav is wider than its right-aligned links)
+  function extent(el: HTMLElement) {
+    const rs = [...el.children].map((c) => c.getBoundingClientRect()).filter((r) => r.width);
+    const l = Math.min(...rs.map((r) => r.left)), r = Math.max(...rs.map((r) => r.right)), t = Math.min(...rs.map((r) => r.top)), bt = Math.max(...rs.map((r) => r.bottom));
+    return { left: l, width: r - l, mid: (t + bt) / 2 };
+  }
+  function slide(to: HTMLElement | undefined, a: ReturnType<typeof extent> | undefined) {
+    if (!to || !a || reduce()) return;
+    const box = to.getBoundingClientRect(), b = extent(to); if (!b.width) return;
+    const s = a.width / b.width, ox = b.left - box.left;
+    to.animate([{ transformOrigin: `${ox}px 50%`, transform: `translate(${a.left - b.left}px, ${a.mid - b.mid}px) scale(${s})` }, { transformOrigin: `${ox}px 50%`, transform: 'none' }],
+      { duration: 520, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
+  }
   async function setTabs(v: boolean) {
     if (v === pastTabs) return;
-    const from = (v ? heroTabs : headTabs)?.getBoundingClientRect();
+    const src = v ? heroTabs : headTabs; const from = src ? extent(src) : undefined;
     pastTabs = v;
     await tick();
-    fly(v ? headTabs : heroTabs, from);
+    slide(v ? headTabs : heroTabs, from);
   }
   function onScroll() {
     if (!heroOn || !lockEl || !mastEl) { overDark = false; return; }
     const h = mastEl.getBoundingClientRect().height;
     setPast(lockEl.getBoundingClientRect().top <= h);
-    if (heroTabs) setTabs(heroTabs.getBoundingClientRect().top <= h);
+    if (heroTabs && headTabs) setTabs(extent(heroTabs).mid <= extent(headTabs).mid);
     // switch once what is left of the dark intro fits under the opaque top of the light layer
     overDark = !!heroEl && heroEl.getBoundingClientRect().bottom > Math.min(20, h * 0.35);
   }
