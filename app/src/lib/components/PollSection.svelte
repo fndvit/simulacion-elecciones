@@ -3,6 +3,7 @@
   import { DATA } from '$lib/data';
   import { PARTY } from '$lib/parties';
   import { fmtN, dec, longDate } from '$lib/format';
+  import { href } from '$lib/nav';
 
   const KEYS = ['PP', 'PSOE', 'VOX', 'SUMAR', 'PODEMOS', 'SALF'] as const;
   const col = (k: string) => (k === 'SUMAR' ? PARTY.FA.c : PARTY[k as keyof typeof PARTY].c);
@@ -107,14 +108,9 @@
 <section class="meth w">
   <h3 class="hd">Cómo se calcula <strong>la proyección</strong></h3>
   <div class="prose">
-    <p><b>Media de encuestas.</b> Se usan {DATA.polls.length} encuestas publicadas desde octubre de 2025, recogidas de Wikipedia y actualizadas cada día de forma automática. Peso de cada una: recencia (el peso se reduce a la mitad cada {DATA.halfLife} días), tamaño de muestra (raíz de n/1.000, con tope en 3.000 y 800 si no se publica), valoración de la empresa demoscópica y frecuencia (las empresas con varios sondeos en el último mes reparten su peso: 1/√k).</p>
-    <p><b>Valoración de las empresas demoscópicas.</b> Error medio absoluto de su último sondeo antes del 23J de 2023 en PP, PSOE, Vox y Sumar, convertido en un multiplicador entre 0,6 y 1,4. Las empresas sin historial reciben 0,85. Se incluyen la estimación del CIS y las reestimaciones de sus microdatos que publican otras empresas; como salen de la misma encuesta, comparten un solo peso.</p>
-    <p><b>Sesgo de cada empresa.</b> Cada encuesta se compara con la media de las demás empresas demoscópicas en ±21 días; la desviación media de cada empresa, encogida hacia cero según el número de sondeos, se resta antes de promediar.</p>
-    <p><b>De España a las provincias.</b> Para cada partido se calcula su fuerza relativa en cada circunscripción (su porcentaje allí dividido por su porcentaje nacional) en las generales de julio de 2023 (peso 0,6), noviembre de 2019 (0,25) y abril de 2019 (0,15). Si un partido no se presentó en una provincia un año concreto, ese año no cuenta (por ejemplo, Vox en Santa Cruz de Tenerife en 2023). Un ajuste proporcional iterativo hace que la suma de provincias reproduzca la media nacional. Frente Amplio y Compromís heredan el perfil de Sumar, Unidas Podemos y Más País; Podemos, el de Unidas Podemos en 2019. SALF, Aliança Catalana y Adelante Andalucía no tienen historial en generales y usan perfiles supuestos (SALF, mitad uniforme y mitad el de Vox; Aliança, uniforme en Cataluña; Adelante, ponderado hacia Cádiz y Sevilla).</p>
-    <p><b>Censo y escaños.</b> Censo total del 29N: {fmtN(DATA.census)} electores (incluidos los residentes en el extranjero), repartido por provincias en proporción al de 2023. Escaños según la convocatoria: Madrid pasa de 37 a 38 y Cádiz de 9 a 8. La participación es la de 2023 en cada provincia.</p>
-    <p><b>La transferencia de voto.</b> Para cada circunscripción, cada opción de 2023 conserva todo el voto que puede (Sumar pasa a Frente Amplio, Compromís y Podemos); lo que pierde se reparte entre las que crecen, en proporción a lo que crecen, y la abstención cierra la cuenta sobre el censo de 2026. Es el trasvase mínimo compatible con los dos resultados, no una medición.</p>
-    <p>La proyección no es un pronóstico: refleja lo que dicen hoy las encuestas y no estima incertidumbre ni probabilidades.</p>
-    <p class="src"><b>Fuentes.</b> Resultados de las generales de abril y noviembre de 2019 y julio de 2023: <a href="https://infoelectoral.interior.gob.es" target="_blank" rel="noopener">Ministerio del Interior</a>. Encuestas: <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">recopilación de Wikipedia</a> de los sondeos publicados (empresas demoscópicas, medios y <a href="https://www.cis.es" target="_blank" rel="noopener">CIS</a>), descargada a diario; la última actualización es del {longDate(DATA.today)}. Censo y escaños del 29N: datos de la convocatoria. Mapa: límites provinciales de <a href="https://github.com/martgnz/es-atlas" target="_blank" rel="noopener">es-atlas</a> (Instituto Geográfico Nacional); cartograma de hexágonos a partir del de El Confidencial.</p>
+    <p>Una media de las {DATA.polls.length} encuestas publicadas desde octubre de 2025 que pesa más las recientes, las de más entrevistas y las de empresas demoscópicas que acertaron en 2023, y que corrige el sesgo de cada empresa. La media se reparte por provincias según dónde ha sido más fuerte o más débil cada partido en las generales de 2019 y 2023, y los escaños se asignan con D'Hondt y la barrera del 3 % en cada circunscripción. No es un pronóstico: refleja lo que dicen hoy las encuestas y no estima incertidumbre ni probabilidades.</p>
+    <p class="more"><a href={href('/metodologia')}>Lee la metodología completa →</a></p>
+    <p class="src"><b>Fuentes.</b> Encuestas: <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">recopilación de Wikipedia</a>, descargada cada día (última actualización: {longDate(DATA.today)}). Resultados de 2019 y 2023: <a href="https://infoelectoral.interior.gob.es" target="_blank" rel="noopener">Ministerio del Interior</a>.</p>
   </div>
 </section>
 
@@ -140,4 +136,6 @@
   .prose p { margin: 0; }
   .prose a { color: inherit; }
   .prose .src { font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .more a { font-family: var(--font-ui); font-weight: 700; font-size: 15px; text-decoration: none; color: var(--ink); border-bottom: 2px solid currentColor; }
+  .more a:hover { color: #d1366b; }
 </style>

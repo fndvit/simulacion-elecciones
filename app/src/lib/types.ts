@@ -16,7 +16,8 @@ export interface Poll {
 }
 export interface AppData {
   today: string; election: string; S: Record<string, number>; compSplit: number; halfLife: number;
-  ratings: Record<string, [number, number]>; polls: Poll[]; series: ({ d: string } & Record<string, number>)[];
+  ratings: Record<string, [number, number]>; he: Record<string, Record<string, number>>; heN: Record<string, number>;
+  wElec: Record<string, number>; polls: Poll[]; series: ({ d: string } & Record<string, number>)[];
   prov: Province[]; census: number;
   hex: { R: number; hexes: { id: string; x: number; y: number; r: number; c: number }[] };
 }

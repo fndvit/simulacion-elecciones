@@ -7,9 +7,7 @@
   import { onMount, tick } from 'svelte';
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
-  import { resolve as res } from '$app/paths';
-  // with the hash router keep only the #/… part, so links work in the single-file build (file://, artifact)
-  const resolve = (p: '/' | '/simula' | '/escenarios') => { const r = res(p); const i = r.indexOf('#'); return i >= 0 ? r.slice(i) : r; };
+  import { href as resolve } from '$lib/nav';
   import { fade } from 'svelte/transition';
   import DialRail from './DialRail.svelte';
   import SeatBar from './SeatBar.svelte';
@@ -36,7 +34,8 @@
   let ready = $state(false);
   // each view is its own URL (/, /simula, /escenarios); this shell lives in the layout, so it persists
   // between them and the rails can slide in and out instead of the page reloading
-  const tab = $derived<'proj' | 'sim' | 'esc'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : 'proj');
+  // /metodologia and /quienes-somos are pages of their own: the bar stays, the projection shell does not
+  const tab = $derived<'proj' | 'sim' | 'esc' | 'page'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : page.route.id === '/' ? 'proj' : 'page');
   const sim = $derived(tab === 'sim');
   // Material Symbols Outlined (weight 400): dashboard, modeling, fork_chart
   const ICON = {
@@ -162,6 +161,7 @@
   </section>
 {/if}
 
+{#if tab !== 'page'}
 <div class="scn" class:sim>
   <aside class="rail left" aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
     <div class="rin"><DialRail bind:scope bind:st cur={scen} bind:focusParty /></div>
@@ -197,9 +197,8 @@
       <section class="sec notes" transition:fade={{ duration: 300 }}>
         <h2 class="hd w">Notas sobre <strong>la simulación</strong></h2>
         <div class="w prose">
-          <p><b>Tus controles.</b> Los deslizadores mueven votos, no escaños. Un cambio nacional se reparte entre provincias de forma proporcional al voto que el partido ya tiene en cada una y el resto de partidos cede votos en proporción a su tamaño. Un cambio provincial solo afecta a esa provincia. La participación añade o quita votantes, que se reparten como el resto salvo que cambies el reparto. Después, D'Hondt asigna los escaños en cada circunscripción.</p>
-          <p><b>Punto de partida.</b> Cada simulación parte de la proyección de las encuestas. La participación de partida es la de 2023 en cada provincia.</p>
-          <p>Es una calculadora de supuestos, no un pronóstico: no estima incertidumbre ni probabilidades.</p>
+          <p>Los controles mueven votos, no escaños: un cambio nacional se reparte entre provincias según dónde tiene ya votos cada partido, uno provincial solo afecta a esa provincia, y la participación añade o quita votantes que, por defecto, votan como el resto. Después, D'Hondt asigna los escaños en las 52 circunscripciones. Cada simulación parte de la proyección de las encuestas. Es una calculadora de supuestos, no un pronóstico.</p>
+          <p class="more"><a href={resolve('/metodologia')}>Lee la metodología completa →</a></p>
         </div>
       </section>
     {/if}
@@ -213,6 +212,7 @@
     </div>
   </aside>
 </div>
+{/if}
 
 <style>
   :global(:root) { --nav-h: 60px; }
@@ -281,6 +281,8 @@
   .notes { border-top: 1px solid var(--line); padding-top: var(--s2); }
   .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); display: flex; flex-direction: column; gap: 12px; }
   .prose p { margin: 0; }
+  .more a { font-family: var(--font-ui); font-weight: 700; font-size: 15px; text-decoration: none; color: var(--ink); border-bottom: 2px solid currentColor; }
+  .more a:hover { color: #d1366b; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
 
   /* the deck: same size as the h2s, light sans */
