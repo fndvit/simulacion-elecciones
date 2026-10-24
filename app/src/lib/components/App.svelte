@@ -163,17 +163,17 @@
   /* page grid: the atlas 12 columns (1262 px). Five tracks: left rail · gap · centre · gutter · right rail.
      In the projection only the centre has width (all 12 columns). In the simulation, on the same columns:
      left rail 1–3, half a column empty, centre from 4½ to the end of column 10 (text keeps the 5-column
-     well width), half a column empty, right rail from 11½ to the end of 12. The tracks animate between both. */
+     well width), right rail on columns 11–12. The tracks animate between both. */
   .scn { --gw: min(1262px, calc(100vw - 32px)); --g: 10px; --c: calc((var(--gw) - 11 * var(--g)) / 12);
     max-width: calc(1262px + 32px); margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; align-items: start; transition: grid-template-columns 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
-  .scn.sim { grid-template-columns: calc(3 * var(--c) + 2 * var(--g)) calc(var(--c) / 2 + var(--g)) minmax(0, 1fr) calc(var(--c) / 2 + var(--g)) calc(1.5 * var(--c) + var(--g)); }
+  .scn.sim { grid-template-columns: calc(3 * var(--c) + 2 * var(--g)) calc(var(--c) / 2 + var(--g)) minmax(0, 1fr) var(--g) calc(2 * var(--c) + var(--g)); }
   .rail { position: sticky; top: calc(var(--nav-h) + 8px); align-self: start; max-height: calc(100vh - var(--nav-h) - 16px); overflow: hidden; overscroll-behavior: contain;
     opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
   .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
   .rail.right { grid-column: 5; grid-row: 1; transform: translateX(32px); padding-top: 14px; }
   .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); }
-  .right .rin { width: calc(1.5 * var(--c) + var(--g)); }
+  .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
