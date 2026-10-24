@@ -35,6 +35,12 @@
   // between them and the rails can slide in and out instead of the page reloading
   const tab = $derived<'proj' | 'sim' | 'esc'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : 'proj');
   const sim = $derived(tab === 'sim');
+  // Material Symbols Outlined (weight 400): dashboard, modeling, fork_chart
+  const ICON = {
+    proj: 'M510-570v-270h330v270H510ZM120-450v-390h330v390H120Zm390 330v-390h330v390H510Zm-390 0v-270h330v270H120Zm60-390h210v-270H180v270Zm390 330h210v-270H570v270Zm0-450h210v-150H570v150ZM180-180h210v-150H180v150Zm210-330Zm180-120Zm0 180ZM390-330Z',
+    sim: 'M718-145 569-295l149-150 42 43-76 77 196 1v60l-196-1 76 77-42 43Zm-578-15q-24 0-42-18t-18-42v-147q0-24 18-42t42-18h269q24 0 42 18t18 42v147q0 24-18 42t-42 18H140Zm0-60h269v-147H140v147Zm102-297-42-42 76-78H80v-60h196l-76-77 42-42 149 149-149 150Zm309-16q-24 0-42-18t-18-42v-147q0-24 18-42t42-18h269q24 0 42 18t18 42v147q0 24-18 42t-42 18H551Zm0-60h269v-147H551v147ZM409-220v-147 147Zm142-373v-147 147Z',
+    esc: 'M120-160v-310q-26-7-43-28t-17-50v-192q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v192q0 29-17 50t-43 28v310h-60Zm480 1q-134 0-227.5-93.5T279-480q0-133 93.5-226.5T600-800q133 0 226.5 93.5T920-480q0 134-93.5 227.5T600-159Zm203-482L642-480l161 162q26-34 41.5-75t15.5-87q0-46-15.5-87T803-641Zm-173-97v186l131-131q-28-22-61-36t-70-19Zm-30 519q46 0 87-15.5t74-41.5L570-467v-271q-98 11-164.5 84.5T339-480q0 109 76 185t185 76Z'
+  };
 
   const scen = $derived(run(st));
   // the projection tab always shows the poll projection; the simulation, the user's scenario
@@ -57,12 +63,13 @@
   });
 </script>
 
+{#snippet icon(d: string)}<svg class="ti" viewBox="0 -960 960 960" aria-hidden="true"><path {d} /></svg>{/snippet}
 <header class="mast" class:sim>
   <div class="brand"><VitLogo height={26} /><h1 class="brand-title">TresCincuenta.es</h1></div>
   <nav class="tabs" aria-label="Secciones">
-    <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>Proyección</a>
-    <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>Simula</a>
-    <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}><em>Cocinando</em> Escenarios</a>
+    <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>{@render icon(ICON.proj)}Proyección</a>
+    <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
+    <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
   </nav>
   {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
 </header>
@@ -138,14 +145,16 @@
   .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: calc(var(--logo-h) / 0.75); line-height: 1.2; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
 
   /* tabs */
-  .tabs { flex: 1; display: flex; justify-content: center; align-items: center; gap: 28px; min-width: 0; }
+  /* tabs: right-aligned, ending on the grid's last column (the title bar shares the grid's edges) */
+  .tabs { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 26px; min-width: 0; }
   .tabs a { text-decoration: none; }
-  .tabs a, .soon { font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; white-space: nowrap;
+  .tabs a, .soon { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap;
     background: none; border: 0; padding: 10px 0 8px; border-bottom: 2px solid transparent; color: var(--muted); }
   .tabs a { cursor: pointer; }
   .tabs a:hover { color: var(--ink); }
   .tabs a.on { color: var(--ink); border-bottom-color: var(--ink); }
-  .soon { display: inline-flex; align-items: baseline; gap: 6px; }
+  .ti { width: 18px; height: 18px; fill: currentColor; flex: none; }
+  .soon em { margin-right: -2px; }
   .soon:not(.on) { opacity: 0.55; }
   .soon em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
   .share-top { display: none; }
@@ -217,5 +226,5 @@
     .center { grid-template-columns: minmax(0, 1fr); }
     .center :global(.sec > .w6), .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
   }
-  @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; letter-spacing: 0.05em; } }
+  @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; } .ti { width: 16px; height: 16px; } }
 </style>
