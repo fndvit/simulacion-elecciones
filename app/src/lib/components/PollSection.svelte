@@ -128,14 +128,14 @@
   .chart .grid { stroke: var(--line); stroke-width: 1; }
   .chart .lbl { font-weight: 700; font-size: 12px; paint-order: stroke; stroke: var(--halo); stroke-width: 3px; }
   .ptable { width: 100%; border-collapse: collapse; font-family: var(--font-ui); font-size: 13px; color: var(--ink); font-weight: 400; }
-  .ptable th { text-align: right; font-size: 12px; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ptable th { text-align: right; font-size: 12px; color: var(--muted); padding: 4px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   .ptable th:first-child, .ptable td:first-child { text-align: left; }
-  .ptable td { padding: 5px 6px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ptable td { padding: 5px 5px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .ptable td.fw { color: var(--muted); }
   .ptable td.wcell { text-align: left; width: 90px; }
   .wn { display: inline-block; width: 3ch; text-align: right; margin-right: 6px; }
   .wbar { display: inline-block; height: 8px; border-radius: 2px; background: var(--fg); vertical-align: middle; opacity: 0.7; }
-  .meth { border-top: 1px solid var(--line); padding-top: var(--s2); display: flex; flex-direction: column; gap: 4px; }
+  .meth { margin-top: var(--s3); display: flex; flex-direction: column; gap: 4px; }
   .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); max-width: 64ch; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
   .prose p { margin: 0; }
   .prose a { color: inherit; }
