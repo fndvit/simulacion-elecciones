@@ -80,7 +80,11 @@
       </section>
     {:else}
     <section class="sec">
-      <p class="lede deck w6">Nuestro modelo <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={(e) => { if (tab !== 'proj') { e.preventDefault(); goto(resolve('/')).then(() => setTimeout(() => toBase(e), 450)); } else toBase(e); }}><strong>media de encuestas</strong></a> nacionales.</p>
+      {#if sim}
+        <p class="lede deck w6">Personaliza <strong>la proyección de nuestro modelo</strong>: cambia el voto de cada partido y la participación, en toda España o provincia a provincia, mira cómo se mueven los 350 escaños y <strong>comparte tu escenario</strong>.</p>
+      {:else}
+  <p class="lede deck w6">Nuestro modelo <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={(e) => { if (tab !== 'proj') { e.preventDefault(); goto(resolve('/')).then(() => setTimeout(() => toBase(e), 450)); } else toBase(e); }}><strong>media de encuestas</strong></a> nacionales.</p>
+      {/if}
       <p class="updated w6">Datos actualizados a {longDate(DATA.today)}</p>
     </section>
     <section class="sec">
