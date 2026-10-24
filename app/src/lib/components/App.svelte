@@ -93,7 +93,8 @@
     const h = mastEl.getBoundingClientRect().height;
     setPast(lockEl.getBoundingClientRect().top <= h);
     if (heroTabs) setTabs(heroTabs.getBoundingClientRect().top <= h);
-    overDark = !!heroEl && heroEl.getBoundingClientRect().bottom > h;
+    // switch once what is left of the dark intro fits under the opaque top of the light layer
+    overDark = !!heroEl && heroEl.getBoundingClientRect().bottom > Math.min(20, h * 0.35);
   }
   onMount(() => {
     let raf = 0;
@@ -280,9 +281,15 @@
 
   /* ── hero ─────────────────────────────────────────────────────────────────────────────────────── */
   /* the bar over the hero: transparent, only the (larger, light) ViT mark; name, 350 and tabs wait */
-  .mast::before { transition: opacity 0.35s ease, background 0.35s ease; }
-  .mast.hero::before { opacity: 0; }
-  .mast.dark::before { background: linear-gradient(#16181d, color-mix(in srgb, #16181d 20%, transparent)); }
+  /* two layers crossfade: the dark one while the bar sits over the intro, the light gradient + blur after */
+  .mast::before { transition: opacity 0.45s ease; }
+  .mast::after { content: ''; position: absolute; inset: 0 0 -40px; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.45s ease;
+    background: linear-gradient(#16181d, color-mix(in srgb, #16181d 20%, transparent));
+    -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); }
+  .mast.hero::before, .mast.dark::before { opacity: 0; }
+  .mast.dark:not(.hero)::after { opacity: 1; }
+  .brand-title { transition: opacity 0.35s ease, color 0.45s ease; }
+  .tabs a { transition: color 0.45s ease, border-color 0.45s ease; }
   .brand :global(.vitlogo) { transform-origin: 0 0; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s ease; }
   .mast.hero .brand :global(.vitlogo) { transform: translate(106px, 18px) scale(1.385); }
   @media (max-width: 900px) { .mast.hero .brand :global(.vitlogo) { transform: translateY(14px) scale(1.385); } }
