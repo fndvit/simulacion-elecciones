@@ -60,6 +60,7 @@
   let pastLogo = $state(false);
   let overDark = $state(false); // the bar still sits over the dark hero
   const compact = $derived(!heroOn || pastLogo);
+  const tabsUp = $derived(!heroOn || pastTabs);
   let mastEl = $state<HTMLElement>(), heroEl = $state<HTMLElement>(), lockEl = $state<HTMLElement>();
   let hero350 = $state<HTMLElement>(), heroTabs = $state<HTMLElement>(), head350 = $state<HTMLElement>(), headTabs = $state<HTMLElement>();
   const reduce = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -71,19 +72,27 @@
     to.animate([{ transformOrigin: '0 0', transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${s})` }, { transformOrigin: '0 0', transform: 'none' }],
       { duration: 480, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
   }
+  // each piece moves into the bar when it reaches it: first the 350 lockup, then (further down) the tabs
+  let pastTabs = $state(false);
   async function setPast(v: boolean) {
     if (v === pastLogo) return;
-    // where the pieces are now, before the swap
-    const logoFrom = (v ? hero350 : head350)?.getBoundingClientRect(), tabsFrom = (v ? heroTabs : headTabs)?.getBoundingClientRect();
+    const from = (v ? hero350 : head350)?.getBoundingClientRect(); // where it is now, before the swap
     pastLogo = v;
     await tick();
-    fly(v ? head350 : hero350, logoFrom);
-    fly(v ? headTabs : heroTabs, tabsFrom);
+    fly(v ? head350 : hero350, from);
+  }
+  async function setTabs(v: boolean) {
+    if (v === pastTabs) return;
+    const from = (v ? heroTabs : headTabs)?.getBoundingClientRect();
+    pastTabs = v;
+    await tick();
+    fly(v ? headTabs : heroTabs, from);
   }
   function onScroll() {
     if (!heroOn || !lockEl || !mastEl) { overDark = false; return; }
     const h = mastEl.getBoundingClientRect().height;
     setPast(lockEl.getBoundingClientRect().top <= h);
+    if (heroTabs) setTabs(heroTabs.getBoundingClientRect().top <= h);
     overDark = !!heroEl && heroEl.getBoundingClientRect().bottom > h;
   }
   onMount(() => {
@@ -94,7 +103,7 @@
     return () => { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
   });
   // entering the projection from another tab: start from the top state without animating
-  $effect(() => { if (heroOn) tick().then(() => { pastLogo = false; onScroll(); }); else { pastLogo = false; overDark = false; } });
+  $effect(() => { if (heroOn) tick().then(() => { pastLogo = false; pastTabs = false; onScroll(); }); else { pastLogo = false; pastTabs = false; overDark = false; } });
 
   // a shared link (?e=…) opens that scenario in the simulation; otherwise the one saved in this browser, if any
   onMount(() => {
@@ -117,14 +126,14 @@
   <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
   <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
 {/snippet}
-<header class="mast" class:sim class:hero={heroOn && !compact} class:dark={heroOn && overDark} bind:this={mastEl}>
+<header class="mast" class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
-  <nav class="tabs" aria-label="Secciones" bind:this={headTabs} inert={!compact}>{@render tablinks()}</nav>
+  <nav class="tabs" aria-label="Secciones" bind:this={headTabs} inert={!tabsUp}>{@render tablinks()}</nav>
   {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
 </header>
 
 {#if heroOn}
-  <section class="intro" class:past={pastLogo} bind:this={heroEl} out:fade={{ duration: 200 }}>
+  <section class="intro" class:past={pastLogo} class:tabsup={pastTabs} bind:this={heroEl} out:fade={{ duration: 200 }}>
     <div class="hero-in">
       <div class="lockup" bind:this={lockEl}>
         <span class="h350" bind:this={hero350} aria-hidden="true">{@html logo350}</span>
@@ -132,7 +141,7 @@
       </div>
       <p class="h-deck">Nuestro modelo <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={toBase}><strong>media de encuestas</strong></a> nacionales.</p>
       <p class="h-updated">Datos actualizados a {longDate(DATA.today)}</p>
-      <nav class="h-tabs" aria-label="Secciones" bind:this={heroTabs} inert={compact}>{@render tablinks()}</nav>
+      <nav class="h-tabs" aria-label="Secciones" bind:this={heroTabs} inert={tabsUp}>{@render tablinks()}</nav>
     </div>
   </section>
 {/if}
@@ -279,7 +288,7 @@
   @media (max-width: 900px) { .mast.hero .brand :global(.vitlogo) { transform: translateY(14px) scale(1.385); } }
   .mast.dark .brand :global(.vitlogo) { color: #f7f4ef; }
   .l350, .brand-title, .mast .tabs { transition: opacity 0.35s ease; }
-  .mast.hero .l350, .mast.hero .tabs { opacity: 0; visibility: hidden; transition: none; }
+  .mast.hero .l350, .mast.notabs .tabs { opacity: 0; visibility: hidden; transition: none; }
   .mast.hero .brand-title { opacity: 0; }
   .mast.dark .brand-title { color: #fff; }
   .mast.dark .tabs a { color: rgba(214, 209, 211, 0.75); }
@@ -294,7 +303,7 @@
   .h350 { display: block; line-height: 0; }
   .h350 :global(svg) { height: 130px; width: auto; display: block; }
   .h-title { margin: -4px 0 0; font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 48; font-size: 48px; line-height: 45px; color: #fff; transition: opacity 0.35s ease; }
-  .past .h350, .past .h-tabs { visibility: hidden; }
+  .past .h350, .tabsup .h-tabs { visibility: hidden; }
   .past .h-title { opacity: 0; }
   .h-deck { margin: 28px 0 0; font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: #fff; max-width: 620px; }
   .h-deck strong { font-weight: 700; }
