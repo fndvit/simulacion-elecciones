@@ -55,7 +55,7 @@
   <div class="brand"><VitLogo height={26} /><h1 class="brand-title">TresCincuenta.es</h1></div>
   <nav class="tabs" aria-label="Secciones">
     <button class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined} onclick={() => go('proj')}>Proyección</button>
-    <button class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined} onclick={() => go('sim')}>Simulación personalizada</button>
+    <button class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined} onclick={() => go('sim')}>Simula</button>
     <span class="soon" aria-disabled="true" title="Próximamente">Escenarios <em>Cocinándose…</em></span>
   </nav>
   {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
@@ -68,11 +68,17 @@
 
   <main class="center">
     <section class="sec">
-      <p class="lede deck w">Este simulador <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={(e) => { if (sim) { e.preventDefault(); go('proj'); setTimeout(() => toBase(e), 450); } else toBase(e); }}><strong>media ponderada de encuestas</strong></a> nacionales, repartida por provincias según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.</p>
-      <p class="updated w">Datos actualizados a {longDate(DATA.today)}</p>
+      <p class="lede deck w6">Nuestro modelo <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={(e) => { if (sim) { e.preventDefault(); go('proj'); setTimeout(() => toBase(e), 450); } else toBase(e); }}><strong>media de encuestas</strong></a> nacionales.</p>
+      <p class="updated w6">Datos actualizados a {longDate(DATA.today)}</p>
     </section>
-    <section class="sec"><div class="f"><SeatBar {cur} {scope} projection={!sim} /></div></section>
-    <section class="sec"><HexMap {cur} bind:scope bind:focusParty projection={!sim} /></section>
+    <section class="sec">
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> a día de hoy.{/if}</h2>
+      <div class="f"><SeatBar {cur} {scope} projection={!sim} /></div>
+    </section>
+    <section class="sec">
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el reparto por provincias</strong> en tu escenario.{:else}Así quedaría <strong>el reparto por provincias</strong> según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.{/if}</h2>
+      <HexMap {cur} bind:scope bind:focusParty projection={!sim} />
+    </section>
     <section class="sec"><div class="w"><ScenarioTable {cur} {scope} projection={!sim} /></div></section>
     <section class="sec"><div class="w stack"><LastSeat {cur} bind:scope projection={!sim} /></div></section>
     {#if !sim}
@@ -138,6 +144,9 @@
   /* in the simulation the centre is narrower: text well widens to 9 columns, wide charts to all 12 */
   .sim .center :global(.sec > .w) { grid-column: 1 / 10; }
   .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
+  /* the deck runs over cols 1–6 in the projection (all 12 → 1–9 in the simulation) */
+  .center :global(.sec > .w6) { grid-column: 1 / 7; }
+  .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
 
   /* the deck: same size as the h2s, light sans */
@@ -175,7 +184,7 @@
     .sim .rail.right { grid-row: 3; }
     .left .rin, .right .rin { width: auto; padding-right: 0; }
     .center { grid-template-columns: minmax(0, 1fr); }
-    .sim .center :global(.sec > .w), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
+    .center :global(.sec > .w6), .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
   }
   @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs button, .soon { font-size: 12px; letter-spacing: 0.05em; } }
 </style>

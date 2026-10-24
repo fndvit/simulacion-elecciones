@@ -185,7 +185,7 @@
 
 <p class="sub w">
   {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid cuenta también el escaño nuevo).{/if}
-  Pulsa una provincia para seleccionarla en todo el simulador.
+  Pulsa una provincia para seleccionarla en toda la página.
 </p>
 
 <style>

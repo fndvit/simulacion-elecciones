@@ -6,7 +6,7 @@
   import { PROV } from '$lib/data';
   import { partyColor, partyLabel } from '$lib/parties';
   import { transfers } from '$lib/model';
-  import { sortEs } from '$lib/format';
+  import { sortEs, fmtN } from '$lib/format';
   import type { RunResult } from '$lib/types';
 
   let { cur, scope = $bindable() }: { cur: RunResult; scope: string } = $props();
@@ -18,7 +18,6 @@
   const rank = (k: string) => { const i = ORDER.indexOf(k); return i < 0 ? 99 : i; };
   const nodeLabel = (n: string) => (n === 'SUMAR' ? 'Sumar' : partyLabel(n));
   const nodeColor = (n: string) => (n === 'ABST' ? GREY : n === 'SUMAR' ? partyColor('FA') : partyColor(n));
-  const fmtK = (v: number) => (v >= 1e6 ? (v / 1e6).toFixed(1).replace('.', ',') + ' M' : v >= 1e4 ? Math.round(v / 1e3) + ' mil' : v >= 1e3 ? (v / 1e3).toFixed(1).replace('.', ',') + ' mil' : String(Math.round(v)));
 
   const model = $derived.by(() => {
     if (!flows.length) return null;
@@ -54,6 +53,7 @@
     const ordered = [...links].sort((a, b) => srcOrder.indexOf(a.from) - srcOrder.indexOf(b.from) || tgtOrder.indexOf(a.to) - tgtOrder.indexOf(b.to));
     const rows: any[] = [];
     const grads: { id: string; s: string; t: string }[] = [];
+    const byId = new Map<string, { from: string; to: string; votes: number }>();
     ordered.forEach((f, k) => {
       const dv = f.votes * pxPerVote;
       const s0 = sCur.get(f.from)!; sCur.set(f.from, s0 + dv);
@@ -62,10 +62,11 @@
       rows.push({ id, x: 0, y1: s0, y2: s0 + dv });
       rows.push({ id, x: 1, y1: t0, y2: t0 + dv });
       grads.push({ id, s: nodeColor(f.from), t: nodeColor(f.to) });
+      byId.set(id, { from: nodeLabel(f.from), to: nodeLabel(f.to), votes: f.votes });
     });
     const nodes = [
-      ...srcOrder.map((k) => ({ side: 'source', label: `${nodeLabel(k)} ${fmtK(outTot.get(k)!)}`, y: (sSpan.get(k)!.y0 + sSpan.get(k)!.y1) / 2 })),
-      ...tgtOrder.map((k) => ({ side: 'target', label: `${nodeLabel(k)} ${fmtK(inTot.get(k)!)}`, y: (tSpan.get(k)!.y0 + tSpan.get(k)!.y1) / 2 }))
+      ...srcOrder.map((k) => ({ side: 'source', label: nodeLabel(k), y: (sSpan.get(k)!.y0 + sSpan.get(k)!.y1) / 2 })),
+      ...tgtOrder.map((k) => ({ side: 'target', label: nodeLabel(k), y: (tSpan.get(k)!.y0 + tSpan.get(k)!.y1) / 2 }))
     ];
     // keep labels at least 17 px apart on each side (small parties sit close together)
     for (const side of ['source', 'target']) {
@@ -74,10 +75,14 @@
       const over = L.length ? L[L.length - 1].y - (height - 4) : 0;
       if (over > 0) for (let i = L.length - 1; i >= 0; i--) { L[i].y -= over; if (i && L[i].y - L[i - 1].y >= 17) break; }
     }
-    return { rows, grads, nodes, height };
+    return { rows, grads, nodes, height, byId };
   });
 
   let host = $state<HTMLDivElement>();
+  let box = $state<HTMLDivElement>();
+  let datum = $state<{ from: string; to: string; votes: number } | null>(null);
+  let tx = $state(0), ty = $state(0), tw = $state(0);
+  function tmove(e: PointerEvent) { if (!box) return; const r = box.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; tw = r.width; }
   let figW = $state(560);
   const NS = 'http://www.w3.org/2000/svg';
 
@@ -88,13 +93,13 @@
     // reading inward with a page-bg halo, full-opacity ribbons over 0.8 gradients.
     const W = figW || 560, H = model.height + 14;
     const fig = Plot.plot({
-      width: W, height: H, marginLeft: W < 600 ? 50 : 156, marginRight: W < 600 ? 50 : 156, marginTop: 8, marginBottom: 6,
+      width: W, height: H, marginLeft: 50, marginRight: 50, marginTop: 8, marginBottom: 6,
       x: { domain: [0, 1], axis: null },
       y: { axis: null, reverse: true, domain: [0, model.height] },
       marks: [
         Plot.areaY(model.rows, { x: 'x', y1: 'y1', y2: 'y2', z: 'id', fill: (d: any) => `url(#${d.id})`, fillOpacity: 1, curve: 'bump-x' }),
-        Plot.text(model.nodes.filter((n) => n.side === 'source'), { x: 0, y: 'y', text: 'label', textAnchor: 'start', dx: W < 600 ? -44 : -150, fontSize: 14, fill: 'currentColor', strokeWidth: 5 }),
-        Plot.text(model.nodes.filter((n) => n.side === 'target'), { x: 1, y: 'y', text: 'label', textAnchor: 'end', dx: W < 600 ? 44 : 150, fontSize: 14, fill: 'currentColor', strokeWidth: 5 })
+        Plot.text(model.nodes.filter((n) => n.side === 'source'), { x: 0, y: 'y', text: 'label', textAnchor: 'start', dx: -44, fontSize: 14, fill: 'currentColor', strokeWidth: 5 }),
+        Plot.text(model.nodes.filter((n) => n.side === 'target'), { x: 1, y: 'y', text: 'label', textAnchor: 'end', dx: 44, fontSize: 14, fill: 'currentColor', strokeWidth: 5 })
       ]
     });
     const svg = (fig.tagName.toLowerCase() === 'svg' ? fig : fig.querySelector('svg')) as SVGSVGElement;
@@ -111,22 +116,41 @@
     }
     svg.insertBefore(defs, svg.firstChild);
     host.replaceChildren(fig);
-    return () => fig.remove();
+    // hover on each ribbon (as the atlas): highlight it, dim the rest, glassy tooltip with the flow
+    const paths = [...svg.querySelectorAll<SVGPathElement>('g[aria-label="area"] path')];
+    let timer: ReturnType<typeof setTimeout>;
+    const paint = (a: SVGPathElement | null) => { for (const q of paths) q.style.fillOpacity = a ? (q === a ? '1' : '0.5') : ''; };
+    for (const path of paths) {
+      const id = path.getAttribute('fill')?.match(/#(.+)\)/)?.[1];
+      const info = id ? model.byId.get(id) : undefined;
+      if (!info) continue;
+      path.style.cursor = 'pointer'; path.style.transition = 'fill-opacity 0.12s ease';
+      path.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(() => { datum = info; paint(path); }, 120); });
+      path.addEventListener('pointerleave', () => { clearTimeout(timer); datum = null; paint(null); });
+    }
+    return () => { clearTimeout(timer); fig.remove(); };
   });
 </script>
 
 <h2 class="hd w">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
 <p class="sub w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
-<div class="sankey c7">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>
   <div class="fig" bind:this={host} bind:clientWidth={figW}
     role="img" aria-label="Transferencias de voto de 2023 a la proyección"></div>
+  {#if datum}
+    <div class="tip" style="left:{tx}px;top:{ty}px;transform:translate({tx > tw - 264 ? 'calc(-100% - 14px)' : '14px'}, 12px)">
+      <h4>{datum.from} → {datum.to}</h4>
+      <div>Votos: <b>{fmtN(datum.votes)}</b></div>
+    </div>
+  {/if}
   {#if !model}
     <p class="empty">No hay datos para este ámbito.</p>
   {/if}
 </div>
 
 <style>
-  .sankey { min-width: 0; }
+  .sankey { min-width: 0; position: relative; }
   .fig { min-width: 0; color: var(--muted); }
   .sel { display: inline-flex; vertical-align: baseline; }
   .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
