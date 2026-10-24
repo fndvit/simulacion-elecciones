@@ -133,7 +133,6 @@
   /* sticky title bar, as in trees.fndvit.org: the page fades out under it (gradient + slight blur, masked) */
   .mast { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-block: 8px; padding-inline: max(16px, calc((100% - 1262px) / 2)); transition: padding 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
   /* aligned with the content: the 1262 px grid in the projection, the 1440 px page with rails in the simulation */
-  .mast.sim { padding-inline: max(16px, calc((100% - 1440px) / 2 + 16px)); }
   .mast::before { content: ''; position: absolute; inset: 0 0 -40px; z-index: -1; pointer-events: none;
     background: linear-gradient(var(--bg), color-mix(in srgb, var(--bg) 20%, transparent));
     -webkit-backdrop-filter: blur(1px); backdrop-filter: blur(1px);
@@ -161,15 +160,22 @@
 
   /* page grid: rail · gap · centre · gutter · rail. In the projection the rail tracks are 0 and the
      rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
-  .scn { max-width: 1440px; margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  /* page grid: the atlas 12 columns (1262 px). Five tracks: left rail · gap · centre · gutter · right rail.
+     In the projection only the centre has width (all 12 columns). In the simulation, on the same columns:
+     left rail 1–3, half a column empty, centre to column 10 (wide charts end there, text keeps the 5-column
+     well width), right rail 11–12 and a little beyond the grid. The tracks animate between both. */
+  .scn { --gw: min(1262px, calc(100vw - 32px)); --g: 10px; --c: calc((var(--gw) - 11 * var(--g)) / 12);
+    max-width: calc(1262px + 32px); margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; align-items: start; transition: grid-template-columns 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
-  .scn.sim { grid-template-columns: 300px 48px minmax(0, 1fr) 24px 200px; }
+  .scn.sim { grid-template-columns: calc(3 * var(--c) + 2 * var(--g)) calc(var(--c) / 2 + var(--g)) minmax(0, 1fr) var(--g) calc(2 * var(--c) + var(--g)); }
   .rail { position: sticky; top: calc(var(--nav-h) + 8px); align-self: start; max-height: calc(100vh - var(--nav-h) - 16px); overflow: hidden; overscroll-behavior: contain;
     opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
   .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
   .rail.right { grid-column: 5; grid-row: 1; transform: translateX(32px); padding-top: 14px; }
-  .left .rin { width: 300px; padding-right: 6px; }
-  .right .rin { width: 200px; }
+  .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); }
+  /* the right rail runs a little past the grid's right edge (up to 48 px, never past the page) */
+  .rail.right { margin-right: calc(-1 * min(48px, (100vw - var(--gw)) / 2 - 4px)); }
+  .right .rin { width: calc(2 * var(--c) + var(--g) + min(48px, (100vw - var(--gw)) / 2 - 4px)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; }
@@ -179,11 +185,12 @@
     width: 100%; max-width: 1262px; justify-self: center; min-width: 0; padding-top: 14px; }
   .sim .center { max-width: none; }
   /* in the simulation the centre is narrower: text well widens to 9 columns, wide charts to all 12 */
-  .sim .center :global(.sec > .w) { grid-column: 1 / 10; }
-  .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w), .sim .center :global(.sec > .c8), .sim .center :global(.sec > .c8w) { grid-column: 1 / -1; }
+  .sim .center :global(.sec > *) { grid-column: 1 / -1; }
+  /* text and well-sized pieces keep the projection's well width: 5 columns */
+  .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6) { max-width: calc(5 * var(--c) + 4 * var(--g)); }
   /* the deck runs over cols 2–7 in the projection (all 12 → 1–9 in the simulation) */
   .center :global(.sec > .w6) { grid-column: 2 / 8; }
-  .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }
+  .sim .center :global(.sec > .w6) { grid-column: 1 / -1; }
   .notes { border-top: 1px solid var(--line); padding-top: var(--s2); }
   .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); display: flex; flex-direction: column; gap: 12px; }
   .prose p { margin: 0; }
@@ -206,16 +213,12 @@
     .tabs { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 22px; overflow-x: auto; scrollbar-width: none; }
     .share-top { margin-left: auto; }
   }
-  /* medium screens: the history rail moves under the centre and sharing goes to the title bar */
-  @media (max-width: 1380px) {
-    .scn.sim { grid-template-columns: 280px 32px minmax(0, 1fr) 0px 0px; }
-    .sim .rail.right { grid-column: 1 / -1; grid-row: 2; position: static; max-height: none; overflow: visible; padding-top: var(--s3); }
-    .sim .right .rin { width: auto; max-width: 560px; }
-    .share-top { display: block; }
-    .share-rail { display: none; }
-  }
   /* small screens: one column, as the atlas below 900 px */
   @media (max-width: 900px) {
+    .share-top { display: block; }
+    .share-rail { display: none; }
+    .rail.right { margin-right: 0; }
+    .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6) { max-width: none; }
     .scn, .scn.sim { grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; transition: none; }
     .rail { display: none; }
     .sim .rail { display: block; grid-column: 1 / -1; position: static; max-height: none; overflow: visible; }
