@@ -136,7 +136,7 @@
   .wn { display: inline-block; width: 3ch; text-align: right; margin-right: 6px; }
   .wbar { display: inline-block; height: 8px; border-radius: 2px; background: var(--fg); vertical-align: middle; opacity: 0.7; }
   .meth { border-top: 1px solid var(--line); padding-top: var(--s2); display: flex; flex-direction: column; gap: 4px; }
-  .prose { font-family: var(--font-body); font-size: 15px; line-height: 1.72; max-width: 64ch; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+  .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); max-width: 64ch; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
   .prose p { margin: 0; }
   .prose a { color: inherit; }
   .prose .src { font-size: 13px; line-height: 1.6; color: var(--muted); }

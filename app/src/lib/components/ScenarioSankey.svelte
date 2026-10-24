@@ -133,7 +133,7 @@
 </script>
 
 <h2 class="hd w">Transferencia de voto <strong>de 2023 a la proyección</strong> {scope === 'ES' ? 'en toda España' : `en ${BYID[scope].n}`}</h2>
-<p class="sub w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
+<p class="lede w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
 <div class="c7w stickyui sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></div>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>

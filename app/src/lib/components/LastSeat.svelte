@@ -33,7 +33,7 @@
   {:else if kind === 'plain'}En <strong>{focus.p.n}</strong>, el último escaño se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
   {:else}En <strong>{focus.p.n}</strong> no hay un último escaño en disputa.{/if}
 </h2>
-<p class="sub">
+<p class="lede">
   {#if focus.r.chal}{nm(focus.r.chal.k)} necesita <b>{fmtN(focus.r.chal.need)} votos</b> más para quitárselo (un {pct(focus.r.chal.need / focus.r.valid, 2)} del voto válido de la provincia).{/if}
   Cada columna es un partido y cada fila un divisor D'Hondt; el recuadro marca el escaño más frágil y el siguiente en la cola.
 </p>
@@ -44,7 +44,7 @@
 </div>
 
 <h3 class="hd" style="margin-top:12px">Los <strong>escaños más ajustados</strong> {of}</h3>
-<p class="sub">Votos que le faltan al aspirante para arrebatar el último escaño, en proporción al voto válido de cada circunscripción. Pulsa una fila para ir a esa provincia.</p>
+<p class="lede">Votos que le faltan al aspirante para arrebatar el último escaño, en proporción al voto válido de cada circunscripción. Pulsa una fila para ir a esa provincia.</p>
 <div class="tight">
   {#each list.slice(0, 10) as x (x.p.id)}
     <button class="trow" onclick={() => (scope = x.p.id)}>

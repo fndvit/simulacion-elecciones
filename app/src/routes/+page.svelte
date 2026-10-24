@@ -157,7 +157,7 @@
   .center :global(.sec > .w6) { grid-column: 2 / 8; }
   .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }
   .notes { border-top: 1px solid var(--line); padding-top: var(--s2); }
-  .prose { font-family: var(--font-body); font-size: 15px; line-height: 1.72; display: flex; flex-direction: column; gap: 12px; }
+  .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); display: flex; flex-direction: column; gap: 12px; }
   .prose p { margin: 0; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
 

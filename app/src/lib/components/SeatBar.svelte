@@ -5,9 +5,10 @@
   // adjustments change against the poll projection (labels pushed sideways, then into rows, if they collide).
   import { BYID } from '$lib/data';
   import { PARTY, BLOC } from '$lib/parties';
-  import { BASE, scopeSeats, seats2023, sumSeats, INVEST } from '$lib/model';
+  import { BASE, scopeSeats, scopeVotes, scopeValid, seats2023, sumSeats, INVEST } from '$lib/model';
+  import { pct } from '$lib/format';
   import { sgnInt } from '$lib/format';
-  import type { RunResult } from '$lib/types';
+  import type { RunResult, PartyKey } from '$lib/types';
 
   let { cur, scope, projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
   let W = $state(800);
@@ -58,24 +59,43 @@
     return { items, rows: Math.max(1, rows.length) };
   });
 
+  // hover (either bar or the band between them): the party stands out, the rest fade, tooltip with its numbers
+  let hov = $state<PartyKey | null>(null);
+  let tip = $state({ x: 0, y: 0 });
+  let barsEl: HTMLDivElement;
+  function over(e: PointerEvent, P: PartyKey) { const r = barsEl.getBoundingClientRect(); hov = P; tip = { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  const hd = $derived.by(() => {
+    if (!hov) return null;
+    const v = scopeVotes(cur, scope), val = scopeValid(cur, scope);
+    return { P: hov, seats: sC[hov] || 0, s23: s23[hov] || 0, share: (v[hov] || 0) / val, d: (sC[hov] || 0) - (sB[hov] || 0) };
+  });
   const right = $derived(sumSeats(sC, ['PP', 'VOX']));
   const inv = $derived(sumSeats(sC, INVEST));
 </script>
 
 <div class="seatbar" bind:clientWidth={W}>
   <div class="cap"><b>{isES ? 'Congreso' : BYID[scope].n}</b> · {n} {n === 1 ? 'escaño' : 'escaños'}{isES ? ' · mayoría absoluta, 176' : ''}</div>
-  <div class="bars">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="bars" class:hovering={hov} bind:this={barsEl} onpointerleave={() => (hov = null)}>
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
-      {#each segs as s (s.P)}{#if s.s}<span style="width:{s.s * 100}%;background:{PARTY[s.P].c}" title="{PARTY[s.P].n}: {s23[s.P] || 0} en 2023"></span>{/if}{/each}
+      {#each segs as s (s.P)}{#if s.s}<span class:on={hov === s.P} style="width:{s.s * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
     </div>
     <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label={projection ? "De los escaños de 2023 a los de la proyección" : "De los escaños de 2023 a los de tu escenario"}>
-      {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity="0.28" />{/each}
+      {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity={hov ? (hov === b.P ? 0.6 : 0.12) : 0.28} onpointermove={(e) => over(e, b.P)} />{/each}
       {#each band as b (b.P)}{#if b.show}<text x={b.lx} y={BAND - 7} text-anchor="middle" class:up={b.d > 0} class:down={b.d < 0}>{sgnInt(b.d)}</text>{/if}{/each}
     </svg>
     <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : "Escaños en tu escenario"}>
-      {#each segs as s (s.P)}{#if s.f}<span style="width:{s.f * 100}%;background:{PARTY[s.P].c}" title="{PARTY[s.P].n}: {sC[s.P] || 0}"></span>{/if}{/each}
+      {#each segs as s (s.P)}{#if s.f}<span class:on={hov === s.P} style="width:{s.f * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
     </div>
     {#if isES}<div class="maj" aria-hidden="true"></div>{/if}
+    {#if hd}
+      <div class="tip" style="left:{tip.x}px;top:{tip.y}px;transform:translate({tip.x > W - 270 ? 'calc(-100% - 14px)' : '14px'}, 14px)">
+        <h4><span class="sw" style="background:{PARTY[hd.P].c}"></span>{PARTY[hd.P].n}</h4>
+        <div>{projection ? 'Proyección' : 'Tu escenario'}: <b>{hd.seats} {hd.seats === 1 ? 'escaño' : 'escaños'}</b> · {pct(hd.share)} del voto</div>
+        <div>En 2023: <b>{hd.s23}</b>{#if hd.seats - hd.s23} ({sgnInt(hd.seats - hd.s23)}){/if}</div>
+        {#if !projection && hd.d}<div>Frente a la proyección: <b>{sgnInt(hd.d)}</b></div>{/if}
+      </div>
+    {/if}
   </div>
   <div class="note">Barra fina: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra gruesa: {projection ? 'la proyección' : 'tu escenario'}. En 2023, Frente Amplio es Sumar.</div>
 
@@ -114,6 +134,10 @@
   .bar { display: flex; width: 100%; overflow: hidden; border-radius: 6px; background: var(--panel); }
   .bar span { height: 100%; display: block; transition: width 0.35s ease; }
   .bar span + span { box-shadow: -1px 0 0 var(--bg); }
+  .bar span, .band polygon { cursor: pointer; transition: opacity 0.15s ease, width 0.35s ease; }
+  .band polygon { transition: opacity 0.15s ease; }
+  .hovering .bar span:not(.on) { opacity: 0.35; }
+  .tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
   .bar.slim { height: 12px; opacity: 0.72; }
   .bar.fat { height: 56px; }
   .maj { position: absolute; left: 50%; top: -6px; bottom: -6px; border-left: 2px dashed var(--stroke); }
