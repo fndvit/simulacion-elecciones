@@ -63,7 +63,7 @@
   .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
   .sel :global(.opts) { max-height: 320px; overflow-y: auto; }
   .sel :global(.opt) { font-size: 16px; line-height: 24px; }
-  .trow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) 70px; gap: 10px; align-items: center; padding: 8px 0; border: 0; border-bottom: 1px solid var(--line); font-family: var(--font-ui); font-size: 14px; color: var(--ink); cursor: pointer; background: none; text-align: left; font-weight: 400; }
+  .trow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) 70px; gap: 10px; align-items: start; line-height: 1.9; padding: 8px 0; border: 0; border-bottom: 1px solid var(--line); font-family: var(--font-ui); font-size: 14px; color: var(--ink); cursor: pointer; background: none; text-align: left; font-weight: 400; }
   .trow:hover { background: var(--panel); }
   .pv { font-weight: 700; }
   .vs { color: var(--muted); line-height: 1.9; }
