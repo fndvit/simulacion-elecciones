@@ -163,7 +163,7 @@
   /* page grid: the atlas 12 columns (1262 px). Five tracks: left rail · gap · centre · gutter · right rail.
      In the projection only the centre has width (all 12 columns). In the simulation, on the same columns:
      left rail 1–3, half a column empty, centre from 4½ to the end of column 10 (text keeps the 5-column
-     well width), half a column empty, right rail from 11½ to 12 and a little beyond the grid. The tracks animate between both. */
+     well width), half a column empty, right rail from 11½ to the end of 12. The tracks animate between both. */
   .scn { --gw: min(1262px, calc(100vw - 32px)); --g: 10px; --c: calc((var(--gw) - 11 * var(--g)) / 12);
     max-width: calc(1262px + 32px); margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; align-items: start; transition: grid-template-columns 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -173,9 +173,7 @@
   .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
   .rail.right { grid-column: 5; grid-row: 1; transform: translateX(32px); padding-top: 14px; }
   .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); }
-  /* the right rail runs a little past the grid's right edge (up to 48 px, never past the page) */
-  .rail.right { margin-right: calc(-1 * min(48px, (100vw - var(--gw)) / 2 - 4px)); }
-  .right .rin { width: calc(1.5 * var(--c) + var(--g) + min(48px, (100vw - var(--gw)) / 2 - 4px)); }
+  .right .rin { width: calc(1.5 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
@@ -217,7 +215,6 @@
   @media (max-width: 900px) {
     .share-top { display: block; }
     .share-rail { display: none; }
-    .rail.right { margin-right: 0; }
     .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6) { max-width: none; }
     .scn, .scn.sim { grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; transition: none; }
     .rail { display: none; }
