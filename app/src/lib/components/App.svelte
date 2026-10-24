@@ -1,0 +1,217 @@
+<script lang="ts">
+  // TresCincuenta.es — two views of the same page.
+  //  · Proyección: the poll projection itself, on the atlas's 12-column grid, no rails.
+  //  · Simulación: the rails slide in (controls on the left, step-by-step on the right) and the sections
+  //    that only explain the projection (transfers, la base, method) fade out.
+  //  · Escenarios: coming soon.
+  import { onMount } from 'svelte';
+  import { page } from '$app/state';
+  import { goto } from '$app/navigation';
+  import { resolve as res } from '$app/paths';
+  // with the hash router keep only the #/… part, so links work in the single-file build (file://, artifact)
+  const resolve = (p: '/' | '/simula' | '/escenarios') => { const r = res(p); const i = r.indexOf('#'); return i >= 0 ? r.slice(i) : r; };
+  import { fade } from 'svelte/transition';
+  import DialRail from './DialRail.svelte';
+  import SeatBar from './SeatBar.svelte';
+  import HexMap from './HexMap.svelte';
+  import ScenarioTable from './ScenarioTable.svelte';
+  import LastSeat from './LastSeat.svelte';
+  import ScenarioSankey from './ScenarioSankey.svelte';
+  import PollSection from './PollSection.svelte';
+  import HistoryRail from './HistoryRail.svelte';
+  import VitLogo from './VitLogo.svelte';
+  import ShareButton from './ShareButton.svelte';
+  import { blank, run, historyEntries, BASE } from '$lib/model';
+  import { DATA } from '$lib/data';
+  import { longDate } from '$lib/format';
+  import { scenarioFromUrl } from '$lib/share';
+  import type { Scenario } from '$lib/types';
+
+  let st = $state<Scenario>(blank());
+  let scope = $state('ES');
+  let focusParty = $state('PP');
+  let ready = $state(false);
+  // each view is its own URL (/, /simula, /escenarios); this shell lives in the layout, so it persists
+  // between them and the rails can slide in and out instead of the page reloading
+  const tab = $derived<'proj' | 'sim' | 'esc'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : 'proj');
+  const sim = $derived(tab === 'sim');
+
+  const scen = $derived(run(st));
+  // the projection tab always shows the poll projection; the simulation, the user's scenario
+  const cur = $derived(sim ? scen : BASE);
+  // in-page jump without touching the hash (the router lives there)
+  function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  const entries = $derived(historyEntries(st));
+
+  // a shared link (?e=…) opens that scenario in the simulation; otherwise the one saved in this browser, if any
+  onMount(() => {
+    const linked = scenarioFromUrl(blank);
+    if (linked) { st = linked; if (!sim) goto(resolve('/simula') + location.search); }
+    else try { const s = JSON.parse(localStorage.getItem('sim29n') || 'null'); if (s && s.nat) st = Object.assign(blank(), s); } catch {}
+    ready = true;
+  });
+  $effect(() => {
+    const snap = JSON.stringify(st);
+    if (!ready) return;
+    try { localStorage.setItem('sim29n', snap); } catch {}
+  });
+</script>
+
+<header class="mast" class:sim>
+  <div class="brand"><VitLogo height={26} /><h1 class="brand-title">TresCincuenta.es</h1></div>
+  <nav class="tabs" aria-label="Secciones">
+    <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>Proyección</a>
+    <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>Simula</a>
+    <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}><em>Cocinando</em> Escenarios</a>
+  </nav>
+  {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
+</header>
+
+<div class="scn" class:sim>
+  <aside class="rail left" aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
+    <div class="rin"><DialRail bind:scope bind:st cur={scen} bind:focusParty /></div>
+  </aside>
+
+  <main class="center">
+    {#if tab === 'esc'}
+      <section class="sec" in:fade={{ duration: 300 }}>
+        <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
+        <p class="lede w">Pronto podrás explorar escenarios ya preparados para el 29 de noviembre. Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula</a> el tuyo.</p>
+      </section>
+    {:else}
+    <section class="sec">
+      <p class="lede deck w6">Nuestro modelo <strong>proyecta el reparto de los 350 escaños</strong> del Congreso para las elecciones generales del <strong>29 de noviembre</strong> a partir de una <a class="jump" href="#la-base" onclick={(e) => { if (tab !== 'proj') { e.preventDefault(); goto(resolve('/')).then(() => setTimeout(() => toBase(e), 450)); } else toBase(e); }}><strong>media de encuestas</strong></a> nacionales.</p>
+      <p class="updated w6">Datos actualizados a {longDate(DATA.today)}</p>
+    </section>
+    <section class="sec">
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> a día de hoy.{/if}</h2>
+      <div class="f"><SeatBar {cur} {scope} projection={!sim} /></div>
+    </section>
+    <section class="sec">
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el reparto por provincias</strong> en tu escenario.{:else}Así quedaría <strong>el reparto por provincias</strong> según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.{/if}</h2>
+      <HexMap {cur} bind:scope bind:focusParty projection={!sim} />
+    </section>
+    <section class="sec"><div class="w"><ScenarioTable {cur} {scope} projection={!sim} /></div></section>
+    <section class="sec"><div class="w stack"><LastSeat {cur} bind:scope projection={!sim} /></div></section>
+    {#if !sim}
+      <section class="sec" transition:fade={{ duration: 300 }}><ScenarioSankey {cur} bind:scope /></section>
+      <section class="sec" transition:fade={{ duration: 300 }}><PollSection /></section>
+    {:else}
+      <section class="sec notes" transition:fade={{ duration: 300 }}>
+        <h2 class="hd w">Notas sobre <strong>la simulación</strong></h2>
+        <div class="w prose">
+          <p><b>Tus controles.</b> Los deslizadores mueven votos, no escaños. Un cambio nacional se reparte entre provincias de forma proporcional al voto que el partido ya tiene en cada una y el resto de partidos cede votos en proporción a su tamaño. Un cambio provincial solo afecta a esa provincia. La participación añade o quita votantes, que se reparten como el resto salvo que cambies el reparto. Después, D'Hondt asigna los escaños en cada circunscripción.</p>
+          <p><b>Punto de partida.</b> Cada simulación parte de la proyección de las encuestas. La participación de partida es la de 2023 en cada provincia.</p>
+          <p>Es una calculadora de supuestos, no un pronóstico: no estima incertidumbre ni probabilidades.</p>
+        </div>
+      </section>
+    {/if}
+    {/if}
+  </main>
+
+  <aside class="rail right" aria-label="Historial del escenario" aria-hidden={!sim} inert={!sim}>
+    <div class="rin">
+      <div class="share-rail"><ShareButton {entries} {st} cur={scen} /></div>
+      <HistoryRail {entries} bind:st cur={scen} />
+    </div>
+  </aside>
+</div>
+
+<style>
+  :global(:root) { --nav-h: 60px; }
+  /* sticky title bar, as in trees.fndvit.org: the page fades out under it (gradient + slight blur, masked) */
+  .mast { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-block: 8px; padding-inline: max(16px, calc((100% - 1262px) / 2)); transition: padding 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+  /* aligned with the content: the 1262 px grid in the projection, the 1440 px page with rails in the simulation */
+  .mast.sim { padding-inline: max(16px, calc((100% - 1440px) / 2 + 16px)); }
+  .mast::before { content: ''; position: absolute; inset: 0 0 -40px; z-index: -1; pointer-events: none;
+    background: linear-gradient(var(--bg), color-mix(in srgb, var(--bg) 20%, transparent));
+    -webkit-backdrop-filter: blur(1px); backdrop-filter: blur(1px);
+    -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); }
+  /* the name is as tall as the logo: Bodoni Moda's capitals are 0.75 em high, so font-size = logo height / 0.75,
+     and the baseline sits on the logo's bottom edge (a flex item with no text aligns by its bottom) */
+  .brand { --logo-h: 26px; display: inline-flex; align-items: baseline; gap: 12px; min-width: 0; }
+  .brand :global(.vitlogo svg) { height: var(--logo-h); }
+  .brand-title { font-family: var(--font-display); font-weight: 500; font-variation-settings: 'opsz' 18; font-size: calc(var(--logo-h) / 0.75); line-height: 1.2; color: var(--ink); margin: 0; white-space: nowrap; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
+
+  /* tabs */
+  .tabs { flex: 1; display: flex; justify-content: center; align-items: center; gap: 28px; min-width: 0; }
+  .tabs a { text-decoration: none; }
+  .tabs a, .soon { font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; white-space: nowrap;
+    background: none; border: 0; padding: 10px 0 8px; border-bottom: 2px solid transparent; color: var(--muted); }
+  .tabs a { cursor: pointer; }
+  .tabs a:hover { color: var(--ink); }
+  .tabs a.on { color: var(--ink); border-bottom-color: var(--ink); }
+  .soon { display: inline-flex; align-items: baseline; gap: 6px; }
+  .soon:not(.on) { opacity: 0.55; }
+  .soon em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
+  .share-top { display: none; }
+
+  /* page grid: rail · gap · centre · gutter · rail. In the projection the rail tracks are 0 and the
+     rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
+  .scn { max-width: 1440px; margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; align-items: start; transition: grid-template-columns 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+  .scn.sim { grid-template-columns: 300px 48px minmax(0, 1fr) 24px 200px; }
+  .rail { position: sticky; top: calc(var(--nav-h) + 8px); align-self: start; max-height: calc(100vh - var(--nav-h) - 16px); overflow: hidden; overscroll-behavior: contain;
+    opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+  .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
+  .rail.right { grid-column: 5; grid-row: 1; transform: translateX(32px); padding-top: 14px; }
+  .left .rin { width: 300px; padding-right: 6px; }
+  .right .rin { width: 200px; }
+  .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
+  .share-rail { margin-bottom: var(--s2); }
+  .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; }
+
+  /* centre: the atlas 12-column grid (1262 px) */
+  .center { grid-column: 3; grid-row: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px; row-gap: var(--s4);
+    width: 100%; max-width: 1262px; justify-self: center; min-width: 0; padding-top: 14px; }
+  .sim .center { max-width: none; }
+  /* in the simulation the centre is narrower: text well widens to 9 columns, wide charts to all 12 */
+  .sim .center :global(.sec > .w) { grid-column: 1 / 10; }
+  .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
+  /* the deck runs over cols 2–7 in the projection (all 12 → 1–9 in the simulation) */
+  .center :global(.sec > .w6) { grid-column: 2 / 8; }
+  .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }
+  .notes { border-top: 1px solid var(--line); padding-top: var(--s2); }
+  .prose { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); display: flex; flex-direction: column; gap: 12px; }
+  .prose p { margin: 0; }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+
+  /* the deck: same size as the h2s, light sans */
+  .deck { font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: var(--ink); margin: 0; }
+  .deck strong { font-weight: 700; }
+  /* same size as the seat bar caption; date of the last good data (the page is only rebuilt with good data) */
+  .updated { margin: -8px 0 0; font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: #c4314b; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .updated { color: #f2847a; } }
+  :global(:root[data-theme='dark']) .updated { color: #f2847a; }
+  .jump { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .jump:hover { text-decoration-thickness: 2px; }
+  :global(#la-base) { scroll-margin-top: calc(var(--nav-h) + 16px); }
+
+  /* tabs drop to their own row under the name */
+  @media (max-width: 1100px) {
+    :global(:root) { --nav-h: 92px; }
+    .tabs { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 22px; overflow-x: auto; scrollbar-width: none; }
+    .share-top { margin-left: auto; }
+  }
+  /* medium screens: the history rail moves under the centre and sharing goes to the title bar */
+  @media (max-width: 1380px) {
+    .scn.sim { grid-template-columns: 280px 32px minmax(0, 1fr) 0px 0px; }
+    .sim .rail.right { grid-column: 1 / -1; grid-row: 2; position: static; max-height: none; overflow: visible; padding-top: var(--s3); }
+    .sim .right .rin { width: auto; max-width: 560px; }
+    .share-top { display: block; }
+    .share-rail { display: none; }
+  }
+  /* small screens: one column, as the atlas below 900 px */
+  @media (max-width: 900px) {
+    .scn, .scn.sim { grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; transition: none; }
+    .rail { display: none; }
+    .sim .rail { display: block; grid-column: 1 / -1; position: static; max-height: none; overflow: visible; }
+    .sim .rail.left { grid-row: 1; }
+    .sim .center { grid-row: 2; padding-top: var(--s3); }
+    .sim .rail.right { grid-row: 3; }
+    .left .rin, .right .rin { width: auto; padding-right: 0; }
+    .center { grid-template-columns: minmax(0, 1fr); }
+    .center :global(.sec > .w6), .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
+  }
+  @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; letter-spacing: 0.05em; } }
+</style>

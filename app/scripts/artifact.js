@@ -8,5 +8,6 @@ const head = html.match(/<head>([\s\S]*?)<\/head>/)[1].replace(/<meta charset[^>
 const bStart = html.indexOf('>', html.indexOf('<body')) + 1;
 const body = html.slice(bStart, html.lastIndexOf('</body>'));
 fs.writeFileSync('build/artifact.html', head.trim() + '\n' + body.trim() + '\n');
-if (fs.existsSync('../datos')) fs.copyFileSync('build/index.html', '../index.html');
+// the root index.html is the portable hash-routed build; the Vercel build (real paths) is not copied there
+if (fs.existsSync('../datos') && !process.env.VERCEL) fs.copyFileSync('build/index.html', '../index.html');
 console.log('build/index.html, build/artifact.html y ../index.html listos');

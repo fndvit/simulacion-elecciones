@@ -3,5 +3,6 @@
   "framework": null,
   "installCommand": "npm ci --prefix app",
   "buildCommand": "npm run build --prefix app",
-  "outputDirectory": "app/build"
+  "outputDirectory": "app/build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

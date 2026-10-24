@@ -19,27 +19,27 @@
   );
   const focus = $derived(scope !== 'ES' ? { p: BYID[scope], r: cur.prov[scope] } : list[0]);
   // the province picker is shared with the map, the controls and the transfers
-  const provOpts = [{ value: 'ES', label: 'El más volátil' }, ...[...PROV].sort((a, b) => sortEs(a.n, b.n)).map((p) => ({ value: p.id, label: p.n }))];
+  const provOpts = [...[...PROV].sort((a, b) => sortEs(a.n, b.n)).map((p) => ({ value: p.id, label: p.n }))];
   // «volátil» = among the 10 tightest last seats; «muy lejos» = the challenger needs more than 5 % of the valid vote
   const FAR = 0.05;
   const top10 = $derived(new Set(list.slice(0, 10).map((x) => x.p.id)));
   const kind = $derived(!focus.r.last || !focus.r.chal ? 'none' : scope === 'ES' ? 'most' : top10.has(focus.p.id) ? 'volatile' : focus.r.chal.need / focus.r.valid > FAR ? 'far' : 'plain');
 </script>
 
-<h2 class="hd">
-  {#if kind === 'most'}El escaño más volátil está en <strong>{focus.p.n}</strong>: se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
-  {:else if kind === 'volatile'}El último escaño de <strong>{focus.p.n}</strong> es uno de los más volátiles: se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
-  {:else if kind === 'far'}En <strong>{focus.p.n}</strong>, el último escaño es de <strong>{nm(focus.r.last!.k)}</strong>, con <strong>{nm(focus.r.chal!.k)}</strong> muy lejos de alcanzarlo.
-  {:else if kind === 'plain'}En <strong>{focus.p.n}</strong>, el último escaño se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
-  {:else}En <strong>{focus.p.n}</strong> no hay un último escaño en disputa.{/if}
-</h2>
-<p class="lede">
-  {#if focus.r.chal}{nm(focus.r.chal.k)} necesita <b>{fmtN(focus.r.chal.need)} votos</b> más para quitárselo (un {pct(focus.r.chal.need / focus.r.valid, 2)} del voto válido de la provincia).{/if}
-  Cada columna es un partido y cada fila un divisor D'Hondt; el recuadro marca el escaño más frágil y el siguiente en la cola.
-</p>
-<!-- the selector stays under the title bar only while the diagram is in view -->
+{#snippet pick(after = '')}<span class="nowrap"><span class="sel"><LibDrop bind:value={() => focus.p.id, (v) => (scope = v)} options={provOpts} label="Circunscripción" filter /></span>{after}</span>{/snippet}
+<!-- the heading carries the province selector; it stays under the title bar while the diagram is in view -->
 <div class="blk">
-  <div class="stickyui sel"><LibDrop bind:value={scope} options={provOpts} label="Circunscripción del último escaño" filter /></div>
+  <h2 class="hd stickyui">
+    {#if kind === 'most'}El escaño más volátil está en {@render pick(',')} se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
+    {:else if kind === 'volatile'}El último escaño de {@render pick()} es uno de los más volátiles, se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
+    {:else if kind === 'far'}En {@render pick(',')} el último escaño es de <strong>{nm(focus.r.last!.k)}</strong>, con <strong>{nm(focus.r.chal!.k)}</strong> muy lejos de alcanzarlo.
+    {:else if kind === 'plain'}En {@render pick(',')} el último escaño se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
+    {:else}En {@render pick()} no hay un último escaño en disputa.{/if}
+  </h2>
+  <p class="lede">
+    {#if focus.r.chal}{nm(focus.r.chal.k)} necesita <b>{fmtN(focus.r.chal.need)} votos</b> más para quitárselo (un {pct(focus.r.chal.need / focus.r.valid, 2)} del voto válido de la provincia).{/if}
+    Cada columna es un partido y cada fila un divisor D'Hondt; el recuadro marca el escaño más frágil y el siguiente en la cola.
+  </p>
   <SeatDiagram r={focus.r} />
 </div>
 
@@ -58,8 +58,9 @@
 <style>
   .tight { display: flex; flex-direction: column; }
   .blk { display: flex; flex-direction: column; gap: 14px; }
-  .sel { align-self: flex-start; }
-  .sel :global(.word) { font-size: 18px; line-height: 26px; padding: 4px 12px; font-weight: 300; }
+  .nowrap { white-space: nowrap; }
+  .sel { display: inline-flex; vertical-align: baseline; }
+  .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
   .sel :global(.opts) { max-height: 320px; overflow-y: auto; }
   .sel :global(.opt) { font-size: 16px; line-height: 24px; }
   .trow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) 70px; gap: 10px; align-items: center; padding: 8px 0; border: 0; border-bottom: 1px solid var(--line); font-family: var(--font-ui); font-size: 14px; color: var(--ink); cursor: pointer; background: none; text-align: left; font-weight: 400; }
