@@ -84,6 +84,15 @@
     {#if !sim}
       <section class="sec" transition:fade={{ duration: 300 }}><ScenarioSankey {cur} bind:scope /></section>
       <section class="sec" transition:fade={{ duration: 300 }}><PollSection /></section>
+    {:else}
+      <section class="sec notes" transition:fade={{ duration: 300 }}>
+        <h2 class="hd w">Notas sobre <strong>la simulación</strong></h2>
+        <div class="w prose">
+          <p><b>Tus controles.</b> Los deslizadores mueven votos, no escaños. Un cambio nacional se reparte entre provincias de forma proporcional al voto que el partido ya tiene en cada una y el resto de partidos cede votos en proporción a su tamaño. Un cambio provincial solo afecta a esa provincia. La participación añade o quita votantes, que se reparten como el resto salvo que cambies el reparto. Después, D'Hondt asigna los escaños en cada circunscripción.</p>
+          <p><b>Punto de partida.</b> Cada simulación parte de la proyección de las encuestas. La participación de partida es la de 2023 en cada provincia.</p>
+          <p>Es una calculadora de supuestos, no un pronóstico: no estima incertidumbre ni probabilidades.</p>
+        </div>
+      </section>
     {/if}
   </main>
 
@@ -144,9 +153,12 @@
   /* in the simulation the centre is narrower: text well widens to 9 columns, wide charts to all 12 */
   .sim .center :global(.sec > .w) { grid-column: 1 / 10; }
   .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
-  /* the deck runs over cols 1–6 in the projection (all 12 → 1–9 in the simulation) */
-  .center :global(.sec > .w6) { grid-column: 1 / 7; }
+  /* the deck runs over cols 2–7 in the projection (all 12 → 1–9 in the simulation) */
+  .center :global(.sec > .w6) { grid-column: 2 / 8; }
   .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }
+  .notes { border-top: 1px solid var(--line); padding-top: var(--s2); }
+  .prose { font-family: var(--font-body); font-size: 15px; line-height: 1.72; display: flex; flex-direction: column; gap: 12px; }
+  .prose p { margin: 0; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
 
   /* the deck: same size as the h2s, light sans */

@@ -54,7 +54,7 @@
 
 <h2 class="hd w" id="la-base">La base: <strong>media ponderada de encuestas</strong></h2>
 <p class="lede w">La proyección sigue la metodología de FiveThirtyEight, el modelo que popularizó Nate Silver en Estados Unidos, adaptada a las encuestas españolas: una media ponderada que premia las encuestas recientes, grandes y de empresas demoscópicas que acertaron en 2023, corrige el sesgo de cada empresa y reparte el resultado por provincias según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales. Después, D'Hondt reparte los escaños. Las encuestas se recogen cada día, de forma automática, de la recopilación de sondeos publicados que mantiene Wikipedia.</p>
-<div class="cwrap c7" bind:clientWidth={cw}><div class="scrollx">
+<div class="cwrap c9" bind:clientWidth={cw}><div class="scrollx">
   <svg bind:this={svgEl} onpointermove={hover} onpointerleave={() => (hov = null)} class="chart" viewBox="0 0 {W} {H}" width={W} height={H} role="img" aria-label="Evolución de la media de encuestas">
     {#each [0, 10, 20, 30, 40] as v}<line class="grid" x1={m.l} x2={W - m.r} y1={Y(v)} y2={Y(v)} /><text x={m.l - 6} y={Y(v) + 4} text-anchor="end">{v}</text>{/each}
     {#each months as mo}<text x={mo.x} y={H - 6} text-anchor="middle">{mo.t}</text>{/each}

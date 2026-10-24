@@ -3,7 +3,7 @@
   // Atlas ScenarioSankey (Observable Plot): from the 2023 vote to the scenario, nationally or in one
   // constituency. The constituency picker is shared with the map, the controls and the last seat.
   import LibDrop from './LibDrop.svelte';
-  import { PROV } from '$lib/data';
+  import { PROV, BYID } from '$lib/data';
   import { partyColor, partyLabel } from '$lib/parties';
   import { transfers } from '$lib/model';
   import { sortEs, fmtN } from '$lib/format';
@@ -132,8 +132,9 @@
   });
 </script>
 
-<h2 class="hd w">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
+<h2 class="hd w">Transferencia de voto <strong>de 2023 a la proyección</strong> {scope === 'ES' ? 'en toda España' : `en ${BYID[scope].n}`}</h2>
 <p class="sub w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
+<div class="c7w stickyui sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></div>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>
   <div class="fig" bind:this={host} bind:clientWidth={figW}
@@ -152,8 +153,8 @@
 <style>
   .sankey { min-width: 0; position: relative; }
   .fig { min-width: 0; color: var(--muted); }
-  .sel { display: inline-flex; vertical-align: baseline; }
-  .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
+  .sel { justify-self: start; }
+  .sel :global(.word) { font-size: 18px; line-height: 26px; padding: 4px 12px; font-weight: 300; }
   .sel :global(.opts) { max-height: 320px; overflow-y: auto; }
   .sel :global(.opt) { font-size: 16px; line-height: 24px; }
   .fig :global(text) { stroke: var(--halo); paint-order: stroke; stroke-linejoin: round; font-family: var(--font-ui); }
