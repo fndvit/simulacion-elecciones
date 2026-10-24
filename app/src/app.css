@@ -90,9 +90,12 @@ input[type='range'] { width: 100%; accent-color: var(--knob); cursor: pointer; m
 .sec > .c7 { grid-column: 1 / 8; }
 .sec > .c7w { grid-column: 2 / 8; }
 .sec > .c9 { grid-column: 1 / 10; }
+/* the map: cols 1–9 so it is at least as big as in the simulation at every width; its UI from the well (col 2) to col 9 */
+.sec > .c8 { grid-column: 1 / 10; }
+.sec > .c8w { grid-column: 2 / 10; }
 .sec > .f { grid-column: 1 / -1; }
 @media (max-width: 900px) {
-  .sec > .w, .sec > .c7, .sec > .c7w, .sec > .c9, .sec > .f { grid-column: 1 / -1; }
+  .sec > .w, .sec > .c7, .sec > .c7w, .sec > .c8, .sec > .c8w, .sec > .c9, .sec > .f { grid-column: 1 / -1; }
 }
 /* sticky UI rows (as the atlas .madlib-row): stay under the title bar while their chart is in view */
 .stickyui { position: sticky; top: calc(var(--nav-h) + 8px); z-index: 6; padding: 6px 8px; margin: -6px -8px; border-radius: 10px;

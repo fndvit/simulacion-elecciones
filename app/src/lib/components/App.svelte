@@ -180,7 +180,7 @@
   .sim .center { max-width: none; }
   /* in the simulation the centre is narrower: text well widens to 9 columns, wide charts to all 12 */
   .sim .center :global(.sec > .w) { grid-column: 1 / 10; }
-  .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
+  .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w), .sim .center :global(.sec > .c8), .sim .center :global(.sec > .c8w) { grid-column: 1 / -1; }
   /* the deck runs over cols 2–7 in the projection (all 12 → 1–9 in the simulation) */
   .center :global(.sec > .w6) { grid-column: 2 / 8; }
   .sim .center :global(.sec > .w6) { grid-column: 1 / 10; }

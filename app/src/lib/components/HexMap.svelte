@@ -97,7 +97,7 @@
   });
 </script>
 
-<div class="c7w stickyui mapui">
+<div class="c8w stickyui mapui">
 <div class="map-top">
   <div class="toggle" role="group" aria-label="Cómo colorear el mapa">
     <button class:on={mode === 'seats'} aria-pressed={mode === 'seats'} onclick={() => (mode = 'seats')}>Escaños</button>
@@ -125,7 +125,7 @@
 </div>
 
 
-<div class="legend c7w">
+<div class="legend c8w">
   {#if mode === 'seats'}
     <span>Cada {view === 'hex' ? 'hexágono' : 'celda'} es un escaño. Líneas finas: provincias; gruesas: comunidades autónomas.</span>
     {#each BLOC.filter((P) => cur.seats[P]) as P}<span><i style="background:{PARTY[P].c}"></i>{PARTY[P].n} {cur.seats[P]}</span>{/each}
@@ -136,7 +136,7 @@
 </div>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="mapwrap c7" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
+<div class="mapwrap c8" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
     <defs>{#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}</defs>
     <path class="canbox" d="M{cb[0]},{cb[1]}H{cb[2]}V{cb[3]}" />
@@ -203,7 +203,9 @@
   .pdrop :global(.opt) { font-size: 16px; }
   .map-heading { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--fg); }
   .mapwrap { position: relative; }
-  .map { width: 100%; height: auto; display: block; max-width: 820px; }
+  .map { width: 100%; height: auto; display: block; }
+  /* in the simulation the centre is narrower; keep the map from growing past 820 px there */
+  :global(.sim) .map { max-width: 820px; }
   /* each hex is stroked in its own fill colour so neighbours fuse without anti-aliasing seams */
   .hx { cursor: pointer; transition: fill 0.3s ease, stroke 0.3s ease; stroke-width: 1.5; stroke-linejoin: round; }
   .hx { transition: fill 0.3s ease, stroke 0.3s ease, opacity 0.15s ease; }
