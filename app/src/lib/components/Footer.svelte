@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Site footer, after the atlas's: «Un proyecto de» ViT · sections · contact · share. No gradient: the
-  // intro's black, with the 350 mark's colours on a strip along the top and on the column titles.
+  // Site footer, after the atlas's: «Un proyecto de» ViT · contact · sections · share. No gradient: the
+  // intro's black, light grey headers.
   import { href } from '$lib/nav';
   const SITE = 'https://trescincuenta.es';
   const TEXT = 'TresCincuenta.es · la proyección de los 350 escaños del Congreso para el 29N';
@@ -9,12 +9,9 @@
     bluesky: `https://bsky.app/intent/compose?text=${encodeURIComponent(`${TEXT} ${SITE}`)}`
   };
   const REPO = 'https://github.com/fndvit/simulacion-elecciones';
-  // the 350 mark's colours, in its own order
-  const STRIP = ['#d1366b', '#db4540', '#edc747', '#759ac6', '#275aa3', '#5db9ae', '#e0833f', '#7bba56', '#a8c854'];
 </script>
 
 <footer class="site-foot">
-  <div class="strip" aria-hidden="true">{#each STRIP as c}<i style="background:{c}"></i>{/each}</div>
   <div class="foot">
     <div class="brand">
       <div class="proj">Un proyecto de</div>
@@ -30,8 +27,14 @@
       </a>
     </div>
 
+    <div class="col">
+      <div class="col-title">Contacto</div>
+      <div>Karma Peiró</div>
+      <a href="mailto:karma@fundaciovit.org">karma@fundaciovit.org</a>
+    </div>
+
     <nav class="col links" aria-label="Mapa web">
-      <div class="col-title" style="color:#5db9ae">Secciones</div>
+      <div class="col-title">Secciones</div>
       <a href={href('/')}>Proyección</a>
       <a href={href('/simula')}>Simula</a>
       <a href={href('/escenarios')}>Escenarios</a>
@@ -40,13 +43,7 @@
     </nav>
 
     <div class="col">
-      <div class="col-title" style="color:#e0833f">Contacto</div>
-      <div>Karma Peiró</div>
-      <a href="mailto:karma@fundaciovit.org">karma@fundaciovit.org</a>
-    </div>
-
-    <div class="col">
-      <div class="col-title" style="color:#d1366b">Comparte</div>
+      <div class="col-title">Comparte</div>
       <div class="social">
         <a href={share.linkedin} target="_blank" rel="noopener" aria-label="Compartir en LinkedIn">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zm1.78 13.02H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.22 0z" /></svg>
@@ -64,19 +61,17 @@
 
 <style>
   .site-foot { margin-top: var(--s4); background: #16181d; color: #d6d1d3; font-family: var(--font-ui); font-weight: 400; }
-  .strip { display: flex; height: 6px; }
-  .strip i { flex: 1; }
   .foot { max-width: 1262px; margin: 0 auto; padding: var(--s4) 16px var(--s3); box-sizing: content-box;
     display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px; row-gap: var(--s3); align-items: start; }
   .brand { grid-column: 1 / 4; }
   .foot > :nth-child(2) { grid-column: 4 / 7; }
   .foot > :nth-child(3) { grid-column: 7 / 10; }
   .foot > :nth-child(4) { grid-column: 10 / 13; }
-  .proj { color: #edc747; font-weight: 700; font-size: 20px; margin-bottom: 12px; }
+  .proj { color: #a9a3a5; font-weight: 700; font-size: 20px; margin-bottom: 12px; }
   .logo { display: inline-block; color: #f7f4ef; }
   .logo svg { height: 80px; width: auto; display: block; }
   .col { display: flex; flex-direction: column; gap: 5px; font-size: 16px; line-height: 1.5; }
-  .col-title { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .col-title { color: #a9a3a5; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
   .col a { color: inherit; text-decoration: none; }
   .col a:hover { color: #fff; text-decoration: underline; }
   .social { display: flex; align-items: center; gap: 24px; margin-top: 2px; }

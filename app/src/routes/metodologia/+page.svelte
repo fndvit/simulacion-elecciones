@@ -127,7 +127,7 @@
 
   <!-- ── polls ─────────────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>1. Las <strong>encuestas</strong></h2>
+    <h2>Las <strong>encuestas</strong></h2>
     <p>
       La materia prima es la tabla de sondeos publicados que mantiene la comunidad de Wikipedia en español para estas elecciones.
       Cada mañana se descarga con la API de Wikipedia (con tres intentos), se lee fila a fila y se normaliza: empresa y medio,
@@ -149,7 +149,7 @@
 
   <!-- ── weighted average ──────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>2. La <strong>media ponderada</strong></h2>
+    <h2>La <strong>media ponderada</strong></h2>
     <p>
       Cada encuesta pesa el producto de cuatro factores. Ninguno descarta encuestas: las viejas, pequeñas o de empresas que fallaron
       cuentan menos, pero cuentan.
@@ -162,7 +162,7 @@
       </tbody>
     </table>
     <p>
-      Para cada partido, la media es el promedio de sus estimaciones con esos pesos, ya corregidas del sesgo de cada empresa (paso 3).
+      Para cada partido, la media es el promedio de sus estimaciones con esos pesos, ya corregidas del sesgo de cada empresa (ver abajo).
       La línea del gráfico de la proyección repite el cálculo semana a semana con lo que se sabía en cada fecha. La tabla de
       encuestas de la página principal muestra el peso que tiene hoy cada una.
     </p>
@@ -185,7 +185,7 @@
 
   <!-- ── house effects ─────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>3. El <strong>sesgo</strong> de cada empresa</h2>
+    <h2>El <strong>sesgo</strong> de cada empresa</h2>
     <p>
       Algunas empresas dan sistemáticamente más (o menos) a un partido que el resto. Para medirlo, cada encuesta se compara con la
       media de las <strong>demás empresas</strong> en una ventana de ±21 días (ponderada por cercanía en el tiempo y tamaño de muestra).
@@ -210,7 +210,7 @@
   <!-- ── national average today ────────────────────────────────────────── -->
   <div class="prose well">
     <h3>La media de hoy</h3>
-    <p>El resultado de los pasos 1 a 3 es una estimación nacional por partido, en porcentaje del voto válido:</p>
+    <p>El resultado de la media y la corrección del sesgo es una estimación nacional por partido, en porcentaje del voto válido:</p>
     <div class="avg">
       {#each ORDERED as [k, v]}
         <div class="row"><span class="nm"><i style="background:{PARTY[k as keyof typeof PARTY]?.c}"></i>{name(k)}</span><span class="track"><span style="width:{(v / ORDERED[0][1]) * 100}%;background:{PARTY[k as keyof typeof PARTY]?.c}"></span></span><span class="num">{dec(v)} %</span></div>
@@ -220,7 +220,7 @@
 
   <!-- ── provinces ─────────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>4. De España a las <strong>provincias</strong></h2>
+    <h2>De España a las <strong>provincias</strong></h2>
     <p>
       Las encuestas son nacionales, pero los escaños se reparten en 52 circunscripciones. Para bajar la media a cada provincia se usa
       el <strong>perfil territorial</strong> de cada partido: su fuerza relativa en cada circunscripción, es decir, su porcentaje allí
@@ -258,7 +258,7 @@
 
   <!-- ── census, turnout, seats ────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>5. Censo, participación y <strong>escaños</strong></h2>
+    <h2>Censo, participación y <strong>escaños</strong></h2>
     <p>
       El censo del 29N es de <strong>{fmtN(DATA.census)} electores</strong>, incluidos los residentes en el extranjero, repartido entre
       provincias en proporción al de 2023. La participación, el voto nulo y el voto en blanco de cada provincia son los de las generales
@@ -280,10 +280,10 @@
 
   <!-- ── simulator ─────────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>6. El <strong>simulador</strong></h2>
+    <h2>El <strong>simulador</strong></h2>
     <p>Los controles mueven <strong>votos</strong>, nunca escaños. Después de cada cambio se recalcula el D'Hondt de las 52 circunscripciones.</p>
     <ul>
-      <li><strong>Un partido en toda España.</strong> Su nuevo porcentaje nacional se reparte entre provincias en proporción a los votos que ya tiene en cada una, con el mismo ajuste iterativo del paso 4. El resto de partidos cede (o gana) votos en proporción a su tamaño, provincia a provincia.</li>
+      <li><strong>Un partido en toda España.</strong> Su nuevo porcentaje nacional se reparte entre provincias en proporción a los votos que ya tiene en cada una, con el mismo ajuste iterativo que reparte la media entre provincias. El resto de partidos cede (o gana) votos en proporción a su tamaño, provincia a provincia.</li>
       <li><strong>Un partido en una provincia.</strong> El cambio solo afecta a esa provincia; los demás partidos de esa provincia lo absorben en proporción a su tamaño.</li>
       <li><strong>La participación.</strong> Añade o quita votantes en cada provincia (nacional y, además, por provincia), entre el 20 % y el 98 % del censo.</li>
       <li><strong>Los que se suman.</strong> Por defecto, los nuevos votantes votan como el resto (×1). Cada partido puede captar entre nada (×0) y cuatro veces su parte (×4) de esos votantes. Sin cambio de participación, este control no tiene efecto.</li>
@@ -296,7 +296,7 @@
 
   <!-- ── transfers & map ───────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>7. Transferencias de voto y <strong>mapa</strong></h2>
+    <h2>Transferencias de voto y <strong>mapa</strong></h2>
     <p>
       El diagrama de transferencias compara, en cada circunscripción, el voto de 2023 (con la abstención sobre el censo de 2026) con la
       proyección. Cada opción conserva todo el voto que puede —Sumar pasa a Frente Amplio, Compromís y Podemos— y lo que pierde se
@@ -315,7 +315,7 @@
 
   <!-- ── daily update ──────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>8. Actualización diaria y <strong>respaldo</strong></h2>
+    <h2>Actualización diaria y <strong>respaldo</strong></h2>
     <p>
       Todo el proceso corre solo cada mañana (a las 07:17 UTC, las 08:17 en Madrid en invierno) en GitHub Actions: descarga, validación,
       media, proyección, comprobación y publicación. La web solo se reconstruye con datos que superan todas las comprobaciones:
