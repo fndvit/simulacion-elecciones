@@ -162,12 +162,12 @@
      rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
   /* page grid: the atlas 12 columns (1262 px). Five tracks: left rail · gap · centre · gutter · right rail.
      In the projection only the centre has width (all 12 columns). In the simulation, on the same columns:
-     left rail 1–3, half a column empty, centre to column 10 (wide charts end there, text keeps the 5-column
-     well width), right rail 11–12 and a little beyond the grid. The tracks animate between both. */
+     left rail 1–3, half a column empty, centre from 4½ to the end of column 10 (text keeps the 5-column
+     well width), half a column empty, right rail from 11½ to 12 and a little beyond the grid. The tracks animate between both. */
   .scn { --gw: min(1262px, calc(100vw - 32px)); --g: 10px; --c: calc((var(--gw) - 11 * var(--g)) / 12);
     max-width: calc(1262px + 32px); margin: 0 auto; padding-block: var(--s2) var(--s4); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; align-items: start; transition: grid-template-columns 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
-  .scn.sim { grid-template-columns: calc(3 * var(--c) + 2 * var(--g)) calc(var(--c) / 2 + var(--g)) minmax(0, 1fr) var(--g) calc(2 * var(--c) + var(--g)); }
+  .scn.sim { grid-template-columns: calc(3 * var(--c) + 2 * var(--g)) calc(var(--c) / 2 + var(--g)) minmax(0, 1fr) calc(var(--c) / 2 + var(--g)) calc(1.5 * var(--c) + var(--g)); }
   .rail { position: sticky; top: calc(var(--nav-h) + 8px); align-self: start; max-height: calc(100vh - var(--nav-h) - 16px); overflow: hidden; overscroll-behavior: contain;
     opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
   .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
@@ -175,10 +175,10 @@
   .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); }
   /* the right rail runs a little past the grid's right edge (up to 48 px, never past the page) */
   .rail.right { margin-right: calc(-1 * min(48px, (100vw - var(--gw)) / 2 - 4px)); }
-  .right .rin { width: calc(2 * var(--c) + var(--g) + min(48px, (100vw - var(--gw)) / 2 - 4px)); }
+  .right .rin { width: calc(1.5 * var(--c) + var(--g) + min(48px, (100vw - var(--gw)) / 2 - 4px)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
-  .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; }
+  .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
 
   /* centre: the atlas 12-column grid (1262 px) */
   .center { grid-column: 3; grid-row: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px; row-gap: var(--s4);
