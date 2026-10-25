@@ -134,9 +134,10 @@
 
 <!-- the heading carries the area selector and stays under the title bar while the chart is in view -->
 <h2 class="hd w stickyui">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
-<p class="lede w">Izquierda: el voto de las generales de 2023 (con la abstención sobre el censo de 2026). Derecha: la proyección. Cada partido conserva todo el voto que puede y lo que pierde va a quien crece; Sumar pasa a Frente Amplio, Compromís y Podemos. Es la estimación de mínimo trasvase, calculada provincia a provincia: los movimientos reales son mayores.</p>
+<p class="lede w">En este diagrama se muestra una estimación de cómo podría transferirse el voto, que aunque parezca contraintuitivo, no representa cambios individuales de voto. El modelo parte de los resultados de 2023 y busca la combinación de transferencias entre partidos que mejor reproduce los resultados proyectados.</p>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>
+  <div class="ends" aria-hidden="true"><b>Resultados 23J</b><b>Proyección 29N</b></div>
   <div class="fig" bind:this={host} bind:clientWidth={figW}
     role="img" aria-label="Transferencias de voto de 2023 a la proyección"></div>
   {#if datum}
@@ -152,6 +153,8 @@
 
 <style>
   .sankey { min-width: 0; position: relative; }
+  /* column heads, over the labels on each side */
+  .ends { display: flex; justify-content: space-between; padding: 0 6px; margin-bottom: 6px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--ink); }
   .fig { min-width: 0; color: var(--muted); }
   .sel { display: inline-flex; vertical-align: baseline; }
   .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
