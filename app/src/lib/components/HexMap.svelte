@@ -78,6 +78,19 @@
     const top = ca === '04' ? [Math.min(...hs.map((h) => GEO.cells[h.i].ring.reduce((m, p) => Math.min(m, p[1]), 1e9))), Math.min(...hs.map((h) => h.y))] : null;
     return { ca, lines: CA_N[ca], out: ca === '04', g: top ? [gx / A, top[0] - 14] : [gx / A, gy / A], h: top ? [hx, top[1] - HEX.R - 10] : [hx, hy] };
   }).filter((c) => c.ca !== '05');
+  // how to read the map: A Coruña drawn larger under the Balearic Islands, split into its seats
+  const KEY = '15';
+  const [VX, VY, VW, VH] = VIEWBOX.split(' ').map(Number);
+  const keyHex = HEX.byProv[KEY];
+  const bboxOf = (pts: number[][]) => [Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1]))];
+  const keyGeoBox = bboxOf(keyHex.flatMap((h) => GEO.cells[h.i].ring));
+  const keyHexBox = bboxOf(keyHex.flatMap((h) => [[h.x - HEX.R, h.y - HEX.R], [h.x + HEX.R, h.y + HEX.R]]));
+  const keyBox = $derived([0, 1, 2, 3].map((k) => lerp(keyGeoBox[k], keyHexBox[k])));
+  const keyCells = $derived(cells.filter((c) => c.id === KEY));
+  // anchor: just under the Balearic Islands (both maps), as a share of the map box
+  const bal = HEX.H.filter((h) => BYID[h.id].ca === '04');
+  const balGeo = bboxOf(bal.flatMap((h) => GEO.cells[h.i].ring)), balHex = bboxOf(bal.map((h) => [h.x, h.y + HEX.R]));
+  const keyTop = $derived((lerp(balGeo[3], balHex[3]) + 46 - VY) / VH * 100);
   // pointer over the sea, a gap or the inset box: no province is hovered any more
   function offCell(e: MouseEvent) { if (tip && !(e.target as Element).classList?.contains('hx')) tip = null; }
   function clear(e: MouseEvent) { if (!(e.target as Element).classList?.contains('hx')) { scope = 'ES'; tip = null; } }
@@ -127,7 +140,7 @@
 
 <div class="legend c8w">
   {#if mode === 'seats'}
-    <span>Cada {view === 'hex' ? 'hexágono' : 'celda'} es un escaño. Líneas finas: provincias; gruesas: comunidades autónomas.</span>
+    <span>Líneas finas: provincias; gruesas: comunidades autónomas.</span>
     {#each BLOC.filter((P) => cur.seats[P]) as P}<span><i style="background:{PARTY[P].c}"></i>{PARTY[P].n} {cur.seats[P]}</span>{/each}
   {:else}
     <span>Voto a {PARTY[focusParty as keyof typeof PARTY].n} en cada circunscripción</span>
@@ -168,6 +181,20 @@
     <text class="ca" x={me.x + HEX.R * 1.2} y={me.y + 7}>Melilla</text>
     <text class="ca" x={cb[0] + 2} y={cb[1] - 10}>Canarias</text>
   </svg>
+
+  <div class="key" style="--top:{keyTop}%">
+    <span class="kname">{BYID[KEY].n} · {BYID[KEY].seats} escaños</span>
+    <svg viewBox="{keyBox[0] - 2} {keyBox[1] - 2} {keyBox[2] - keyBox[0] + 4} {keyBox[3] - keyBox[1] + 4}" aria-hidden="true">
+      {#each keyCells as c (c.key)}
+        {#if t === 1}<polygon points={c.pts} style="fill:{c.fill}" />{:else}<path d={shapes ? shapes[c.gi] : GEO.cells[c.gi].d} style="fill:{c.fill}" />{/if}
+      {/each}
+    </svg>
+    <p>
+      <b>Cómo leer el mapa</b>
+      {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños reparte{:else}Cada provincia se divide en tantas partes como escaños reparte{/if}{#if mode === 'seats'}, y cada una toma el color del partido que gana ese escaño, con el primero en el centro.{:else}, todas con el tono del voto del partido en la provincia.{/if}
+      {#if view === 'geo'}Las partes no siguen los municipios: no muestran dónde se vota a cada partido.{/if}
+    </p>
+  </div>
 
   {#if tipData && tip}
     <div class="tip" style="left:{tip.x}px;top:{tip.y}px">
@@ -221,10 +248,19 @@
   .canbox { fill: none; stroke: var(--muted); stroke-width: 1.2; }
   .map text { font-family: var(--font-ui); font-size: 13px; fill: var(--muted); paint-order: stroke; stroke: var(--halo); stroke-width: 3px; pointer-events: none; }
   .map text.ca { font-size: 19px; font-weight: 700; fill: var(--fg); letter-spacing: 0.01em; }
-  /* over the map: printed on the cells, transparent to the mouse so hover and click still reach them */
-  .map text.ca.over { fill: #000; stroke: none; opacity: 0.42; mix-blend-mode: multiply; }
-  :global(:root[data-theme='dark']) .map text.ca.over { fill: #fff; mix-blend-mode: screen; }
-  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme='light'])) .map text.ca.over { fill: #fff; mix-blend-mode: screen; } }
+  /* over the map: solid text with a wide halo in the page colour, so it reads on any party colour */
+  .map text.ca.over { fill: var(--ink); stroke: var(--halo); stroke-width: 5px; stroke-linejoin: round; }
+  .key { position: absolute; right: 0; top: var(--top); width: 26%; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .key svg { width: 46%; height: auto; display: block; }
+  .key svg :global(path), .key svg :global(polygon) { stroke: var(--bg); stroke-width: 1.6; stroke-linejoin: round; }
+  .key p { margin: 0; font-family: var(--font-ui); font-weight: 400; font-size: 12px; line-height: 1.45; color: var(--muted); }
+  .kname { font-family: var(--font-ui); font-weight: 700; font-size: 12px; color: var(--fg); margin-bottom: -4px; }
+  .key b { display: block; color: var(--fg); font-weight: 700; margin-bottom: 2px; }
+  @media (max-width: 700px) {
+    .key { position: static; width: auto; display: grid; grid-template-columns: 84px 1fr; align-items: start; gap: 4px 12px; margin-top: 12px; }
+    .kname { grid-column: 1 / 3; margin: 0; }
+    .key svg { width: 84px; flex: none; }
+  }
   .mapwrap { cursor: default; }
   .legend { margin-bottom: -6px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-ui); font-size: 12px; color: var(--muted); font-weight: 400; }
   .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
