@@ -68,6 +68,8 @@
     '07': ['Castilla-', 'La Mancha'], '08': ['Castilla', 'y León'], '09': ['Cataluña'], '10': ['Extremadura'], '11': ['Galicia'],
     '12': ['Madrid'], '13': ['Navarra'], '14': ['País', 'Vasco'], '15': ['Murcia'], '16': ['La Rioja'], '17': ['Comunitat', 'Valenciana']
   };
+  // nudges for the hexagon view only (map units, ~0.85 px each at full width)
+  const HEX_DY: Record<string, number> = { '07': 21 };
   const ringArea = (r: number[][]) => { let a = 0, x = 0, y = 0; for (let k = 0; k < r.length; k++) { const p = r[k], q = r[(k + 1) % r.length], f = p[0] * q[1] - q[0] * p[1]; a += f; x += (p[0] + q[0]) * f; y += (p[1] + q[1]) * f; } return { a: a / 2, x: x / (3 * a), y: y / (3 * a) }; };
   const CA_POS = Object.keys(CA_N).map((ca) => {
     const hs = HEX.H.filter((h) => BYID[h.id].ca === ca);
@@ -76,7 +78,7 @@
     const hx = hs.reduce((a, h) => a + h.x, 0) / hs.length, hy = hs.reduce((a, h) => a + h.y, 0) / hs.length;
     // Baleares: above the islands in both maps
     const top = ca === '04' ? [Math.min(...hs.map((h) => GEO.cells[h.i].ring.reduce((m, p) => Math.min(m, p[1]), 1e9))), Math.min(...hs.map((h) => h.y))] : null;
-    return { ca, lines: CA_N[ca], out: ca === '04', g: top ? [gx / A, top[0] - 14] : [gx / A, gy / A], h: top ? [hx, top[1] - HEX.R - 10] : [hx, hy] };
+    return { ca, lines: CA_N[ca], out: ca === '04', g: top ? [gx / A, top[0] - 14] : [gx / A, gy / A], h: top ? [hx, top[1] - HEX.R - 10] : [hx, hy + (HEX_DY[ca] || 0)] };
   }).filter((c) => c.ca !== '05');
   // how to read the map: A Coruña drawn larger under the Balearic Islands, split into its seats
   const KEY = '15';
@@ -175,10 +177,10 @@
     {/if}
     {#each CA_POS as c (c.ca)}
       {@const n = c.lines.length}
-      <text class="ca" class:over={!c.out} x={lerp(c.g[0], c.h[0])} y={lerp(c.g[1], c.h[1]) - (n - 1) * 10 + 7} text-anchor="middle">{#each c.lines as l, k}<tspan x={lerp(c.g[0], c.h[0])} dy={k ? 20 : 0}>{l}</tspan>{/each}</text>
+      <text class="ca" class:over={!c.out} x={lerp(c.g[0], c.h[0])} y={lerp(c.g[1], c.h[1]) - (n - 1) * 8 + 6} text-anchor="middle">{#each c.lines as l, k}<tspan x={lerp(c.g[0], c.h[0])} dy={k ? 16 : 0}>{l}</tspan>{/each}</text>
     {/each}
-    <text class="ca" x={ce.x - HEX.R * 1.2} y={ce.y + 7} text-anchor="end">Ceuta</text>
-    <text class="ca" x={me.x + HEX.R * 1.2} y={me.y + 7}>Melilla</text>
+    <text class="ca" x={ce.x - HEX.R * 1.2} y={ce.y + 6} text-anchor="end">Ceuta</text>
+    <text class="ca" x={me.x + HEX.R * 1.2} y={me.y + 6}>Melilla</text>
     <text class="ca" x={cb[0] + 2} y={cb[1] - 10}>Canarias</text>
   </svg>
 
@@ -190,7 +192,7 @@
       {/each}
     </svg>
     <p>
-      {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños reparte{:else}Cada provincia se divide en tantas partes como escaños reparte{/if}{#if mode === 'seats'}, y cada una toma el color del partido que gana ese escaño, con el primero en el centro.{:else}, todas con el tono del voto del partido en la provincia.{/if}
+      {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños reparte{:else}Cada provincia se divide en tantas partes como escaños reparte{/if}{#if mode === 'seats'}, y cada {view === 'hex' ? 'uno' : 'una'} toma el color del partido que gana ese escaño, con el primero en el centro.{:else}, {view === 'hex' ? 'todos' : 'todas'} con el tono del voto del partido en la provincia.{/if}
       {#if view === 'geo'}Las divisiones no muestran los municipios donde se vota a cada partido.{/if}
     </p>
   </div>
@@ -246,9 +248,9 @@
   .selo { fill: none; stroke: var(--fg); stroke-width: 3.5; stroke-linecap: round; pointer-events: none; }
   .canbox { fill: none; stroke: var(--muted); stroke-width: 1.2; }
   .map text { font-family: var(--font-ui); font-size: 13px; fill: var(--muted); paint-order: stroke; stroke: var(--halo); stroke-width: 3px; pointer-events: none; }
-  .map text.ca { font-size: 19px; font-weight: 700; fill: var(--fg); letter-spacing: 0.01em; }
+  .map text.ca { font-size: 15.5px; font-weight: 700; fill: var(--fg); letter-spacing: 0.01em; }
   /* over the map: solid text with a wide halo in the page colour, so it reads on any party colour */
-  .map text.ca.over { fill: var(--ink); stroke: var(--halo); stroke-width: 5px; stroke-linejoin: round; }
+  .map text.ca.over { fill: var(--ink); stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; }
   .key { position: absolute; right: 0; top: var(--top); width: 26%; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .key svg { width: 46%; height: auto; display: block; }
   .key svg :global(path), .key svg :global(polygon) { stroke: var(--bg); stroke-width: 1.6; stroke-linejoin: round; }
