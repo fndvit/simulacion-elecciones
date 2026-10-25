@@ -88,18 +88,38 @@ const seatOrder = (seats: Record<string, number>) =>
   Object.entries(seats).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1] || ORDER.indexOf(a[0] as never) - ORDER.indexOf(b[0] as never));
 
 /** reference party for every hex: the poll projection, or the 2023 result. Madrid has one more hex than
- *  its 2023 seats (left empty = a new seat) and Cádiz one fewer (its smallest 2023 seat drops). */
-function refArray(seats: Record<string, number>, n: number) {
-  const arr: string[] = [];
-  for (const [k, c] of seatOrder(seats)) for (let i = 0; i < c; i++) arr.push(k);
-  while (arr.length < n) arr.push('');
-  return arr.slice(0, n);
+ *  its 2023 seats (left empty = a new seat) and Cádiz one fewer (its smallest 2023 seat drops).
+ *  With a clear winner, the winner takes the middle of the province (the cells nearest its most central
+ *  cell, on the geographic map) and the other parties follow round the edge, clockwise from the north,
+ *  each in one run. Without one (a tie at the top), all parties go clockwise from the north. */
+const dist = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+function refArray(seats: Record<string, number>, id: string) {
+  const L = byProv[id], n = L.length, order = seatOrder(seats);
+  const flat: string[] = [];
+  for (const [k, c] of order) for (let i = 0; i < c; i++) flat.push(k);
+  while (flat.length < n) flat.push('');
+  flat.length = n;
+  const clear = order.length > 1 && order[0][1] > order[1][1] && n > 2;
+  if (!clear) return flat;
+  const P = L.map((h) => GEO.cells[h.i].c as Pt);
+  // the most central cell: the one closest, in total, to all the others
+  let mid = 0, best = Infinity;
+  P.forEach((p, i) => { const s = P.reduce((a, q) => a + dist(p, q), 0); if (s < best) { best = s; mid = i; } });
+  const [W, w] = order[0];
+  const byNear = P.map((_, i) => i).sort((a, b) => dist(P[a], P[mid]) - dist(P[b], P[mid]));
+  const inner = new Set(byNear.slice(0, w));
+  const ang = (i: number) => (Math.atan2(P[i][1] - P[mid][1], P[i][0] - P[mid][0]) + 2.5 * Math.PI) % (2 * Math.PI);
+  const outer = P.map((_, i) => i).filter((i) => !inner.has(i)).sort((a, b) => ang(a) - ang(b));
+  const arr: string[] = new Array(n).fill('');
+  for (const i of inner) arr[i] = W;
+  flat.slice(w).forEach((k, j) => (arr[outer[j]] = k));
+  return arr;
 }
 export const BASE_HEX: Record<string, string[]> = {};
 export const HEX_2023: Record<string, string[]> = {};
 for (const id in byProv) {
-  BASE_HEX[id] = refArray(BASE.prov[id].seats, byProv[id].length);
-  HEX_2023[id] = refArray(BYID[id].r23.s as Record<string, number>, byProv[id].length);
+  BASE_HEX[id] = refArray(BASE.prov[id].seats, id);
+  HEX_2023[id] = refArray(BYID[id].r23.s as Record<string, number>, id);
 }
 /** scenario party per hex, laid out on the reference: a hex keeps its reference party while that party
  *  still has seats, so only real changes move */
