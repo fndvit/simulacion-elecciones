@@ -69,7 +69,7 @@
     '12': ['Madrid'], '13': ['Navarra'], '14': ['País', 'Vasco'], '15': ['Murcia'], '16': ['La Rioja'], '17': ['Comunitat', 'Valenciana']
   };
   // nudges for the hexagon view only (map units, ~0.85 px each at full width)
-  const HEX_DY: Record<string, number> = { '07': 21 };
+  const HEX_DY: Record<string, number> = { '07': 42 };
   const ringArea = (r: number[][]) => { let a = 0, x = 0, y = 0; for (let k = 0; k < r.length; k++) { const p = r[k], q = r[(k + 1) % r.length], f = p[0] * q[1] - q[0] * p[1]; a += f; x += (p[0] + q[0]) * f; y += (p[1] + q[1]) * f; } return { a: a / 2, x: x / (3 * a), y: y / (3 * a) }; };
   const CA_POS = Object.keys(CA_N).map((ca) => {
     const hs = HEX.H.filter((h) => BYID[h.id].ca === ca);
