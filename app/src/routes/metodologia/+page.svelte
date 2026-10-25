@@ -56,6 +56,7 @@
   // ── sources ───────────────────────────────────────────────────────────
   const sources = [
     { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en español (empresas demoscópicas, medios y CIS)', u: 'https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026', d: 'Cada día' },
+    { q: 'Transferencias de voto', s: 'Microdatos del barómetro mensual del CIS (recuerdo de voto e intención de voto)', u: 'https://www.cis.es', d: 'Cada mes' },
     { q: 'Resultados electorales', s: 'Ministerio del Interior, infoelectoral: generales de abril y noviembre de 2019 y julio de 2023, por circunscripción', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
     { q: 'Censo y escaños del 29N', s: 'Real decreto de convocatoria y censo electoral (incluidos los residentes en el extranjero)', u: '', d: 'Fijo' },
     { q: 'Valoración de las empresas', s: 'Último sondeo publicado por cada empresa antes del 23J de 2023, frente al resultado', u: '', d: 'Fijo' },
@@ -296,14 +297,32 @@
 
   <!-- ── transfers & map ───────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>Transferencias de voto y <strong>mapa</strong></h2>
+    <h2>Transferencias de <strong>voto</strong></h2>
     <p>
-      El diagrama de transferencias compara, en cada circunscripción, el voto de 2023 (con la abstención sobre el censo de 2026) con la
-      proyección. Cada opción conserva todo el voto que puede —Sumar pasa a Frente Amplio, Compromís y Podemos— y lo que pierde se
-      reparte entre las que crecen, en proporción a lo que crecen; la abstención cierra la cuenta. Es el <strong>trasvase mínimo</strong>
-      compatible con los dos resultados, no una medición: los movimientos reales de votantes son mayores, porque hay flujos que se
-      compensan. Las provincias se suman para el total de España.
+      Las encuestas preguntan qué se votó en 2023 y qué se votaría hoy. El diagrama de transferencias combina esas respuestas con
+      nuestra proyección en tres pasos:
     </p>
+    <ul>
+      <li><strong>El patrón, del CIS.</strong> Con los microdatos del barómetro más reciente —hoy, el {DATA.trMeta.title}, con
+        {fmtN(DATA.trMeta.n)} entrevistas útiles— se cruza el recuerdo de voto en 2023 con la intención de voto, ponderando como el CIS. A quien
+        aún no sabe a quién votará se le asigna el partido por el que siente simpatía; quien no tiene ninguno queda fuera. El voto en
+        blanco va con «otros»; el nulo, la abstención y quien no podía votar en 2023 van con la abstención.</li>
+      <li><strong>Prudencia con los partidos pequeños.</strong> Un partido con pocos encuestados (Aliança Catalana, CC, UPN…) apenas
+        dice nada fiable, así que su fila o su columna se apoya más en un punto de partida neutro: quien llega a un partido viene de
+        cada opción de 2023 en proporción a su tamaño, y quien votó a un partido le es fiel en la proporción media del resto y reparte lo
+        demás como el electorado de hoy. El peso de la encuesta es <code>n ÷ (n + 60)</code>, donde <code>n</code> son los encuestados.</li>
+      <li><strong>Los totales, del resultado y del modelo.</strong> Con un ajuste proporcional iterativo, el patrón se escala hasta que
+        cada fila suma el resultado real de 2023 (con la abstención sobre el censo de 2026) y cada columna, la proyección. Se hace en
+        cada circunscripción —un partido que no se presenta allí es un cero— y España es la suma de las 52.</li>
+    </ul>
+    <p>
+      El ajuste corrige que en las encuestas se recuerda mal el voto pasado y se declara más participación de la real; por eso los flujos
+      hacia y desde la abstención son mayores que los que declaran los encuestados. El resultado es la combinación de trasvases más
+      coherente a la vez con lo que dice la encuesta y con la proyección, <strong>no una medición</strong> de cambios individuales de
+      voto: el patrón sale de una sola encuesta, es el mismo para toda España antes de ajustarse a cada provincia y se actualiza cada mes,
+      cuando el CIS publica un barómetro nuevo.
+    </p>
+    <h2>El <strong>mapa</strong></h2>
     <p>
       En el mapa <strong>cada celda es un escaño</strong>. Dentro de cada provincia, el territorio se divide en tantas celdas como
       diputados elige (un diagrama de Voronoi con puntos repartidos sobre la provincia), y cada celda toma el color del partido que gana
@@ -328,7 +347,7 @@
     </ul>
     <p>
       Si algo falla, la web sigue con el <strong>último día bueno</strong> (la fecha de «Datos actualizados» es la de esos datos) y se abre
-      un aviso para revisarlo a mano. Cada versión anterior de las encuestas se guarda con su fecha: se conservan las 30 últimas.
+      un aviso para revisarlo a mano. Cada versión anterior de las encuestas se guarda con su fecha: se conservan las 30 últimas. Los microdatos del barómetro del CIS, que alimentan las transferencias de voto, se añaden a mano cada mes, cuando el CIS los publica.
     </p>
   </div>
 

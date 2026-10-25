@@ -11,7 +11,7 @@
  *    shared out by the newcomer distribution (×1 = they vote like everyone else).
  * Then D'Hondt with the 3 % threshold over valid votes (blank included) in each of the 52 constituencies.
  */
-import { PROV, BYID } from './data';
+import { PROV, BYID, DATA } from './data';
 import { ORDER, PARTY, INVEST23 } from './parties';
 import type { Scenario, RunResult, DhondtResult, ProvResult } from './types';
 
@@ -140,39 +140,15 @@ export function hasScopeChanges(st: Scenario, scope: string) {
 }
 
 /**
- * Vote transfers from the 2023 result to the scenario — the minimum-switching estimate.
- * In each constituency every 2023 option keeps as many voters as it can (Sumar 2023 → Frente Amplio,
- * Compromís and Podemos), what it loses goes to whoever grows, in proportion to their growth, and
- * abstention closes the account (2026 census on both sides, so new electors count as 2023 abstainers).
- * Summed over the chosen scope. It is a lower bound on real movement, not a measured flow.
+ * Vote transfers 2023 → projection for Spain or one province. Precomputed in modelo/transfers.py: the latest CIS
+ * barometer's 2023 recall × current intention, as a pattern, fitted (IPF) to each province's real 2023 result and
+ * its projection. Spain is the sum of the 52 provinces. Only for the projection (not the user's scenario).
  */
-export const LEFT_GROUPS: Record<string, string[]> = {
-  PP: ['PP'], PSOE: ['PSOE'], VOX: ['VOX'], SUMAR: ['FA', 'COMP', 'PODEMOS'], ERC: ['ERC'], JUNTS: ['JUNTS'],
-  BILDU: ['BILDU'], PNV: ['PNV'], BNG: ['BNG'], CC: ['CC'], UPN: ['UPN'], AA: ['AA'], OTROS: ['OTROS'], ABST: ['ABST']
-};
-export function transfers(cur: RunResult, scope: string) {
+export function transfers(_cur: RunResult, scope: string) {
   const F: Record<string, number> = {};
-  const add = (a: string, b: string, v: number) => { if (v > 0.5) { const k = a + '>' + b; F[k] = (F[k] || 0) + v; } };
   for (const p of PROV) {
     if (scope !== 'ES' && p.id !== scope) continue;
-    const r = cur.prov[p.id], t = p.r23;
-    const L: Record<string, number> = {};
-    for (const k in t.v) L[k] = t.v[k] * t.valid;
-    L.OTROS = (L.OTROS || 0) + t.blank;
-    L.ABST = p.census - t.valid;
-    const R: Record<string, number> = {};
-    for (const k in r.votes) if (k !== 'OTROS') R[k] = r.votes[k];
-    R.OTROS = (r.votes.OTROS || 0) + r.blank;
-    R.ABST = p.census - r.valid;
-    const gain: Record<string, number> = { ...R }, loss: Record<string, number> = {};
-    for (const [g, heirs] of Object.entries(LEFT_GROUPS)) {
-      const lg = L[g] || 0, rg = heirs.reduce((a, h) => a + (R[h] || 0), 0);
-      const kept = Math.min(lg, rg);
-      for (const h of heirs) if (R[h]) { const share = (kept * R[h]) / rg; add(g, h, share); gain[h] -= share; }
-      loss[g] = lg - kept;
-    }
-    const G = Object.values(gain).reduce((a, v) => a + Math.max(0, v), 0);
-    if (G > 0) for (const g in loss) for (const h in gain) if (gain[h] > 0) add(g, h, (loss[g] * gain[h]) / G);
+    for (const [a, b, v] of DATA.tr[p.id] || []) { const k = a + '>' + b; F[k] = (F[k] || 0) + v; }
   }
   return Object.entries(F).map(([k, votes]) => { const [from, to] = k.split('>'); return { from, to, votes }; });
 }

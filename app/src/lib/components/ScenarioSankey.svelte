@@ -3,10 +3,11 @@
   // Atlas ScenarioSankey (Observable Plot): from the 2023 vote to the scenario, nationally or in one
   // constituency. The constituency picker is shared with the map, the controls and the last seat.
   import LibDrop from './LibDrop.svelte';
-  import { PROV } from '$lib/data';
+  import { PROV, DATA } from '$lib/data';
   import { partyColor, partyLabel } from '$lib/parties';
   import { transfers } from '$lib/model';
   import { sortEs, fmtN } from '$lib/format';
+  import { href } from '$lib/nav';
   import type { RunResult } from '$lib/types';
 
   let { cur, scope = $bindable() }: { cur: RunResult; scope: string } = $props();
@@ -150,9 +151,11 @@
     <p class="empty">No hay datos para este ámbito.</p>
   {/if}
 </div>
+<p class="method c7">Patrón de trasvases: recuerdo de voto en 2023 e intención de voto del {DATA.trMeta.title} del CIS ({fmtN(DATA.trMeta.n)} entrevistas), ajustado al resultado de 2023 y a la proyección en cada circunscripción. <a href={href('/metodologia')}>Cómo se calcula</a>.</p>
 
 <style>
   .sankey { min-width: 0; position: relative; }
+  .method a { color: inherit; }
   /* column heads, over the labels on each side */
   .ends { display: flex; justify-content: space-between; padding: 0 6px; margin-bottom: 6px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--ink); }
   .fig { min-width: 0; color: var(--muted); }

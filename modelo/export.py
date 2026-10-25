@@ -1,5 +1,6 @@
 import json, os, datetime as dt
 import polls as PL
+import transfers as TR
 from projection import *
 I, nat = indices(); B = base_inputs()
 rows = PL.load(); he, counts = PL.house_effects(rows)
@@ -48,5 +49,9 @@ out = dict(today=PL.TODAY.isoformat(), election='2026-11-29', S={k: round(v, 3) 
     he={f: {k: round(v, 2) for k, v in d_.items()} for f, d_ in he.items()}, heN=counts,
     polls=plist, series=series, prov=prov, geo=dict(W=geo['W'], H=geo['H'], canBox=geo['canBox']),
     wElec=W_ELEC, census=CENSUS_2026)
+# vote transfers 2023 → projection: the latest CIS barometer's recall × intention, fitted to each province's totals
+tr, trMeta = TR.province_flows(out)[:2]
+out['tr'] = tr
+out['trMeta'] = {k: trMeta[k] for k in ('study', 'title', 'n')}
 json.dump(out, open(os.path.join(D, 'app_data.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 print(len(json.dumps(out, ensure_ascii=False)), len(plist), len(series))
