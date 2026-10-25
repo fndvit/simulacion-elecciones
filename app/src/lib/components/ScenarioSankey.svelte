@@ -6,7 +6,7 @@
   import { PROV, DATA } from '$lib/data';
   import { partyColor, partyLabel } from '$lib/parties';
   import { transfers } from '$lib/model';
-  import { sortEs, fmtN } from '$lib/format';
+  import { sortEs, fmtN, pct } from '$lib/format';
   import { href } from '$lib/nav';
   import type { RunResult } from '$lib/types';
 
@@ -58,7 +58,7 @@
     const ordered = [...links].sort((a, b) => srcOrder.indexOf(a.from) - srcOrder.indexOf(b.from) || tgtOrder.indexOf(a.to) - tgtOrder.indexOf(b.to));
     const rows: any[] = [];
     const grads: { id: string; s: string; t: string }[] = [];
-    const byId = new Map<string, { from: string; to: string; votes: number }>();
+    const byId = new Map<string, { from: string; to: string; votes: number; a: string; b: string }>();
     ordered.forEach((f, k) => {
       const dv = f.votes * pxPerVote;
       const s0 = sCur.get(f.from)!; sCur.set(f.from, s0 + dv);
@@ -67,11 +67,11 @@
       rows.push({ id, x: 0, y1: s0, y2: s0 + dv });
       rows.push({ id, x: 1, y1: t0, y2: t0 + dv });
       grads.push({ id, s: nodeColor(f.from), t: nodeColor(f.to) });
-      byId.set(id, { from: nodeLabel(f.from), to: nodeLabel(f.to), votes: f.votes });
+      byId.set(id, { from: nodeLabel(f.from), to: nodeLabel(f.to), votes: f.votes, a: f.from, b: f.to });
     });
     const nodes = [
-      ...srcOrder.map((k) => ({ side: 'source', label: nodeLabel(k), y: (sSpan.get(k)!.y0 + sSpan.get(k)!.y1) / 2 })),
-      ...tgtOrder.map((k) => ({ side: 'target', label: nodeLabel(k), y: (tSpan.get(k)!.y0 + tSpan.get(k)!.y1) / 2 }))
+      ...srcOrder.map((k) => ({ side: 'source', key: k, label: nodeLabel(k), y: (sSpan.get(k)!.y0 + sSpan.get(k)!.y1) / 2 })),
+      ...tgtOrder.map((k) => ({ side: 'target', key: k, label: nodeLabel(k), y: (tSpan.get(k)!.y0 + tSpan.get(k)!.y1) / 2 }))
     ];
     // keep labels at least 17 px apart on each side (small parties sit close together)
     for (const side of ['source', 'target']) {
@@ -80,12 +80,25 @@
       const over = L.length ? L[L.length - 1].y - (height - 4) : 0;
       if (over > 0) for (let i = L.length - 1; i >= 0; i--) { L[i].y -= over; if (i && L[i].y - L[i - 1].y >= 17) break; }
     }
-    return { rows, grads, nodes, height, byId };
+    // a party's whole picture, for the tooltip on its name: every flow (also those too thin to draw), largest
+    // first; under 1 % of the party's votes they are summed as «resto»
+    const party = (key: string, side: string): NodeTip => {
+      const out = side === 'source';
+      const mine = flows.filter((f) => (out ? f.from : f.to) === key).sort((p, q) => q.votes - p.votes);
+      const tot = mine.reduce((a, f) => a + f.votes, 0) || 1;
+      const rows = mine.filter((f) => f.votes >= 0.01 * tot).map((f) => { const o = out ? f.to : f.from; return { label: nodeLabel(o), color: nodeColor(o), votes: f.votes, share: f.votes / tot }; });
+      const rest = tot - rows.reduce((a, r) => a + r.votes, 0);
+      return { kind: 'node', title: nodeLabel(key), out, total: tot, rows, rest: rest >= 1 ? rest : 0 };
+    };
+    return { rows, grads, nodes, height, byId, party };
   });
+
+  type LinkTip = { kind: 'link'; from: string; to: string; votes: number };
+  type NodeTip = { kind: 'node'; title: string; out: boolean; total: number; rows: { label: string; color: string; votes: number; share: number }[]; rest: number };
 
   let host = $state<HTMLDivElement>();
   let box = $state<HTMLDivElement>();
-  let datum = $state<{ from: string; to: string; votes: number } | null>(null);
+  let datum = $state<LinkTip | NodeTip | null>(null);
   let tx = $state(0), ty = $state(0), tw = $state(0);
   function tmove(e: PointerEvent) { if (!box) return; const r = box.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; tw = r.width; }
   let figW = $state(560);
@@ -124,15 +137,29 @@
     // hover on each ribbon (as the atlas): highlight it, dim the rest, glassy tooltip with the flow
     const paths = [...svg.querySelectorAll<SVGPathElement>('g[aria-label="area"] path')];
     let timer: ReturnType<typeof setTimeout>;
-    const paint = (a: SVGPathElement | null) => { for (const q of paths) q.style.fillOpacity = a ? (q === a ? '1' : '0.5') : ''; };
+    const info = (q: SVGPathElement) => { const id = q.getAttribute('fill')?.match(/#(.+)\)/)?.[1]; return id ? model.byId.get(id) : undefined; };
+    const paint = (on: ((q: SVGPathElement) => boolean) | null) => { for (const q of paths) q.style.fillOpacity = on ? (on(q) ? '1' : '0.25') : ''; };
     for (const path of paths) {
-      const id = path.getAttribute('fill')?.match(/#(.+)\)/)?.[1];
-      const info = id ? model.byId.get(id) : undefined;
-      if (!info) continue;
+      const f = info(path);
+      if (!f) continue;
       path.style.cursor = 'pointer'; path.style.transition = 'fill-opacity 0.12s ease';
-      path.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(() => { datum = info; paint(path); }, 120); });
+      path.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(() => { datum = { kind: 'link', from: f.from, to: f.to, votes: f.votes }; paint((q) => q === path); }, 120); });
       path.addEventListener('pointerleave', () => { clearTimeout(timer); datum = null; paint(null); });
     }
+    // hover on a party's name: its flows stay lit, the rest dim, and the tooltip lists where its votes go
+    // (2023 side) or where they come from (projection side)
+    const groups = [...svg.querySelectorAll<SVGGElement>('g[aria-label="text"]')];
+    (['source', 'target'] as const).forEach((side, gi) => {
+      const list = model.nodes.filter((n) => n.side === side);
+      [...(groups[gi]?.querySelectorAll<SVGTextElement>('text') ?? [])].forEach((t, i) => {
+        const n = list[i];
+        if (!n) return;
+        t.style.cursor = 'pointer';
+        const mine = (q: SVGPathElement) => { const f = info(q); return !!f && (side === 'source' ? f.a : f.b) === n.key; };
+        t.addEventListener('pointerenter', () => { clearTimeout(timer); datum = model.party(n.key, side); paint(mine); t.style.fontWeight = '700'; });
+        t.addEventListener('pointerleave', () => { datum = null; paint(null); t.style.fontWeight = ''; });
+      });
+    });
     return () => { clearTimeout(timer); fig.remove(); };
   });
 </script>
@@ -147,8 +174,19 @@
     role="img" aria-label="Transferencias de voto de 2023 a la proyección"></div>
   {#if datum}
     <div class="tip" style="left:{tx}px;top:{ty}px;transform:translate({tx > tw - 264 ? 'calc(-100% - 14px)' : '14px'}, 12px)">
-      <h4>{datum.from} → {datum.to}</h4>
-      <div>Votos: <b>{fmtN(datum.votes)}</b></div>
+      {#if datum.kind === 'link'}
+        <h4>{datum.from} → {datum.to}</h4>
+        <div>Votos: <b>{fmtN(datum.votes)}</b></div>
+      {:else}
+        <h4>{datum.title}</h4>
+        <div class="sub"><b>{fmtN(datum.total)}</b> votos {datum.out ? 'en 2023 · a dónde van' : 'en la proyección · de dónde vienen'}</div>
+        <table class="rows"><tbody>
+          {#each datum.rows as r}
+            <tr><td><span class="sw" style="background:{r.color}"></span>{r.label}</td><td>{fmtN(r.votes)}</td><td>{pct(r.share, 0)}</td></tr>
+          {/each}
+          {#if datum.rest}<tr class="rest"><td>Resto</td><td>{fmtN(datum.rest)}</td><td>{pct(datum.rest / datum.total, 0)}</td></tr>{/if}
+        </tbody></table>
+      {/if}
     </div>
   {/if}
   {#if !model}
@@ -168,5 +206,13 @@
   .sel :global(.opts) { max-height: 320px; overflow-y: auto; }
   .sel :global(.opt) { font-size: 16px; line-height: 24px; }
   .fig :global(text) { stroke: var(--halo); paint-order: stroke; stroke-linejoin: round; font-family: var(--font-ui); }
+  .tip .sub { color: var(--muted); margin-bottom: 6px; }
+  .tip .rows { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  .tip .rows td { padding: 1px 0; white-space: nowrap; }
+  .tip .rows td + td { text-align: right; padding-left: 12px; }
+  .tip .rows td:last-child { color: var(--muted); }
+  .tip .rows .rest td { color: var(--muted); }
+  .tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+  .fig :global(g[aria-label="text"] text) { pointer-events: auto; }
   .empty { font-family: var(--font-ui); font-weight: 400; font-size: 14px; color: var(--muted); margin: 0; }
 </style>

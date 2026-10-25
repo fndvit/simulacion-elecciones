@@ -57,6 +57,7 @@
   // name gives way to the one-line one and the tabs travel from the hero to the right of the bar.
   const heroOn = $derived(tab === 'proj');
   let pastLogo = $state(false);
+  let pastTabs = $state(false);
   let overDark = $state(false); // the bar still sits over the dark hero
   const compact = $derived(!heroOn || pastLogo);
   const tabsUp = $derived(!heroOn || pastTabs);
@@ -72,7 +73,6 @@
       { duration: 480, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
   }
   // each piece moves into the bar when it reaches it: first the 350 lockup, then (further down) the tabs
-  let pastTabs = $state(false);
   async function setPast(v: boolean) {
     if (v === pastLogo) return;
     const from = (v ? hero350 : head350)?.getBoundingClientRect(); // where it is now, before the swap
