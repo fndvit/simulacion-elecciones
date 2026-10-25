@@ -9,28 +9,27 @@
   import judit from '$lib/assets/team/judit.webp?inline';
   import pol from '$lib/assets/team/pol.webp?inline';
 
-  type Member = { nombre: string; rol: string; bio: string[]; email?: string; twitter?: string; photo?: string };
+  // bios carry <em> for outlet names
+  type Member = { nombre: string; rol: string; bio: string[]; email?: string; photo?: string };
   const team: Member[] = [
     {
       nombre: 'Karma Peiró',
       rol: 'Dirección editorial',
       bio: [
-        'Es cofundadora y directora de la Fundació ViT. Periodista especializada en tecnología desde 1995. Ha trabajado para en.red.ando, La Vanguardia, Catalunya Radio, TV3 y Nació Digital, entre otros medios. Actualmente, también es profesora asociada a la UdG y la URL-Blanquerna.',
+        'Es cofundadora y directora de la Fundació ViT. Periodista especializada en tecnología desde 1995. Ha trabajado para <em>en.red.ando</em>, <em>La Vanguardia</em>, <em>Catalunya Ràdio</em>, <em>TV3</em> y <em>Nació Digital</em>, entre otros medios. Actualmente, también es profesora asociada a la UdG y la URL-Blanquerna.',
         'Activista de datos: en las últimas dos décadas ha impulsado actividades para el conocimiento, análisis y concienciación del uso de los datos abiertos. En diferentes formatos: jornadas, workshops, hackathons o expediciones de datos. El objetivo siempre ha sido el mismo: que la ciudadanía ejerza su derecho de acceso a la información pública.'
       ],
       email: 'karma@fundaciovit.org',
-      twitter: '@kpeiro',
       photo: karma
     },
     {
       nombre: 'Xaquín G.V.',
       rol: 'Dirección del proyecto',
       bio: [
-        'Periodista visual y de datos gallego. Trabajó en The New York Times y en National Geographic, y lideró el equipo de Visuals de The Guardian. Actualmente es mentor del equipo visual de The Straits Times y profesor asociado en la Universidad de Girona.',
+        'Periodista visual y de datos gallego. Trabajó en <em>The New York Times</em> y en <em>National Geographic</em>, y lideró el equipo de Visuals de <em>The Guardian</em>. Actualmente es mentor del equipo visual de <em>The Straits Times</em> y profesor asociado en la Universidad de Girona.',
         'Ha visualizado elecciones locales, autonómicas, nacionales, presidenciales, primarias, referéndums. Con mapas y cartogramas. Hexágonos, gradientes, pictogramas. Sparklines y bolitas. En papel y en digital. En tres continentes. Durante el pasado cuarto de siglo.'
       ],
       email: 'xaquin@fundaciovit.org',
-      twitter: '@xocasgv',
       photo: xaquin
     },
     {
@@ -71,9 +70,8 @@
 
 <PageHead
   kicker="El equipo"
-  color="#5db9ae"
   title="Quiénes <strong>somos</strong>"
-  lede="TresCincuenta.es es un proyecto del Centre de Recerca de la <a href='https://fundaciovit.org/' target='_blank' rel='noopener'>Fundació ViT</a>" />
+  lede="TresCincuenta.es es un proyecto del <strong>Centre de Recerca de la <a href='https://fundaciovit.org/' target='_blank' rel='noopener'>Fundació ViT</a></strong>" />
 
 <section class="page">
   {#each team as p}
@@ -81,13 +79,8 @@
       <div class="bio">
         <h2 class="name">{p.nombre}</h2>
         <div class="role">{p.rol}</div>
-        {#each p.bio as para}<p class="txt">{para}</p>{/each}
-        {#if p.email || p.twitter}
-          <div class="contact">
-            {#if p.email}<a href="mailto:{p.email}">{p.email}</a>{/if}
-            {#if p.twitter}<a href="https://twitter.com/{p.twitter.replace('@', '')}" target="_blank" rel="noopener">{p.twitter}</a>{/if}
-          </div>
-        {/if}
+        {#each p.bio as para}<p class="txt">{@html para}</p>{/each}
+        {#if p.email}<div class="contact"><a href="mailto:{p.email}">{p.email}</a></div>{/if}
       </div>
       <div class="portrait">{#if p.photo}<img src={p.photo} alt={p.nombre} />{/if}</div>
     </article>

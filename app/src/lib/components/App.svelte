@@ -6,7 +6,7 @@
   //  · Escenarios: coming soon.
   import { onMount, tick } from 'svelte';
   import { page } from '$app/state';
-  import { goto } from '$app/navigation';
+  import { goto, beforeNavigate, afterNavigate } from '$app/navigation';
   import { href as resolve } from '$lib/nav';
   import { fade } from 'svelte/transition';
   import DialRail from './DialRail.svelte';
@@ -65,7 +65,7 @@
   const reduce = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // FLIP: animate `to` from where `from` was, scaling to match widths
   function fly(to: HTMLElement | undefined, a: DOMRect | undefined) {
-    if (!to || !a || reduce()) return;
+    if (!to || !a || reduce() || instant) return;
     const b = to.getBoundingClientRect(); if (!b.width) return;
     const s = a.width / b.width;
     to.animate([{ transformOrigin: '0 0', transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${s})` }, { transformOrigin: '0 0', transform: 'none' }],
@@ -89,7 +89,7 @@
     return { left: l, width: r - l, mid: (t + bt) / 2 };
   }
   function slide(to: HTMLElement | undefined, a: ReturnType<typeof extent> | undefined) {
-    if (!to || !a || reduce()) return;
+    if (!to || !a || reduce() || instant) return;
     const box = to.getBoundingClientRect(), b = extent(to); if (!b.width) return;
     const s = a.width / b.width, ox = b.left - box.left;
     to.animate([{ transformOrigin: `${ox}px 50%`, transform: `translate(${a.left - b.left}px, ${a.mid - b.mid}px) scale(${s})` }, { transformOrigin: `${ox}px 50%`, transform: 'none' }],
@@ -117,6 +117,12 @@
     onScroll();
     return () => { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
   });
+  // arriving at or leaving the projection (the only view with the intro), the bar swaps state at once:
+  // no transitions, so the logo and tabs don't visibly travel back
+  let instant = $state(false);
+  beforeNavigate((nav) => { if ((nav.to?.route.id === '/') !== (page.route.id === '/')) instant = true; });
+  // held a little past the swap: the intro's state settles over a couple of frames after the route changes
+  afterNavigate(() => { if (instant) setTimeout(() => (instant = false), 500); });
   // entering the projection from another tab: start from the top state without animating
   $effect(() => { if (heroOn) tick().then(() => { pastLogo = false; pastTabs = false; onScroll(); }); else { pastLogo = false; pastTabs = false; overDark = false; } });
 
@@ -141,7 +147,7 @@
   <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
   <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
 {/snippet}
-<header class="mast" class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
+<header class="mast" class:instant class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
   <nav class="tabs" aria-label="Secciones" bind:this={headTabs} inert={!tabsUp}>{@render tablinks()}</nav>
   {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
@@ -296,6 +302,7 @@
   .jump:hover { text-decoration-thickness: 2px; }
   :global(#la-base) { scroll-margin-top: calc(var(--nav-h) + 16px); }
 
+  .mast.instant, .mast.instant :global(*), .mast.instant::before, .mast.instant::after { transition: none !important; }
   /* ── hero ─────────────────────────────────────────────────────────────────────────────────────── */
   /* the bar over the hero: transparent, only the (larger, light) ViT mark; name, 350 and tabs wait */
   /* two layers crossfade: the dark one while the bar sits over the intro, the light gradient + blur after */
