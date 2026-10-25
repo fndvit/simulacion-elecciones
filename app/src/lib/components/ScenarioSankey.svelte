@@ -23,12 +23,12 @@
   const model = $derived.by(() => {
     if (!flows.length) return null;
     const total = flows.reduce((a, f) => a + f.votes, 0) || 1;
-    // hide the tiniest flows, but NEVER a party: a flow stays if it is big overall OR one of the
-    // main flows (≥ 20 %) of its origin or its destination, so small parties (BNG, CC, UPN…) always show
-    const min = total * 0.004;
+    // the same rule at every scope (Spain or a province), and never hiding a party: a flow shows if it is
+    // at least 5 % of what its origin gives or of what its destination receives
+    const SHARE = 0.05;
     const fromAll = new Map<string, number>(), toAll = new Map<string, number>();
     for (const f of flows) { fromAll.set(f.from, (fromAll.get(f.from) ?? 0) + f.votes); toAll.set(f.to, (toAll.get(f.to) ?? 0) + f.votes); }
-    const links = flows.filter((f) => f.votes >= min || f.votes >= 0.2 * fromAll.get(f.from)! || f.votes >= 0.2 * toAll.get(f.to)!);
+    const links = flows.filter((f) => f.votes >= SHARE * fromAll.get(f.from)! || f.votes >= SHARE * toAll.get(f.to)!);
     if (!links.length) return null;
 
     const outTot = new Map<string, number>(), inTot = new Map<string, number>();
