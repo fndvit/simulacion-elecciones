@@ -248,7 +248,7 @@
   .selo { fill: none; stroke: var(--fg); stroke-width: 3.5; stroke-linecap: round; pointer-events: none; }
   .canbox { fill: none; stroke: var(--muted); stroke-width: 1.2; }
   .map text { font-family: var(--font-ui); font-size: 13px; fill: var(--muted); paint-order: stroke; stroke: var(--halo); stroke-width: 3px; pointer-events: none; }
-  .map text.ca { font-size: 15.5px; font-weight: 700; fill: var(--fg); letter-spacing: 0.01em; }
+  .map text.ca { font-size: 16px; font-weight: 700; fill: var(--fg); letter-spacing: 0.01em; }
   /* over the map: solid text with a wide halo in the page colour, so it reads on any party colour */
   .map text.ca.over { fill: var(--ink); stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; }
   .key { position: absolute; right: 0; top: var(--top); width: 26%; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
