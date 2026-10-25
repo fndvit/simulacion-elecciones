@@ -183,16 +183,15 @@
   </svg>
 
   <div class="key" style="--top:{keyTop}%">
-    <span class="kname">{BYID[KEY].n} · {BYID[KEY].seats} escaños</span>
+    <span class="kname">Cómo leer el mapa</span>
     <svg viewBox="{keyBox[0] - 2} {keyBox[1] - 2} {keyBox[2] - keyBox[0] + 4} {keyBox[3] - keyBox[1] + 4}" aria-hidden="true">
       {#each keyCells as c (c.key)}
         {#if t === 1}<polygon points={c.pts} style="fill:{c.fill}" />{:else}<path d={shapes ? shapes[c.gi] : GEO.cells[c.gi].d} style="fill:{c.fill}" />{/if}
       {/each}
     </svg>
     <p>
-      <b>Cómo leer el mapa</b>
       {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños reparte{:else}Cada provincia se divide en tantas partes como escaños reparte{/if}{#if mode === 'seats'}, y cada una toma el color del partido que gana ese escaño, con el primero en el centro.{:else}, todas con el tono del voto del partido en la provincia.{/if}
-      {#if view === 'geo'}Las partes no siguen los municipios: no muestran dónde se vota a cada partido.{/if}
+      {#if view === 'geo'}Las divisiones no muestran los municipios donde se vota a cada partido.{/if}
     </p>
   </div>
 
@@ -255,7 +254,6 @@
   .key svg :global(path), .key svg :global(polygon) { stroke: var(--bg); stroke-width: 1.6; stroke-linejoin: round; }
   .key p { margin: 0; font-family: var(--font-ui); font-weight: 400; font-size: 12px; line-height: 1.45; color: var(--muted); }
   .kname { font-family: var(--font-ui); font-weight: 700; font-size: 12px; color: var(--fg); margin-bottom: -4px; }
-  .key b { display: block; color: var(--fg); font-weight: 700; margin-bottom: 2px; }
   @media (max-width: 700px) {
     .key { position: static; width: auto; display: grid; grid-template-columns: 84px 1fr; align-items: start; gap: 4px 12px; margin-top: 12px; }
     .kname { grid-column: 1 / 3; margin: 0; }
