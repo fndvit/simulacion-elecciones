@@ -36,6 +36,12 @@ def test_cleaning():
     assert all('Derecha' not in str(p['v']) for p in P)
 
 
+def test_sources():
+    assert by[('EM-Analytics/Electomanía', dt.date(2026, 10, 17))]['src'] == 'https://electomania.es/electopanel-17o/'
+    assert by[('Sigma Dos/El Mundo', dt.date(2026, 10, 14))]['src'].startswith('https://www.elmundo.es/')
+    assert by[('EM-Analytics/Electomanía', dt.date(2026, 1, 3))]['src'] == ''          # no footnote → empty
+
+
 if __name__ == '__main__':
     for name, fn in list(globals().items()):
         if name.startswith('test_'): fn(); print('ok', name)

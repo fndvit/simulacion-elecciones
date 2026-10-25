@@ -55,7 +55,7 @@
 
   // ── sources ───────────────────────────────────────────────────────────
   const sources = [
-    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en español (empresas demoscópicas, medios y CIS)', u: 'https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026', d: 'Cada día' },
+    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en español (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en inglés y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026', d: 'Cada día' },
     { q: 'Transferencias de voto', s: 'Microdatos del barómetro mensual del CIS (recuerdo de voto e intención de voto)', u: 'https://www.cis.es', d: 'Cada mes' },
     { q: 'Resultados electorales', s: 'Ministerio del Interior, infoelectoral: generales de abril y noviembre de 2019 y julio de 2023, por circunscripción', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
     { q: 'Censo y escaños del 29N', s: 'Real decreto de convocatoria y censo electoral (incluidos los residentes en el extranjero)', u: '', d: 'Fijo' },
@@ -80,7 +80,8 @@
   // the pipeline, top to bottom
   const steps = [
     { t: 'Encuestas', d: 'Wikipedia, cada mañana', c: '#d1366b' },
-    { t: 'Validación', d: 'o se mantiene el último día bueno', c: '#db4540' },
+    { t: 'Validación', d: 'o se mantiene la lista aprobada', c: '#db4540' },
+    { t: 'Aprobación', d: 'comprobación con la Wikipedia en inglés y revisión del equipo', c: '#e0833f' },
     { t: 'Media ponderada', d: 'recencia · muestra · acierto · frecuencia', c: '#edc747' },
     { t: 'Sesgo de cada empresa', d: 'se resta antes de promediar', c: '#759ac6' },
     { t: 'Reparto por provincias', d: 'perfil de 2019–2023 + ajuste iterativo', c: '#275aa3' },
@@ -123,17 +124,31 @@
         <li style="--c:{s.c}"><span class="n">{i + 1}</span><b>{s.t}</b><span class="d">{s.d}</span></li>
       {/each}
     </ol>
-    <figcaption>El recorrido del dato, cada mañana: de la recopilación de encuestas a la web. Los resultados de 2019 y 2023 entran en el paso 5; el censo y los escaños del 29N, en el 6.</figcaption>
+    <figcaption>El recorrido del dato, cada mañana: de la recopilación de encuestas a la web, con una persona que aprueba las encuestas nuevas. Los resultados de 2019 y 2023 entran en el paso 6; el censo y los escaños del 29N, en el 7.</figcaption>
   </figure>
 
   <!-- ── polls ─────────────────────────────────────────────────────────── -->
   <div class="prose well">
     <h2>Las <strong>encuestas</strong></h2>
     <p>
-      La materia prima es la tabla de sondeos publicados que mantiene la comunidad de Wikipedia en español para estas elecciones.
-      Cada mañana se descarga con la API de Wikipedia (con tres intentos), se lee fila a fila y se normaliza: empresa y medio,
-      fechas de campo, tamaño de la muestra y estimación de voto de cada partido, en porcentaje del voto válido. Cuenta el
-      <strong>último día de campo</strong>, no la fecha de publicación.
+      La materia prima es la tabla de sondeos publicados que mantiene la comunidad de Wikipedia en español para estas elecciones: es la
+      recopilación pública más completa, cada fila cita la publicación de la que sale y cada cambio queda registrado con su autor y su
+      fecha. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
+      y se normaliza fila a fila: empresa y medio, fechas de campo, tamaño de la muestra, estimación de voto de cada partido en porcentaje
+      del voto válido y enlace a la fuente. Cuenta el <strong>último día de campo</strong>, no la fecha de publicación.
+    </p>
+    <h3>Comprobación cruzada y aprobación</h3>
+    <p>
+      Lo que se descarga no entra directamente en la media. Primero se compara con la lista de encuestas ya aprobadas, y cada encuesta
+      nueva o cambiada se busca en la tabla de la <strong>Wikipedia en inglés</strong>, que mantienen en buena parte otras personas: si
+      PP, PSOE o Vox no coinciden (misma empresa, fin de campo con un día de margen), se marca. Después, <strong>una persona del equipo
+      revisa</strong> las novedades —con el enlace a la fuente de cada una— y las aprueba o las corrige. Solo entonces se recalcula la
+      media.{#if DATA.fuente?.wikipedia_es} Las encuestas aprobadas ahora salen de la <a href={DATA.fuente.wikipedia_es.url} target="_blank" rel="noopener">revisión
+      {DATA.fuente.wikipedia_es.revid}</a> de la Wikipedia en español, del {longDate(DATA.fuente.wikipedia_es.timestamp.slice(0, 10))}.{/if}
+    </p>
+    <p>
+      Los datos de Wikipedia se publican con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>;
+      la lista de encuestas que usamos, que se deriva de ellos, se comparte en las mismas condiciones en el repositorio del proyecto.
     </p>
     <p>
       Se incluyen la estimación del <strong>CIS</strong> y las <strong>reestimaciones de sus microdatos</strong> que publican otras
@@ -336,18 +351,22 @@
   <div class="prose well">
     <h2>Actualización diaria y <strong>respaldo</strong></h2>
     <p>
-      Todo el proceso corre solo cada mañana (a las 07:17 UTC, las 08:17 en Madrid en invierno) en GitHub Actions: descarga, validación,
-      media, proyección, comprobación y publicación. La web solo se reconstruye con datos que superan todas las comprobaciones:
+      Todo el proceso corre solo cada mañana (a las 07:17 UTC, las 08:17 en Madrid en invierno) en GitHub Actions, en dos partes. La
+      primera descarga y valida las encuestas y, si hay novedades, las propone para su aprobación. La segunda recalcula la media y la
+      proyección para la fecha del día con las encuestas aprobadas, las comprueba y publica la web; también se lanza al momento cuando se
+      aprueban encuestas nuevas. Solo se proponen descargas que superan estas comprobaciones:
     </p>
     <ul>
-      <li>al menos 50 encuestas, y no más de un 10 % menos que el último fichero bueno;</li>
-      <li>la encuesta más reciente no puede ser anterior a la del día previo, y no puede haber fechas futuras;</li>
-      <li>PP y PSOE entre el 5 % y el 60 % en cada encuesta, y ninguna encuesta puede sumar más del 115 %;</li>
-      <li>el resultado final tiene 52 circunscripciones, reparte exactamente 350 escaños y sus porcentajes suman el 100 %.</li>
+      <li>al menos 50 encuestas, y no más de un 10 % menos que la lista aprobada;</li>
+      <li>la encuesta más reciente no puede ser anterior a la de la lista aprobada, y no puede haber fechas futuras;</li>
+      <li>PP y PSOE entre el 5 % y el 60 % en cada encuesta, y ninguna encuesta puede sumar más del 115 %.</li>
     </ul>
     <p>
+      Y solo se publica un resultado que tiene 52 circunscripciones, reparte exactamente 350 escaños y cuyos porcentajes suman el 100 %.
+    </p>
+    <p>
       Si algo falla, la web sigue con el <strong>último día bueno</strong> (la fecha de «Datos actualizados» es la de esos datos) y se abre
-      un aviso para revisarlo a mano. Cada versión anterior de las encuestas se guarda con su fecha: se conservan las 30 últimas. Los microdatos del barómetro del CIS, que alimentan las transferencias de voto, se añaden a mano cada mes, cuando el CIS los publica.
+      un aviso para revisarlo a mano. Cada versión anterior de la lista aprobada se guarda con su fecha (las 30 últimas), además del historial completo del repositorio. Los microdatos del barómetro del CIS, que alimentan las transferencias de voto, se añaden a mano cada mes, cuando el CIS los publica.
     </p>
   </div>
 
@@ -413,7 +432,7 @@
   .nowrap { white-space: nowrap; }
   .small { font-size: 12px; margin-top: 2px; }
 
-  .pipe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; counter-reset: s; }
+  .pipe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; counter-reset: s; }
   .pipe li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 12px 14px; border-top: 4px solid var(--c); background: var(--panel); border-radius: 0 0 var(--radius) var(--radius); font-family: var(--font-ui); }
   .pipe li:not(:last-child)::after { content: '→'; position: absolute; right: -10px; top: 14px; transform: translateX(50%); font-size: 14px; color: var(--muted); z-index: 1; }
   .pipe .n { font-size: 12px; font-weight: 700; color: var(--muted); }

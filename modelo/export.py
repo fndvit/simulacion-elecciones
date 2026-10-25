@@ -49,6 +49,9 @@ out = dict(today=PL.TODAY.isoformat(), election='2026-11-29', S={k: round(v, 3) 
     he={f: {k: round(v, 2) for k, v in d_.items()} for f, d_ in he.items()}, heN=counts,
     polls=plist, series=series, prov=prov, geo=dict(W=geo['W'], H=geo['H'], canBox=geo['canBox']),
     wElec=W_ELEC, census=CENSUS_2026)
+# where the approved polls come from: the Wikipedia revision read, with the date it was approved
+src_path = os.path.join(D, 'fuente.json')
+if os.path.exists(src_path): out['fuente'] = json.load(open(src_path))
 # vote transfers 2023 → projection: the latest CIS barometer's recall × intention, fitted to each province's totals
 tr, trMeta = TR.province_flows(out)[:2]
 out['tr'] = tr

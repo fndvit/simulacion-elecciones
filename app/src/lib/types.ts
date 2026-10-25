@@ -19,6 +19,7 @@ export interface AppData {
   ratings: Record<string, [number, number]>; he: Record<string, Record<string, number>>; heN: Record<string, number>;
   wElec: Record<string, number>; polls: Poll[];
   /** vote transfers 2023 → projection per province (CIS recall × intention fitted to each province's totals) */
+  fuente?: { wikipedia_es?: { title: string; revid: number; timestamp: string; url: string }; wikipedia_en?: { revid: number; url: string } | null; leido?: string };
   tr: Record<string, [string, string, number][]>; trMeta: { study: string; title: string; n: number }; series: ({ d: string } & Record<string, number>)[];
   prov: Province[]; census: number;
   hex: { R: number; hexes: { id: string; x: number; y: number; r: number; c: number }[] };

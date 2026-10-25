@@ -1,81 +1,134 @@
-# Actualización diaria del simulador.
+# Actualización diaria del simulador, con una persona que aprueba las encuestas nuevas.
 #
-# Cada día: descarga las encuestas de Wikipedia, las valida, recalcula la media (que también cambia con la
-# fecha, porque las encuestas pierden peso con los días), reconstruye la página y hace commit. Vercel publica
-# cada commit de main (vercel.json); si la compilación de Vercel fallara, sigue en línea el despliegue anterior.
+# Cada mañana, dos trabajos:
+#   1. «revisar»: lee la Wikipedia en español (anotando la revisión exacta), valida la tabla, la compara con
+#      la lista aprobada (datos/polls.csv en main) y comprueba cada encuesta nueva o cambiada con la Wikipedia
+#      en inglés. Si hay cambios, los sube a la rama «encuestas-pendientes» y abre o actualiza un pull request
+#      con el detalle. Nada de esto llega a la web hasta que alguien aprueba el pull request (merge).
+#   2. «publicar»: recalcula la media y la proyección con la lista aprobada para la fecha del día (las
+#      encuestas pierden peso con los días), comprueba los datos, compila y hace commit. Vercel publica cada
+#      commit de main.
+# Al aprobar el pull request, el push a main con un datos/polls.csv nuevo lanza «publicar» al momento.
 #
-# Respaldo, en tres capas:
-#   1. Si Wikipedia falla o devuelve algo raro, modelo/actualizar.py no toca datos/polls.csv (el último fichero
-#      bueno) y el workflow no hace commit: la página en línea sigue siendo la del último día correcto.
-#   2. Antes de sustituir polls.csv se guarda una copia fechada en datos/respaldo/ (las 30 últimas), además del
-#      historial de git.
-#   3. Si falla cualquier paso posterior (cálculo, comprobación de datos, compilación), no hay commit, así que
-#      Vercel no despliega nada nuevo.
-# En cualquiera de los casos se abre (o se comenta) un issue con la etiqueta «fallo-datos»; GitHub avisa por
-# correo. Cuando vuelve a ir bien, el issue se cierra solo.
+# Respaldo:
+#   - Si Wikipedia falla o devuelve algo raro, no se propone nada y la web sigue con la lista aprobada.
+#   - Si falla el cálculo, la comprobación o la compilación, no hay commit: sigue en línea el último día bueno.
+#   - En ambos casos se abre (o se comenta) un issue con la etiqueta «fallo-datos». Se cierra solo cuando
+#     vuelve a ir bien.
+#
+# Requisitos del repositorio (una vez):
+#   - Settings → Actions → General → Workflow permissions: «Read and write» y «Allow GitHub Actions to create
+#     and approve pull requests».
+#   - Opcional: variable de repositorio REVISOR (Settings → Secrets and variables → Actions → Variables) con
+#     el usuario de GitHub de quien aprueba; se le asigna el pull request y se le pide revisión.
 name: Actualizar encuestas
 
 on:
   schedule:
     - cron: '17 7 * * *'     # 07:17 UTC = 08:17 en Madrid en invierno (09:17 en verano)
   workflow_dispatch: {}       # botón «Run workflow» para lanzarlo a mano
+  push:                       # al aprobar encuestas (merge del pull request)
+    branches: [main]
+    paths: [datos/polls.csv]
 
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 concurrency:
   group: actualizar-encuestas
   cancel-in-progress: false
 
 jobs:
-  actualizar:
+  revisar:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     outputs:
       estado: ${{ steps.datos.outputs.estado }}
       cambios: ${{ steps.datos.outputs.cambios }}
       motivo: ${{ steps.datos.outputs.motivo }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REVISION_MD: /tmp/revision.md        # the pull request body, written by actualizar.py
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -r modelo/requirements.txt
 
-      - name: Tests del lector de Wikipedia
-        run: python modelo/tests/test_fetch_polls.py
+      - name: Tests de los lectores de Wikipedia
+        run: |
+          python modelo/tests/test_fetch_polls.py
+          python modelo/tests/test_fetch_en.py
 
-      - name: Descargar y validar encuestas
+      - name: Leer, validar y comparar con la lista aprobada
         id: datos
         run: python modelo/actualizar.py
 
-      - name: Aviso si se usa el respaldo
+      - name: Aviso si no se ha podido leer Wikipedia
         if: steps.datos.outputs.estado == 'respaldo'
         env:
-          MOTIVO: ${{ steps.datos.outputs.motivo }}   # texto que viene de Wikipedia: siempre por variable, nunca dentro del script
-        run: echo "::warning title=Encuestas no actualizadas::$MOTIVO. Se mantiene el último fichero bueno y la página publicada."
+          MOTIVO: ${{ steps.datos.outputs.motivo }}   # texto que viene de Wikipedia: siempre por variable
+        run: echo "::warning title=Encuestas no revisadas::$MOTIVO. La web sigue con la lista aprobada."
 
-      # A partir de aquí solo si los datos son buenos. Se reconstruye cada día aunque no haya encuestas nuevas,
-      # porque la media se calcula para la fecha del día.
+      - name: Proponer los cambios en un pull request
+        if: steps.datos.outputs.estado == 'ok' && steps.datos.outputs.cambios == 'si'
+        env:
+          MOTIVO: ${{ steps.datos.outputs.motivo }}
+          REVISOR: ${{ vars.REVISOR }}
+        run: |
+          git config user.name "simulador-29n[bot]"
+          git config user.email "simulador-29n@users.noreply.github.com"
+          git checkout -B encuestas-pendientes
+          git add datos/polls.csv datos/fuente.json datos/respaldo
+          git commit -m "Encuestas para revisar ($(date -u +%Y-%m-%d)): $MOTIVO"
+          git push --force origin encuestas-pendientes
+          gh label create revision-encuestas --color 0E8A16 --description "Encuestas nuevas pendientes de aprobar" --force
+          TITLE="Encuestas para revisar: $MOTIVO"
+          N=$(gh pr list --head encuestas-pendientes --state open --json number --jq '.[0].number')
+          if [ -n "$N" ]; then
+            gh pr edit "$N" --title "$TITLE" --body-file "$REVISION_MD"
+          else
+            gh pr create --base main --head encuestas-pendientes --title "$TITLE" --body-file "$REVISION_MD" --label revision-encuestas
+            N=$(gh pr list --head encuestas-pendientes --state open --json number --jq '.[0].number')
+          fi
+          if [ -n "$REVISOR" ]; then
+            gh pr edit "$N" --add-assignee "$REVISOR" --add-reviewer "$REVISOR" || true
+          fi
+          echo "Pull request: $(gh pr view "$N" --json url --jq .url)" >> "$GITHUB_STEP_SUMMARY"
+
+  publicar:
+    needs: revisar
+    if: always() && (needs.revisar.result == 'success' || needs.revisar.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # siempre la lista aprobada, nunca la propuesta
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r modelo/requirements.txt
+
       - name: Recalcular media y proyección
-        if: steps.datos.outputs.estado == 'ok'
         run: python modelo/export.py
 
       - name: Comprobar los datos de la app
-        if: steps.datos.outputs.estado == 'ok'
         run: python modelo/comprobar.py
 
       - uses: actions/setup-node@v4
-        if: steps.datos.outputs.estado == 'ok'
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: app/package-lock.json
 
       - name: Construir la página
-        if: steps.datos.outputs.estado == 'ok'
         working-directory: app
         run: |
           npm ci
@@ -85,43 +138,44 @@ jobs:
           test "$(wc -c < ../index.html)" -gt 300000   # una página vacía o rota pesaría mucho menos
 
       - name: Commit
-        if: steps.datos.outputs.estado == 'ok'
-        env:
-          MOTIVO: ${{ steps.datos.outputs.motivo }}
         run: |
           git config user.name "simulador-29n[bot]"
           git config user.email "simulador-29n@users.noreply.github.com"
-          git add datos/polls.csv datos/respaldo datos/app_data.json app/src/lib/data/app_data.json index.html
-          git diff --cached --quiet || git commit -m "Datos del $(date -u +%Y-%m-%d): $MOTIVO"
+          git add datos/app_data.json app/src/lib/data/app_data.json index.html
+          git diff --cached --quiet || git commit -m "Datos del $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
           git push
 
-
   avisar:
-    needs: actualizar
+    needs: [revisar, publicar]
     if: always()
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      ESTADO: ${{ needs.actualizar.outputs.estado }}
-      MOTIVO: ${{ needs.actualizar.outputs.motivo }}
+      ESTADO: ${{ needs.revisar.outputs.estado }}
+      MOTIVO: ${{ needs.revisar.outputs.motivo }}
+      REVISAR: ${{ needs.revisar.result }}
+      PUBLICAR: ${{ needs.publicar.result }}
     steps:
       - name: Abrir o comentar el issue de fallo
-        if: needs.actualizar.result == 'failure' || needs.actualizar.outputs.estado == 'respaldo'
+        if: needs.revisar.result == 'failure' || needs.publicar.result == 'failure' || needs.revisar.outputs.estado == 'respaldo'
         run: |
-          gh label create fallo-datos --color B60205 --description "La actualización diaria no se ha publicado" --force
+          gh label create fallo-datos --color B60205 --description "La actualización diaria no ha ido bien" --force
           if [ "$ESTADO" = "respaldo" ]; then
-            MSG="Las encuestas no se han actualizado y se mantiene el último fichero bueno. Motivo: $MOTIVO"
+            MSG="No se ha podido leer o validar Wikipedia, así que no se proponen encuestas nuevas; la web sigue con la lista aprobada. Motivo: $MOTIVO"
+          elif [ "$REVISAR" = "failure" ]; then
+            MSG="Ha fallado la revisión de encuestas (tests, lectura o pull request); la web sigue con la lista aprobada."
           else
-            MSG="Ha fallado un paso del cálculo o la compilación; no se ha hecho commit y la página en línea sigue siendo la del último día correcto."
+            MSG="Ha fallado el cálculo, la comprobación o la compilación; no se ha hecho commit y la página en línea sigue siendo la del último día correcto."
           fi
           BODY="$(date -u +'%Y-%m-%d %H:%M UTC') — $MSG
           Ejecución: $RUN_URL"
           N=$(gh issue list --label fallo-datos --state open --json number --jq '.[0].number')
           if [ -n "$N" ]; then gh issue comment "$N" --body "$BODY"; else gh issue create --title "La actualización diaria del simulador ha fallado" --label fallo-datos --body "$BODY"; fi
       - name: Cerrar el issue si todo ha ido bien
-        if: needs.actualizar.result == 'success' && needs.actualizar.outputs.estado == 'ok'
+        if: needs.publicar.result == 'success' && needs.revisar.result != 'failure' && needs.revisar.outputs.estado != 'respaldo'
         run: |
           for N in $(gh issue list --label fallo-datos --state open --json number --jq '.[].number'); do
             gh issue close "$N" --comment "Resuelto: la actualización del $(date -u +%Y-%m-%d) ha funcionado. $RUN_URL"

@@ -5,3 +5,5 @@ app/.svelte-kit
 app/build
 _site
 datos/*.tmp
+revision.md
+*.nuevo

@@ -15,6 +15,8 @@ Reglas (las que hacen falta porque Wikipedia no es uniforme):
 - Un valor de partido absurdo (> 2,5 veces y > 6 puntos por encima de la mediana de ese partido en los
   30 días alrededor) se deja en blanco y se registra en el log.
 
+Cada encuesta guarda también su fuente (columna «src»): el primer enlace externo de su nota en Wikipedia.
+
 Uso:  python3 modelo/fetch_polls.py             (descarga y escribe datos/polls.csv)
       python3 modelo/fetch_polls.py --html f.html (parsea un HTML local; para tests)
 """
@@ -39,10 +41,26 @@ def log(*a):
     print(*a, file=sys.stderr)
 
 
+UA = {'User-Agent': 'simulador-29n/1.0 (datos electorales; contacto: fndvit)'}
+
+
+def _get(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+        return json.load(r)
+
+
+def fetch_page(page=PAGE, lang='es'):
+    """the page's HTML and the exact revision read: {text, revid, timestamp, title, url}"""
+    base = f'https://{lang}.wikipedia.org/w/api.php?format=json&formatversion=2'
+    p = _get(base + '&action=parse&prop=text|revid&redirects=1&page=' + urllib.parse.quote(page))['parse']
+    rev = _get(base + f'&action=query&prop=revisions&rvprop=ids|timestamp&revids={p["revid"]}')
+    ts = rev['query']['pages'][0]['revisions'][0]['timestamp']
+    return dict(text=p['text'], revid=p['revid'], timestamp=ts, title=p['title'],
+                url=f'https://{lang}.wikipedia.org/w/index.php?oldid={p["revid"]}')
+
+
 def fetch():
-    req = urllib.request.Request(API, headers={'User-Agent': 'simulador-29n/1.0 (datos electorales; contacto: fndvit)'})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.load(r)['parse']['text']
+    return fetch_page()['text']
 
 
 def cell_text(td):
@@ -129,17 +147,35 @@ def num(t):
     except ValueError: return None
 
 
+def references(doc):
+    """footnote id → first external link (the outlet that published the poll)"""
+    out = {}
+    for li in doc.xpath('//li[starts-with(@id, "cite_note")]'):
+        a = li.xpath('.//a[starts-with(@href, "http")]')
+        if a: out[li.get('id')] = a[0].get('href')
+    return out
+
+
 def parse(html_text, today=None):
     doc = LH.fromstring(html_text)
+    refs = references(doc)
     polls = []
     for table in doc.xpath('//table[contains(@class, "wikitable")]'):
         head = ' '.join(h.text_content() for h in table.xpath('./tbody/tr[1]/th|./tr[1]/th'))
         if 'Trabajo de campo' not in head: continue
         year = year_before(table)
         parties = [p for p in header_parties(table)[4:] if True]
+        # each row's source, read before cell_text() strips the footnote marks
+        row_src = []
+        for tr in table.xpath('./tbody/tr|./tr'):
+            ids = [h.lstrip('#') for h in tr.xpath('.//sup//a[starts-with(@href, "#cite_note")]/@href')]
+            row_src.append(next((refs[i] for i in ids if i in refs), ''))
         g = grid(table)
-        mother = None
-        for r in g[2:]:
+        mother = mother_src = None
+        for ri, r in enumerate(g[2:], start=2):
+            src = row_src[ri] if ri < len(row_src) else ''
+            if r and r[0][1]: mother_src = src
+            src = src or mother_src or ''
             if len(r) < 4 + len(parties): continue
             (pol, pol_own), (fw, _), (n, _), _ = r[0], r[1], r[2], r[3]
             pol = re.sub(r'\s+', ' ', pol).strip()
@@ -162,7 +198,7 @@ def parse(html_text, today=None):
             if vals['PP'] is None and vals['PSOE'] is None: continue  # seats-only / bloc tables
             if vals['FA'] is not None or vals['COMP'] is not None:
                 vals['SUMAR'] = None  # FA/Compromís split already given
-            polls.append(dict(pollster=name, end=end, fw=fw, n=int(re.sub(r'\D', '', n)) if re.sub(r'\D', '', n) else None, v=vals))
+            polls.append(dict(pollster=name, end=end, fw=fw, n=int(re.sub(r'\D', '', n)) if re.sub(r'\D', '', n) else None, v=vals, src=src))
     # dedupe exact repeats
     seen, out = set(), []
     for p in polls:
@@ -183,13 +219,19 @@ def parse(html_text, today=None):
     return out
 
 
+HEAD = ['pollster', 'end', 'fw', 'n'] + COLS + ['src']
+
+
+def row(p):
+    """a poll as the strings written to polls.csv"""
+    return [p['pollster'], p['end'].isoformat(), p['fw'], str(p['n'] or '')] + ['' if p['v'][k] is None else f"{p['v'][k]:g}" for k in COLS] + [p.get('src', '')]
+
+
 def write(polls, path=OUT):
     with open(path, 'w', newline='') as f:
         w = csv.writer(f, delimiter='|')
-        w.writerow(['pollster', 'end', 'fw', 'n'] + COLS)
-        for p in polls:
-            fa, comp = p['v']['FA'], p['v']['COMP']
-            w.writerow([p['pollster'], p['end'].isoformat(), p['fw'], p['n'] or ''] + ['' if p['v'][k] is None else f"{p['v'][k]:g}" for k in COLS])
+        w.writerow(HEAD)
+        for p in polls: w.writerow(row(p))
 
 
 if __name__ == '__main__':
