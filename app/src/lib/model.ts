@@ -7,8 +7,10 @@
  *    share, spread across provinces in proportion to where it already has votes; every other party
  *    gives up votes in proportion to its size, province by province.
  *  · province party swing  → +Δ points in that province only; the rest absorb it proportionally.
- *  · turnout (national + per-province extra) → voters added to / removed from each province and
- *    shared out by the newcomer distribution (×1 = they vote like everyone else).
+ *  · turnout (national + per-province extra) → voters added to / removed from each province. A national
+ *    rise lands where there is abstention to draw on (∝ 1 − t), a fall where turnout is middling or low
+ *    (∝ t·(1 − t)), so no province passes its ceiling. Inside each province they vote like the polling
+ *    stations they come from (DATA.tp, 2023 by mesa), times the user's newcomer multipliers.
  * Then D'Hondt with the 3 % threshold over valid votes (blank included) in each of the 52 constituencies.
  */
 import { PROV, BYID, DATA } from './data';
@@ -23,6 +25,11 @@ export const blank = (): Scenario => ({ nat: {}, prov: {}, turnNat: 0, turnProv:
 export const V0: Record<string, number> = Object.fromEntries(PROV.map((p) => [p.id, p.census * p.t0 * (1 - p.nr)]));
 export const VNAT = Object.values(V0).reduce((a, b) => a + b, 0);
 export const CENSUS = PROV.reduce((a, p) => a + p.census, 0);
+// how a national turnout change is shared between provinces: by room to rise (1 − t) or to fall (t·(1 − t)),
+// scaled so the national change in voters matches the slider
+const UP_W = CENSUS / PROV.reduce((a, p) => a + p.census * (1 - p.t0), 0);
+const DN_W = CENSUS / PROV.reduce((a, p) => a + p.census * p.t0 * (1 - p.t0), 0);
+export const provTurnShift = (p: { t0: number }, dNat: number) => (dNat >= 0 ? dNat * (1 - p.t0) * UP_W : dNat * p.t0 * (1 - p.t0) * DN_W);
 
 /** D'Hondt + the last seat and its cheapest challenger (votes needed to beat the last quotient or cross 3 %) */
 export function dhondt(votes: Record<string, number>, n: number, valid: number): DhondtResult {
@@ -88,16 +95,18 @@ export function run(st: Scenario): RunResult {
     const votes: Record<string, number> = {};
     for (const k in row) votes[k] = row[k] * V0[p.id];
     let blankV = p.bl * V0[p.id];
-    const dt = (st.turnNat || 0) + (st.turnProv[p.id] || 0);
+    const dt = provTurnShift(p, st.turnNat || 0) + (st.turnProv[p.id] || 0);
     const t = Math.min(0.98, Math.max(0.2, p.t0 + dt / 100));
     const dVal = p.census * (t - p.t0) * (1 - p.nr);
     if (dVal) {
       const mult = st.distProv[p.id] || st.distNat || {};
+      const prof = DATA.tp?.[p.id]?.[dVal > 0 ? 'up' : 'down'] || {};
       const w: Record<string, number> = {};
-      let W = p.bl;
-      for (const k in row) { w[k] = row[k] * (mult[k] != null ? mult[k] : 1); W += w[k]; }
+      const wb = p.bl * (prof.BL ?? 1);
+      let W = wb;
+      for (const k in row) { w[k] = row[k] * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); W += w[k]; }
       for (const k in row) votes[k] = Math.max(0, votes[k] + (dVal * w[k]) / W);
-      blankV = Math.max(0, blankV + (dVal * p.bl) / W);
+      blankV = Math.max(0, blankV + (dVal * wb) / W);
     }
     let valid = blankV;
     for (const k in votes) valid += votes[k];
@@ -131,6 +140,26 @@ export const sumSeats = (seats: Record<string, number>, ks: string[]) => ks.redu
 export const INVEST = INVEST23 as string[];
 
 /** newcomer slider (−1…1) ↔ multiplier (0…4); centre = ×1 */
+/** what the voters who join (or, if `down`, stay home) vote, as shares of them, in Spain or one province:
+ *  each province's polling-station profile × the user's multipliers, provinces weighted by how many they add */
+export function newcomerShares(st: Scenario, cur: RunResult, scope: string, down: boolean) {
+  const acc: Record<string, number> = {};
+  let tot = 0;
+  for (const p of PROV) {
+    if (scope !== 'ES' && p.id !== scope) continue;
+    const r = cur.prov[p.id], prof = DATA.tp?.[p.id]?.[down ? 'down' : 'up'] || {}, mult = st.distProv[p.id] || st.distNat || {};
+    const om = scope !== 'ES' ? 1 : p.census * (down ? p.t0 * (1 - p.t0) : 1 - p.t0);
+    const w: Record<string, number> = {};
+    let W = (r.blank / r.valid) * (prof.BL ?? 1);
+    for (const k in r.votes) { w[k] = (r.votes[k] / r.valid) * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); W += w[k]; }
+    if (W <= 0) continue;
+    for (const k in w) acc[k] = (acc[k] || 0) + (om * w[k]) / W;
+    tot += om;
+  }
+  for (const k in acc) acc[k] /= tot || 1;
+  return acc;
+}
+
 export const s2m = (v: number) => (v >= 0 ? 1 + 3 * v : 1 + v);
 export const m2s = (m: number) => (m >= 1 ? (m - 1) / 3 : m - 1);
 

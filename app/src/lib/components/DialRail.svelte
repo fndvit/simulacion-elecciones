@@ -4,7 +4,7 @@
   import LibDrop from './LibDrop.svelte';
   import { PROV, BYID } from '$lib/data';
   import { PARTY } from '$lib/parties';
-  import { BASE, V0, VNAT, CENSUS, partiesIn, scopeVotes, scopeValid, hasScopeChanges, s2m, m2s } from '$lib/model';
+  import { BASE, V0, VNAT, CENSUS, partiesIn, scopeVotes, scopeValid, hasScopeChanges, newcomerShares, provTurnShift, s2m, m2s } from '$lib/model';
   import { pct, pp, fmtSigned, sortEs } from '$lib/format';
   import type { Scenario, RunResult, PartyKey } from '$lib/types';
 
@@ -44,13 +44,7 @@
   const effTurn = $derived(isES ? st.turnNat || (Object.values(st.turnProv).some(Boolean) ? 1 : 0) : st.turnNat + (st.turnProv[scope] || 0));
   const dist = $derived(isES ? st.distNat : st.distProv[scope] || st.distNat);
   const custom = $derived(Object.values(dist || {}).some((v) => v !== 1));
-  const distShare = $derived.by(() => {
-    const sh = scopeVotes(cur, scope), val = scopeValid(cur, scope);
-    let W = isES ? 0.009 : BYID[scope].bl;
-    const w: Record<string, number> = {};
-    for (const P of [...parties, 'OTROS']) { w[P] = ((sh[P] || 0) / val) * (dist[P] != null ? dist[P] : 1); W += w[P]; }
-    return Object.fromEntries(parties.map((P) => [P, w[P] / W]));
-  });
+  const distShare = $derived(newcomerShares(st, cur, scope, effTurn < 0));
   function setDist(P: string, slider: number) {
     const m = s2m(slider);
     if (isES) st.distNat[P] = m;
@@ -98,11 +92,11 @@
     <input id="turn" type="range" min="-15" max={tMax} step="0.5" value={tv} oninput={(e) => setTurn(+e.currentTarget.value)} />
     <div class="ends"><span>−</span>{#if tv}<span class="val" style={pos(tv, -15, tMax)}><b>{pp(tv)} p. · {fmtSigned((tv / 100) * census)} votantes</b></span>{/if}<span>+</span></div>
   </div>
-  {#if !isES && st.turnNat}<p class="note">Se suma a los {pp(st.turnNat)} puntos fijados para toda España.</p>{/if}
+  {#if !isES && st.turnNat}<p class="note">Los {pp(st.turnNat)} puntos fijados para toda España son aquí {pp(provTurnShift(BYID[scope], st.turnNat))}, según cuánto margen tiene la provincia; esto se suma.</p>{/if}
 
-  <div class="gl"><span>… y los que {effTurn < 0 ? 'se quedan en casa votaban' : 'se suman votan'} {custom ? 'así' : 'como el resto'}</span><small>% del total</small></div>
+  <div class="gl"><span>… y los que {effTurn < 0 ? 'se quedan en casa votaban' : 'se suman votan'} {custom ? 'así' : 'como sus vecinos'}</span><small>% del total</small></div>
   <div class="dist">
-    <p class="note">En el centro, cada partido se lleva lo mismo que del resto del voto. Hacia +, capta más; hacia −, menos.</p>
+    <p class="note">{#if effTurn < 0}En el centro, se quedan en casa sobre todo donde ya se vota menos, y votaban como el resto de su mesa electoral en 2023.{:else}En el centro, salen de donde hay más abstención y votan como el resto de su mesa electoral en 2023.{/if} Hacia +, un partido capta más de ellos; hacia −, menos.</p>
     {#each sorted as P (P)}
       <div class="drow">
         <label class="nm" for="d-{P}"><i style="background:{PARTY[P].c}"></i>{PARTY[P].n}</label>

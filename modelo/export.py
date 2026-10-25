@@ -1,6 +1,7 @@
 import json, os, datetime as dt
 import polls as PL
 import transfers as TR
+import participacion as TP
 from projection import *
 I, nat = indices(); B = base_inputs()
 rows = PL.load(); he, counts = PL.house_effects(rows)
@@ -56,5 +57,7 @@ if os.path.exists(src_path): out['fuente'] = json.load(open(src_path))
 tr, trMeta = TR.province_flows(out)[:2]
 out['tr'] = tr
 out['trMeta'] = {k: trMeta[k] for k in ('study', 'title', 'n')}
+# who joins or stays home when turnout changes: abstention geography of the 2023 polling stations
+out['tp'], out['tpMeta'] = TP.profiles()
 json.dump(out, open(os.path.join(D, 'app_data.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 print(len(json.dumps(out, ensure_ascii=False)), len(plist), len(series))

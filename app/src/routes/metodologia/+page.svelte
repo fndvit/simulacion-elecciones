@@ -58,6 +58,7 @@
     { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en español (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en inglés y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026', d: 'Cada día' },
     { q: 'Transferencias de voto', s: 'Microdatos del barómetro mensual del CIS (recuerdo de voto e intención de voto)', u: 'https://www.cis.es', d: 'Cada mes' },
     { q: 'Resultados electorales', s: 'Ministerio del Interior, infoelectoral: generales de abril y noviembre de 2019 y julio de 2023, por circunscripción', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
+    { q: 'Quién se suma al cambiar la participación', s: 'Ministerio del Interior, infoelectoral: generales de julio de 2023, por mesa electoral', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
     { q: 'Censo y escaños del 29N', s: 'Real decreto de convocatoria y censo electoral (incluidos los residentes en el extranjero)', u: '', d: 'Fijo' },
     { q: 'Valoración de las empresas', s: 'Último sondeo publicado por cada empresa antes del 23J de 2023, frente al resultado', u: '', d: 'Fijo' },
     { q: 'Límites provinciales', s: 'es-atlas (Instituto Geográfico Nacional)', u: 'https://github.com/martgnz/es-atlas', d: 'Fijo' },
@@ -256,7 +257,7 @@
     <p>
       El censo del 29N es de <strong>{fmtN(DATA.census)} electores</strong>, incluidos los residentes en el extranjero, repartido entre
       provincias en proporción al de 2023. La participación, el voto nulo y el voto en blanco de cada provincia son los de las generales
-      de 2023; el simulador permite cambiar la participación.
+      de 2023; el simulador permite cambiar la participación, y entonces cuenta de dónde salen los votantes que se suman o se quedan en casa (ver «El simulador»).
     </p>
     <p>
       Los escaños son los de la convocatoria: respecto a 2023, <strong>Madrid pasa de 37 a 38 y Cádiz de 9 a 8</strong>. En cada
@@ -279,8 +280,8 @@
     <ul>
       <li><strong>Un partido en toda España.</strong> Su nuevo porcentaje nacional se reparte entre provincias en proporción a los votos que ya tiene en cada una, con el mismo ajuste iterativo que reparte la media entre provincias. El resto de partidos cede (o gana) votos en proporción a su tamaño, provincia a provincia.</li>
       <li><strong>Un partido en una provincia.</strong> El cambio solo afecta a esa provincia; los demás partidos de esa provincia lo absorben en proporción a su tamaño.</li>
-      <li><strong>La participación.</strong> Añade o quita votantes en cada provincia (nacional y, además, por provincia), entre el 20 % y el 98 % del censo.</li>
-      <li><strong>Los que se suman.</strong> Por defecto, los nuevos votantes votan como el resto (×1). Cada partido puede captar entre nada (×0) y cuatro veces su parte (×4) de esos votantes. Sin cambio de participación, este control no tiene efecto.</li>
+      <li><strong>La participación.</strong> Añade o quita votantes, entre el 20 % y el 98 % del censo. La participación no puede subir donde ya roza el techo: un cambio para toda España se reparte entre provincias según el margen de cada una. Si sube, cuenta la abstención (1 − participación); si baja, cae más donde ya se vota poco o a medias (participación × abstención). Así, 10 puntos más en toda España son unos 16 en Melilla y unos 7 en Cuenca. El cambio fijado en una provincia se suma tal cual.</li>
+      <li><strong>Quién se suma o se queda en casa.</strong> Por defecto, sale de las mesas electorales con más margen y vota como el resto de su mesa en las generales de 2023 (más de 60.000 mesas del Ministerio del Interior). Una subida se reparte entre mesas según su abstención y una bajada, según participación × abstención; sumando las mesas de cada provincia sale el perfil de esos votantes. Como la abstención se concentra en unos barrios y pueblos más que en otros, ese perfil no es el de la media: en Sevilla, por ejemplo, los que se suman votan algo menos al PP y algo más al PSOE que el conjunto de la provincia. Los partidos sin equivalente en 2023 (SALF, Aliança Catalana, Adelante Andalucía) votan como la media, y Frente Amplio, Compromís y Podemos toman el perfil de Sumar. Sobre ese punto de partida, cada partido puede captar entre nada (×0) y cuatro veces (×4) su parte de esos votantes. Sin cambio de participación, este control no tiene efecto.</li>
     </ul>
     <p>
       El escenario se guarda en el navegador y se puede compartir: el enlace lleva codificados todos los cambios. Es una calculadora de
@@ -356,6 +357,7 @@
       <li><strong>El perfil territorial es el del pasado.</strong> Si un partido crece o cae de forma desigual entre provincias, la proyección no lo ve hasta que lo vean las encuestas autonómicas, que no se usan.</li>
       <li><strong>Los partidos nuevos tienen perfiles supuestos.</strong> SALF, Aliança Catalana y, en parte, Adelante Andalucía no tienen historial en generales.</li>
       <li><strong>La participación es la de 2023.</strong> Un cambio grande de participación cambia los escaños más ajustados.</li>
+      <li><strong>Quién se suma se deduce de dónde vive, no de cómo vota.</strong> Suponemos que los nuevos votantes votan como sus vecinos de mesa. Es una inferencia sobre agregados: si un partido moviliza más a sus abstencionistas que el resto, solo lo recoge el control «quién se suma».</li>
       <li><strong>El último escaño se decide por pocos votos.</strong> Diferencias de unos cientos o miles de votos están muy por debajo del error de cualquier encuesta.</li>
     </ul>
   </div>

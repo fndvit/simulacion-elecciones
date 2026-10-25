@@ -20,6 +20,8 @@ export interface AppData {
   wElec: Record<string, number>; polls: Poll[];
   /** vote transfers 2023 → projection per province (CIS recall × intention fitted to each province's totals) */
   fuente?: { wikipedia_es?: { title: string; revid: number; timestamp: string; url: string }; wikipedia_en?: { revid: number; url: string } | null; leido?: string };
+  /** who joins / stays home when turnout changes: multiplier per party on its provincial vote (2023 polling-station abstention) */
+  tp: Record<string, { up: Record<string, number>; down: Record<string, number> }>; tpMeta: { fuente: string; mesas: number };
   tr: Record<string, [string, string, number][]>; trMeta: { study: string; title: string; n: number }; series: ({ d: string } & Record<string, number>)[];
   prov: Province[]; census: number;
   hex: { R: number; hexes: { id: string; x: number; y: number; r: number; c: number }[] };
