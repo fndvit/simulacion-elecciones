@@ -109,8 +109,7 @@
   <h3 class="hd">Cómo se calcula <strong>la proyección</strong></h3>
   <div class="prose">
     <p>Una media de las {DATA.polls.length} encuestas publicadas desde octubre de 2025 que pesa más las recientes, las de más entrevistas y las de empresas demoscópicas que acertaron en 2023, y que corrige el sesgo de cada empresa. La media se reparte por provincias según dónde ha sido más fuerte o más débil cada partido en las generales de 2019 y 2023, y los escaños se asignan con D'Hondt y la barrera del 3 % en cada circunscripción. No es un pronóstico: refleja lo que dicen hoy las encuestas y no estima incertidumbre ni probabilidades.</p>
-    <p class="more"><a href={href('/metodologia')}>Lee la metodología completa →</a></p>
-    <p class="src"><b>Fuentes.</b> Encuestas: <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">recopilación de Wikipedia</a>, descargada cada día (última actualización: {longDate(DATA.today)}). Resultados de 2019 y 2023: <a href="https://infoelectoral.interior.gob.es" target="_blank" rel="noopener">Ministerio del Interior</a>.</p>
+    <p class="more"><a href={href('/metodologia')}>Lee la metodología completa</a></p>
   </div>
 </section>
 

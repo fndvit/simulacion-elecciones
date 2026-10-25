@@ -204,7 +204,7 @@
         <h2 class="hd w">Notas sobre <strong>la simulación</strong></h2>
         <div class="w prose">
           <p>Los controles mueven votos, no escaños: un cambio nacional se reparte entre provincias según dónde tiene ya votos cada partido, uno provincial solo afecta a esa provincia, y la participación añade o quita votantes que, por defecto, votan como el resto. Después, D'Hondt asigna los escaños en las 52 circunscripciones. Cada simulación parte de la proyección de las encuestas. Es una calculadora de supuestos, no un pronóstico.</p>
-          <p class="more"><a href={resolve('/metodologia')}>Lee la metodología completa →</a></p>
+          <p class="more"><a href={resolve('/metodologia')}>Lee la metodología completa</a></p>
         </div>
       </section>
     {/if}
