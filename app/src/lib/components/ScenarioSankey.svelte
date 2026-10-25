@@ -135,7 +135,7 @@
 
 <!-- the heading carries the area selector and stays under the title bar while the chart is in view -->
 <h2 class="hd w stickyui">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
-<p class="lede w">En este diagrama se muestra una estimación de cómo podría transferirse el voto, que aunque parezca contraintuitivo, no representa cambios individuales de voto. El modelo parte de los resultados de 2023 y busca la combinación de transferencias entre partidos que mejor reproduce los resultados proyectados.</p>
+<p class="lede w">Este diagrama estima cómo podría moverse el voto del 23J. El modelo parte de lo que responden los encuestados del barómetro del CIS sobre qué votaron entonces y qué votarían hoy, y ajusta esos trasvases para que cuadren con el resultado de 2023 y con nuestra proyección. Hay que cogerlo con cautela: es una única encuesta, la gente tiende a recordar mal su historial electoral, y con los partidos pequeños hay tan pocos encuestados que nos apoyamos más en supuestos que en sus respuestas. Aunque lo parezca, no muestra cambios de voto individuales, sino la combinación de trasvases más coherente con la encuesta y con la proyección.</p>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>
   <div class="ends" aria-hidden="true"><b>Resultados 23J</b><b>Proyección 29N</b></div>
