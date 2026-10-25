@@ -75,18 +75,6 @@
   async function copyBib() {
     try { await navigator.clipboard.writeText(bibtex); copied = true; setTimeout(() => (copied = false), 1600); } catch { /* no clipboard */ }
   }
-
-  // the pipeline, top to bottom
-  const steps = [
-    { t: 'Encuestas', d: 'Wikipedia, cada mañana', c: '#d1366b' },
-    { t: 'Validación', d: 'o se mantiene la lista aprobada', c: '#db4540' },
-    { t: 'Aprobación', d: 'comprobación con la Wikipedia en inglés y revisión del equipo', c: '#e0833f' },
-    { t: 'Media ponderada', d: 'recencia · muestra · acierto · frecuencia', c: '#edc747' },
-    { t: 'Sesgo de cada empresa', d: 'se resta antes de promediar', c: '#759ac6' },
-    { t: 'Reparto por provincias', d: 'perfil de 2019–2023 + ajuste iterativo', c: '#275aa3' },
-    { t: 'Escaños', d: "D'Hondt con barrera del 3 %", c: '#5db9ae' },
-    { t: 'Web', d: 'proyección, simulador y mapa', c: '#7bba56' }
-  ];
 </script>
 
 <svelte:head>
@@ -116,15 +104,6 @@
       octubre de 2025; los datos son del {longDate(DATA.today)}.
     </p>
   </div>
-
-  <figure class="fig">
-    <ol class="pipe">
-      {#each steps as s, i}
-        <li style="--c:{s.c}"><span class="n">{i + 1}</span><b>{s.t}</b><span class="d">{s.d}</span></li>
-      {/each}
-    </ol>
-    <figcaption>El recorrido del dato, cada mañana: de la recopilación de encuestas a la web, con una persona que aprueba las encuestas nuevas. Los resultados de 2019 y 2023 entran en el paso 6; el censo y los escaños del 29N, en el 7.</figcaption>
-  </figure>
 
   <!-- ── polls ─────────────────────────────────────────────────────────── -->
   <div class="prose well">
@@ -407,10 +386,9 @@
 <style>
   .page { max-width: 1262px; margin: 0 auto; padding: 0 16px var(--s3); box-sizing: content-box; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px; }
   .well { grid-column: 2 / 8; min-width: 0; }
-  .fig { grid-column: 1 / 13; min-width: 0; margin: var(--s2) 0 var(--s1); }
   @media (max-width: 900px) {
     .page { grid-template-columns: minmax(0, 1fr); }
-    .well, .fig { grid-column: 1; }
+    .well { grid-column: 1; }
   }
   .prose h2 { font-family: var(--font-ui); font-weight: 200; font-size: 24px; line-height: 32px; color: var(--ink); margin: var(--s3) 0 var(--s1); }
   .prose h2 :global(strong) { font-weight: 700; }
@@ -426,14 +404,6 @@
   .nowrap { white-space: nowrap; }
   .small { font-size: 12px; margin-top: 2px; }
 
-  .pipe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; counter-reset: s; }
-  .pipe li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 12px 14px; border-top: 4px solid var(--c); background: var(--panel); border-radius: 0 0 var(--radius) var(--radius); font-family: var(--font-ui); }
-  .pipe li:not(:last-child)::after { content: '→'; position: absolute; right: -10px; top: 14px; transform: translateX(50%); font-size: 14px; color: var(--muted); z-index: 1; }
-  .pipe .n { font-size: 12px; font-weight: 700; color: var(--muted); }
-  .pipe b { font-size: 15px; line-height: 1.25; color: var(--ink); }
-  .pipe .d { font-size: 12px; line-height: 1.4; color: var(--muted); }
-  @media (max-width: 900px) { .pipe { grid-template-columns: minmax(0, 1fr); } .pipe li:not(:last-child)::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -12px; transform: translate(-50%, 0); } }
-  .fig figcaption { font-family: var(--font-ui); font-weight: 400; font-size: 13px; line-height: 1.5; color: var(--muted); margin-top: 14px; max-width: 720px; }
 
   .tbl { width: 100%; border-collapse: collapse; margin: var(--s1) 0 var(--s2); font-family: var(--font-ui); font-weight: 400; font-size: 14px; }
   .tbl caption { text-align: left; font-weight: 700; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding-bottom: 10px; line-height: 1.4; }
