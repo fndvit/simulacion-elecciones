@@ -51,6 +51,8 @@ body {
   font-variant-numeric: tabular-nums;
   line-height: 1.5; -webkit-font-smoothing: antialiased;
 }
+/* the default «bolder» only lifts light (300) text to 400: bold is always the heavy weight */
+strong, b { font-weight: 700; }
 h1, h2, h3, h4 { font-family: var(--font-ui); font-weight: 300; margin: 0; text-wrap: balance; }
 button, input, select { font: inherit; }
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
