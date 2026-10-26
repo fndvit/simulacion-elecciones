@@ -6,6 +6,9 @@ CENSUS_2026 = 38728356
 SEATS_2026_CHANGES = {'28': 38, '11': 8}
 W_ELEC = {'g2023': 0.6, 'g2019n': 0.25, 'g2019a': 0.15}
 CAT = {'08','17','25','43'}; AND = {'04','11','14','18','21','23','29','41'}; VAL = {'03','12','46'}
+# parties that do not stand somewhere on 29N (structural zero in the projection)
+# Podemos: no list in Catalonia; it backs ERC and has candidates on its lists (pact of 12 Oct 2026)
+NOT_RUNNING = {'PODEMOS': CAT}
 AA_W = {'11':1.6,'41':1.2,'29':1.0,'18':1.0,'14':0.9,'21':0.9,'23':0.8,'04':0.6}
 PARTIES = ['PP','PSOE','VOX','FA','COMP','PODEMOS','SALF','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN','AA','AC']
 
@@ -61,6 +64,8 @@ def indices():
         I[pr]['SALF'] = 0.5 + 0.5 * I[pr]['VOX']
         I[pr]['AA'] = AA_W.get(pr, 0)
         I[pr]['AC'] = 1.0 if pr in CAT else 0
+        for P, where in NOT_RUNNING.items():
+            if pr in where: I[pr][P] = 0.0
     return I, nat
 
 def base_inputs():

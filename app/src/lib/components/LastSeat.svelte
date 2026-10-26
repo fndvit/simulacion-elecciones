@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ToSpain from './ToSpain.svelte';
   // The last seat in the selected constituency (or the tightest one nationwide) + the 10 tightest seats.
   import SeatDiagram from './SeatDiagram.svelte';
   import LibDrop from './LibDrop.svelte';
@@ -35,6 +36,7 @@
     {:else if kind === 'far'}En {@render pick(',')} el último escaño es de <strong>{nm(focus.r.last!.k)}</strong>, con <strong>{nm(focus.r.chal!.k)}</strong> muy lejos de alcanzarlo.
     {:else if kind === 'plain'}En {@render pick(',')} el último escaño se disputa entre <strong>{nm(focus.r.last!.k)}</strong> y <strong>{nm(focus.r.chal!.k)}</strong>{end(nm(focus.r.chal!.k))}
     {:else}En {@render pick()} no hay un último escaño en disputa.{/if}
+    <span class="tsp"><ToSpain bind:scope /></span>
   </h2>
   <p class="lede">
     {#if focus.r.chal}{nm(focus.r.chal.k)} necesita <b>{fmtN(focus.r.chal.need)} votos</b> más para quitárselo (un {pct(focus.r.chal.need / focus.r.valid, 2)} del voto válido de la provincia).{/if}
@@ -56,6 +58,7 @@
 </div>
 
 <style>
+  .tsp { display: inline-block; margin-left: 10px; vertical-align: middle; }
   .tight { display: flex; flex-direction: column; }
   .blk { display: flex; flex-direction: column; gap: 14px; }
   .nowrap { white-space: nowrap; }

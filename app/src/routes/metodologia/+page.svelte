@@ -241,6 +241,10 @@
         {#each lineage as l}<tr><td class="k">{l.k}</td><td>{l.e23}</td><td>{l.e19}{#if l.note}<div class="muted small">{l.note}</div>{/if}</td></tr>{/each}
       </tbody>
     </table>
+    <p>
+      Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
+      Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y apoya a ERC, con candidatos en sus listas (acuerdo del 12 de octubre de 2026).
+    </p>
     <h3>El ajuste</h3>
     <p>
       Multiplicar la media nacional por el índice de cada provincia no basta: las provincias no suman exactamente la media nacional

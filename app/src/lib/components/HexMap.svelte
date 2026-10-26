@@ -5,6 +5,7 @@
   // constituency is shaded by that party's vote share there. Province and community limits are
   // gaps in the page colour (thin / wide). Click a constituency to tune it.
   import LibDrop from './LibDrop.svelte';
+  import ToSpain from './ToSpain.svelte';
   import { BYID } from '$lib/data';
   import { PARTY, BLOC, ORDER } from '$lib/parties';
   import { HEX, GEO, VIEWBOX, BASE_HEX, hexParties, changedSince2023, poly, morphPath } from '$lib/hex';
@@ -40,26 +41,44 @@
   const mixFill = (c: string, t: number) => `color-mix(in srgb, ${c} ${Math.round(Math.min(1, t) * 100)}%, var(--map-empty))`;
 
   const cells = $derived.by(() => {
-    const out: { key: string; id: string; gi: number; pts: string; inner: string; fill: string; chg: boolean }[] = [];
+    const out: { key: string; id: string; gi: number; pts: string; inner: string; fill: string; chg: boolean; gain: boolean; lost: boolean }[] = [];
+    const P = focusParty;
     for (const id in HEX.byProv) {
       // the layout is always anchored to the poll projection, so the toggle only moves the highlight
       const parts = hexParties(cur, id, BASE_HEX), r = cur.prov[id];
       const since = compare === '2023' ? changedSince2023(parts, id) : null;
       const share = (r.votes[focusParty] || 0) / r.valid;
+      // «Voto a un partido»: the seats that party gains (thick border) or loses (hatched), against the same reference
+      const base = BASE_HEX[id], gain = parts.map(() => false), lost = parts.map(() => false);
+      if (mode === 'party') {
+        if (compare === 'scenario') parts.forEach((k, i) => { gain[i] = k === P && base[i] !== P; lost[i] = base[i] === P && k !== P; });
+        else {
+          const d = parts.filter((k) => k === P).length - ((BYID[id].r23.s as Record<string, number>)[P] || 0);
+          // gained: that many of its cells, those it did not have in the projection first; lost: that many of the
+          // others' cells, those that changed hands since 2023 first
+          const mine = parts.map((k, i) => i).filter((i) => parts[i] === P).sort((a, b) => Number(base[b] !== P) - Number(base[a] !== P));
+          const others = parts.map((k, i) => i).filter((i) => parts[i] !== P && parts[i]).sort((a, b) => Number(!!since?.[b]) - Number(!!since?.[a]));
+          for (const i of d > 0 ? mine.slice(0, d) : []) gain[i] = true;
+          for (const i of d < 0 ? others.slice(0, -d) : []) lost[i] = true;
+        }
+      }
       HEX.byProv[id].forEach((h, i) => {
-        const k = parts[i], chg = since ? since[i] : k !== BASE_HEX[id][i];
+        const k = parts[i], chg = mode === 'party' ? gain[i] : since ? since[i] : k !== BASE_HEX[id][i];
         const fill = mode === 'seats' ? (k ? PARTY[k as keyof typeof PARTY].c : 'var(--map-empty)') : share > 0 ? mixFill(PARTY[focusParty as keyof typeof PARTY].c, share / den) : 'var(--map-empty)';
-        out.push({ key: id + ':' + i, id, gi: h.i, pts: poly(h, HEX.R), inner: poly(h, HEX.R * 0.86), fill, chg });
+        out.push({ key: id + ':' + i, id, gi: h.i, pts: poly(h, HEX.R), inner: poly(h, HEX.R * 0.86), fill, chg, gain: gain[i], lost: lost[i] });
       });
     }
     return out;
   });
   const nChg = $derived(cells.filter((c) => c.chg).length);
+  const nLost = $derived(cells.filter((c) => c.lost).length);
+  const pName = $derived(PARTY[focusParty as keyof typeof PARTY]?.n ?? focusParty);
   const hb = HEX.canBox, gb = GEO.canBox;
   const cb = $derived([0, 1, 2, 3].map((k) => lerp(gb[k], hb[k])));
   const hovId = $derived(tip && !moving ? tip.id : null);
   // other provinces fade towards the page colour (a mixed fill, not opacity, so cells don't show seams)
-  const dimmed = (c: { id: string; fill: string }) => (hovId && c.id !== hovId ? `color-mix(in srgb, ${c.fill} 42%, var(--bg))` : c.fill);
+  const selId = $derived(scope !== 'ES' ? scope : null);
+  const dimmed = (c: { id: string; fill: string }) => ((hovId || selId) && c.id !== hovId && c.id !== selId ? `color-mix(in srgb, ${c.fill} 42%, var(--bg))` : c.fill);
   const ce = $derived(lbl('51')), me = $derived(lbl('52'));
 
   // community names: over the map for the peninsula (non-interactive, blended), outside it for the islands and cities
@@ -127,15 +146,27 @@
   </div>
 </div>
 <div class="chg-row">
+  {#if mode === 'party'}
+    <span class="map-heading">
+      <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="none" stroke="currentColor" stroke-width="3" /></svg>
+      Escaños que gana {pName}&nbsp;({nChg})
+    </span>
+    <span class="map-heading">
+      <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><defs><pattern id="hatch-key" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#3a3a3a" stroke-width="1.6" /></pattern></defs><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="url(#hatch-key)" stroke="#3a3a3a" stroke-width="1" /></svg>
+      que pierde&nbsp;({nLost})
+    </span>
+  {:else}
   <span class="map-heading">
     <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="none" stroke="currentColor" stroke-width="3" /></svg>
     Escaños que cambian de manos{#if nChg}&nbsp;({nChg}){/if}
   </span>
+  {/if}
   {#if projection}<span class="since">desde 2023</span>{:else}
   <div class="toggle small" role="group" aria-label="Escaños que cambian de manos: respecto a">
     <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en tu escenario</button>
     <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compareSel = '2023')}>desde 2023</button>
   </div>{/if}
+  <span class="tsp"><ToSpain bind:scope /></span>
 </div>
 </div>
 
@@ -146,6 +177,7 @@
     {#each BLOC.filter((P) => cur.seats[P]) as P}<span><i style="background:{PARTY[P].c}"></i>{PARTY[P].n} {cur.seats[P]}</span>{/each}
   {:else}
     <span>Voto a {PARTY[focusParty as keyof typeof PARTY].n} en cada circunscripción</span>
+    <span><i class="lk gk"></i>escaño que gana</span><span><i class="lk hk"></i>escaño que pierde</span>
     <span>0 %<span class="ramp" style="background:linear-gradient(90deg, var(--map-empty), {PARTY[focusParty as keyof typeof PARTY].c})"></span>{Math.round(den * 100)} %</span>
   {/if}
 </div>
@@ -153,7 +185,10 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="mapwrap c8" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
-    <defs>{#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}</defs>
+    <defs>
+      {#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}
+      <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="none" /><line x1="0" y1="0" x2="0" y2="7" class="hatchline" /></pattern>
+    </defs>
     <path class="canbox" d="M{cb[0]},{cb[1]}H{cb[2]}V{cb[3]}" />
     {#each cells as c (c.key)}
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
@@ -172,6 +207,13 @@
           {:else}<path class="hx chg geo" d={GEO.cells[c.gi].d} clip-path="url(#vc{c.gi})" style="fill:{dimmed(c)}" onclick={() => pick(c.id)} onmousemove={(e) => move(e, c.id)} />{/if}
         {/if}
       {/each}
+      {#if mode === 'party'}
+        {#each cells as c (c.key)}
+          {#if c.lost}
+            {#if t === 1}<polygon class="lostc" points={c.pts} />{:else}<path class="lostc" d={GEO.cells[c.gi].d} />{/if}
+          {/if}
+        {/each}
+      {/if}
       {#if tip && tip.id !== scope}<path class="hov" d={t === 1 ? HEX.outline[tip.id] : GEO.prov[tip.id]} />{/if}
       {#if scope !== 'ES'}<path class="selo" d={t === 1 ? HEX.outline[scope] : GEO.prov[scope]} />{/if}
     {/if}
@@ -241,6 +283,12 @@
   .hx.chg { stroke: var(--stroke); stroke-width: 5; stroke-linejoin: round; }
   .hx.chg.geo { stroke-width: 7; }
   .lines { pointer-events: none; }
+  .lostc { fill: url(#hatch); stroke: none; pointer-events: none; }
+  :global(.hatchline) { stroke: #3a3a3a; stroke-width: 2.4; }
+  .tsp { margin-left: auto; }
+  .lk { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 5px; border-radius: 2px; }
+  .lk.gk { border: 2.5px solid var(--stroke); box-sizing: border-box; background: none !important; }
+  .lk.hk { background: repeating-linear-gradient(45deg, #3a3a3a 0 2px, transparent 2px 5px) !important; border: 1px solid #3a3a3a; box-sizing: border-box; }
   .pvl.geo { stroke-width: 1.2; stroke-linejoin: round; }
   .cal.geo { stroke-width: 5; stroke-linejoin: round; }
   .pvl { fill: none; stroke: var(--bg); stroke-width: 1.8; stroke-linecap: round; pointer-events: none; }
@@ -255,7 +303,7 @@
   .key svg { width: 46%; height: auto; display: block; }
   .key svg :global(path), .key svg :global(polygon) { stroke: var(--bg); stroke-width: 1.6; stroke-linejoin: round; }
   .key p { margin: 0; font-family: var(--font-ui); font-weight: 400; font-size: 12px; line-height: 1.45; color: var(--muted); }
-  .kname { font-family: var(--font-ui); font-weight: 700; font-size: 12px; color: var(--fg); margin-bottom: -4px; }
+  .kname { font-family: var(--font-ui); font-weight: 700; font-size: 16px; line-height: 1.2; color: var(--ink); margin-bottom: -2px; }
   @media (max-width: 700px) {
     .key { position: static; width: auto; display: grid; grid-template-columns: 84px 1fr; align-items: start; gap: 4px 12px; margin-top: 12px; }
     .kname { grid-column: 1 / 3; margin: 0; }
