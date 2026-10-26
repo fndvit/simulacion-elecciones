@@ -10,6 +10,7 @@ import numpy as np
 # error parameters (calibrated in backtest.py; see datos/backtest.json)
 DEFAULT = dict(
     sigma_ref=2.0,      # points of national error for a party at 30 % on election day
+    size_exp=0.75,      # error grows with party size as (share / 0.30) ^ size_exp
     t_scale=0.0,        # extra variance per day before the vote, relative: var × (1 + t_scale · days)
     rho_bloc=0.0,       # share of a big party's error that is a shared right-vs-left swing
     df=5,               # Student-t degrees of freedom for the national error (fat tails)
@@ -26,9 +27,9 @@ def _t(rng, df, size):
 
 def national_draws(rng, S, parties, right, n, days, p):
     """S: national shares (fractions) of the named parties. Returns [n, K] fractions.
-    Error sd scales with √(share/0.30); a common swing moves the right bloc against the rest."""
+    Error sd scales with (share/0.30)^size_exp; a common swing moves the right bloc against the rest."""
     s = np.array([S[k] for k in parties])
-    sd = p['sigma_ref'] / 100 * np.sqrt(s / 0.30) * np.sqrt(1 + p['t_scale'] * days)
+    sd = p['sigma_ref'] / 100 * (s / 0.30) ** p['size_exp'] * np.sqrt(1 + p['t_scale'] * days)
     own = _t(rng, p['df'], (n, len(s))) * sd * np.sqrt(1 - p['rho_bloc'])
     sign = np.array([1.0 if k in right else -1.0 for k in parties])
     swing = _t(rng, p['df'], (n, 1)) * sign * sd * np.sqrt(p['rho_bloc'])

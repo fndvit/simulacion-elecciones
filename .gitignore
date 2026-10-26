@@ -7,3 +7,4 @@ _site
 datos/*.tmp
 revision.md
 *.nuevo
+datos/wiki_*.json
