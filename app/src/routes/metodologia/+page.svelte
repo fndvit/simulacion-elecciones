@@ -61,7 +61,7 @@
     { q: 'Censo y escaños del 29N', s: 'Real decreto de convocatoria y censo electoral (incluidos los residentes en el extranjero)', u: '', d: 'Fijo' },
     { q: 'Valoración de las empresas', s: 'Último sondeo publicado por cada empresa antes del 23J de 2023, frente al resultado', u: '', d: 'Fijo' },
     { q: 'Límites provinciales', s: 'es-atlas (Instituto Geográfico Nacional)', u: 'https://github.com/martgnz/es-atlas', d: 'Fijo' },
-    { q: 'Cartograma de hexágonos', s: 'A partir del de El Confidencial', u: '', d: 'Fijo' }
+    { q: 'Cartograma de hexágonos', s: 'Utiliza el método de Ralph Straumann, hexágonos sobre la base de un algoritmo de difusión', u: 'https://www.ralphstraumann.ch/blog/2013/05/creating-a-hexagonal-cartogram/', d: 'Fijo' }
   ];
 
   const bibtex = `@misc{trescincuenta_29n,
@@ -90,16 +90,16 @@
 <section class="page">
   <div class="prose well">
     <p>
-      TresCincuenta.es <strong>no es un pronóstico</strong>. Es una <strong>proyección</strong>: traduce a escaños lo que dicen hoy las
+      TresCincuenta.es <strong>no es un pronóstico</strong>. Es una <strong>proyección</strong>: traduce a escaños lo que hoy dicen las
       encuestas publicadas, con un método explícito y reproducible. No estima la incertidumbre, no asigna probabilidades ni
       intenta anticipar cómo cambiará la intención de voto hasta el 29 de noviembre. El simulador, por su parte, es una
       <strong>calculadora de supuestos</strong>: parte de la proyección y deja que cada cual mueva votos y vea qué pasa con los escaños.
     </p>
     <p>
-      El método sigue la escuela de FiveThirtyEight —el sitio que popularizó Nate Silver en Estados Unidos—, adaptada al sistema
+      El método sigue la escuela de FiveThirtyEight —el agregador de encuestas que lanzó Nate Silver en 2008—, adaptada al sistema
       español: una <strong>media ponderada</strong> que da más peso a las encuestas recientes, grandes y de empresas demoscópicas que
       acertaron en 2023; una <strong>corrección del sesgo</strong> sistemático de cada empresa; un <strong>reparto por provincias</strong>
-      según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales, y el <strong>D'Hondt</strong> de cada
+      según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales, y la fórmula <strong>D'Hondt</strong> en cada
       circunscripción. Hoy la media usa <strong>{nPolls} encuestas</strong> de <strong>{firms} empresas o medios</strong>, publicadas desde
       octubre de 2025; los datos son del {longDate(DATA.today)}.
     </p>
@@ -138,6 +138,10 @@
       La mayoría de los sondeos todavía publica una sola cifra para el espacio de Sumar. Las encuestas que dan Compromís por
       separado fijan su peso dentro de ese espacio: de media, el <strong>{dec(DATA.compSplit * 100, 0)} %</strong>. Con esa proporción
       se divide la cifra conjunta entre Frente Amplio y Compromís en todas las encuestas.
+    </p>
+    <p>
+      Este supuesto de nuestro modelo seguramente cambie a medida que más encuestas publiquen por separado a Frente Amplio,
+      Compromís y el resto de partidos de este espacio.
     </p>
   </div>
 
@@ -228,8 +232,9 @@
       </tbody>
     </table>
     <p>
-      El índice final es el promedio ponderado de los tres. Si un partido no se presentó en una provincia en una de esas elecciones,
-      ese año no cuenta para esa provincia (no se toma como apoyo cero): por ejemplo, Vox en Santa Cruz de Tenerife en 2023.
+      El índice final es el promedio ponderado de los tres. Si un partido no se presentó en una provincia en alguna de esas elecciones,
+      ese año no cuenta para esa provincia y el índice se calcula con los otros dos: no haberse presentado no significa no tener
+      votantes. Por ejemplo, Vox en Santa Cruz de Tenerife en 2023.
     </p>
     <h3>Las familias de partidos</h3>
     <p>Entre 2019 y 2026 el espacio a la izquierda del PSOE se ha recompuesto. Cada partido de hoy hereda el perfil de sus antecesores:</p>
@@ -336,7 +341,8 @@
       En el mapa <strong>cada celda es un escaño</strong>. Dentro de cada provincia, el territorio se divide en tantas celdas como
       diputados elige (un diagrama de Voronoi con puntos repartidos sobre la provincia), y cada celda toma el color del partido que gana
       ese escaño. Los límites provinciales y autonómicos vienen de es-atlas (IGN). La vista de hexágonos es un cartograma con un hexágono
-      por escaño, a partir del de El Confidencial. «Escaños que cambian de manos» compara con 2023 en la proyección; en el simulador se puede comparar con la
+      por escaño, siguiendo el <a href="https://www.ralphstraumann.ch/blog/2013/05/creating-a-hexagonal-cartogram/" target="_blank" rel="noopener">método de Ralph Straumann</a> que utilizó
+      <em>The Guardian</em> en las elecciones generales británicas de 2015. «Escaños que cambian de manos» compara con 2023 en la proyección; en el simulador se puede comparar con la
       proyección o con 2023.
     </p>
   </div>
@@ -391,7 +397,7 @@
   <!-- ── cite ──────────────────────────────────────────────────────────── -->
   <div class="prose well">
     <h2>Cómo <strong>citar</strong></h2>
-    <p>El código, los datos de cada día y las transformaciones son públicos y reproducibles. Si reutilizas la proyección, cítala así:</p>
+    <p>Los datos de cada día y las transformaciones son públicos y reproducibles. Si reutilizas la proyección, cítala así:</p>
     <p class="cite-apa">Fundació ViT, Visualització per a la Transparència. (2026). <em>TresCincuenta.es: proyección del reparto de escaños del Congreso para las elecciones generales del 29 de noviembre de 2026</em> [modelo, datos y aplicación web]. https://trescincuenta.es</p>
     <div class="code">
       <div class="code-head"><span>BibTeX</span><button class="copy" type="button" onclick={copyBib}>{copied ? '✓ Copiado' : 'Copiar'}</button></div>

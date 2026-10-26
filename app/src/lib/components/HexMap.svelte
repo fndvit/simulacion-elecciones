@@ -245,8 +245,8 @@
       {/each}
     </svg>
     <p>
-      {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños reparte{:else}Cada provincia se divide en tantas partes como escaños reparte{/if}{#if mode === 'seats'}, y cada {view === 'hex' ? 'uno' : 'una'} toma el color del partido que gana ese escaño, con el primero en el centro.{:else}, {view === 'hex' ? 'todos' : 'todas'} con el tono del voto del partido en la provincia.{/if}
-      {#if view === 'geo'}Las divisiones no muestran los municipios donde se vota a cada partido.{/if}
+      {#if view === 'hex'}Cada provincia tiene tantos hexágonos como escaños elige{:else}Cada provincia se divide en tantas piezas como escaños elige{/if}{#if mode === 'seats'}, y cada {view === 'hex' ? 'uno' : 'una'} toma el color del partido que gana ese escaño.{:else}, {view === 'hex' ? 'todos' : 'todas'} con el tono del voto del partido en la provincia.{/if}
+      {#if view === 'geo'}¡Ojo! Esas piezas no corresponden a los municipios en los que gana cada partido.{/if}
     </p>
   </div>
 
@@ -266,8 +266,8 @@
 </div>
 
 <p class="sub w">
-  {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid cuenta también el escaño nuevo).{/if}
-  Pulsa una provincia para seleccionarla en toda la página.
+  {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid, también se cuenta el escaño nuevo).{/if}
+  <span class="on-mouse">Clica en una provincia</span><span class="on-touch">Toca una provincia</span> para seleccionarla en toda la página.
 </p>
 
 <style>

@@ -36,7 +36,7 @@
     </div>
   {/each}
 </div>
-<p class="method">Escaños por la regla D'Hondt en cada circunscripción, con barrera del 3 % del voto válido (blancos incluidos), como fija la LOREG.{projection ? '' : ' ± compara con la proyección de las encuestas.'} En 2023, Frente Amplio se lee como Sumar (con Compromís) y Podemos iba dentro de Sumar.</p>
+<p class="method">Escaños repartidos según la fórmula D'Hondt en cada circunscripción, con barrera del 3 % del voto válido (blancos incluidos), como fija la LOREG.{projection ? '' : ' ± compara con la proyección de las encuestas.'} En 2023, Sumar se corresponde con el actual Frente Amplio, Compromís y Podemos.</p>
 
 <style>
   .rows { display: flex; flex-direction: column; font-family: var(--font-ui); font-weight: 400; }

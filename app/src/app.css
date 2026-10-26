@@ -64,6 +64,9 @@ button, input, select { font: inherit; }
 .sub { font-family: var(--font-ui); font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 640px; font-weight: 400; }
 .sub b { color: var(--fg); }
 .lede { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); margin: 0; max-width: 62ch; }
+/* «Clica» with a mouse, «Toca» on touch screens */
+.on-touch { display: none; }
+@media (hover: none) { .on-touch { display: inline; } .on-mouse { display: none; } }
 .note { font-family: var(--font-ui); font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0; font-weight: 400; }
 .method { font-family: var(--font-ui); font-size: 13px; color: var(--muted); margin: 6px 0 0; font-weight: 400; line-height: 1.5; }
 .scrollx { overflow-x: auto; }

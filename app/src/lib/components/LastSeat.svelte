@@ -46,7 +46,7 @@
 </div>
 
 <h3 class="hd" style="margin-top:12px">Los <strong>escaños más ajustados</strong> {of}</h3>
-<p class="lede">Votos que le faltan al aspirante para arrebatar el último escaño, en proporción al voto válido de cada circunscripción. Pulsa una fila para ir a esa provincia.</p>
+<p class="lede">Votos que le faltan al aspirante para arrebatar el último escaño, en proporción al voto válido de cada circunscripción. <span class="on-mouse">Clica en una fila</span><span class="on-touch">Toca una fila</span> para ir a esa provincia.</p>
 <div class="tight">
   {#each list.slice(0, 10) as x (x.p.id)}
     <button class="trow" onclick={() => (scope = x.p.id)}>

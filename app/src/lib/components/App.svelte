@@ -178,7 +178,9 @@
     {#if tab === 'esc'}
       <section class="sec" in:fade={{ duration: 300 }}>
         <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
-        <p class="lede w">Pronto podrás explorar escenarios ya preparados para el 29 de noviembre. Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula</a> el tuyo.</p>
+        <p class="lede w">Estamos cocinando escenarios para el 29N. Preguntas concretas convertidas en cambios de voto y de participación, con los supuestos a la vista. ¿Qué pasaría si votan los barrios más jóvenes, esos donde hoy más gente se queda en casa? ¿Y si la vivienda mueve el voto donde el alquiler más aprieta? ¿Y si las encuestas se equivocan con Vox, como cuando en 2016 anunciaron un <em>sorpasso</em> que nunca cuajó, o al revés?</p>
+        <p class="lede w">Ninguno de estos escenarios es una predicción. Son preguntas del tipo «¿qué pasaría si…?», y cada una muestra cuánto se reordenaría el hemiciclo y en qué provincias se decidiría. Y, de paso, sirven de trampolín para tus propios escenarios.</p>
+        <p class="lede w">Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula tu escenario</a>.</p>
         <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /><figcaption class="note">Ilustración @oyematias</figcaption></figure>
       </section>
     {:else}
@@ -189,11 +191,11 @@
     </section>
     {/if}
     <section class="sec">
-      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> a día de hoy.{/if}</h2>
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> hoy.{/if}</h2>
       <div class="f"><SeatBar {cur} bind:scope projection={!sim} /></div>
     </section>
     <section class="sec">
-      <h2 class="hd w">{#if sim}Así quedaría <strong>el reparto por provincias</strong> en tu escenario.{:else}Así quedaría <strong>el reparto por provincias</strong> según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales.{/if}</h2>
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el reparto por provincias</strong> en tu escenario.{:else}Así quedaría <strong>el reparto por provincias</strong> según los resultados de cada partido en las tres últimas generales.{/if}</h2>
       <HexMap {cur} bind:scope bind:focusParty projection={!sim} />
     </section>
     <section class="sec"><div class="w"><ScenarioTable {cur} {scope} projection={!sim} /></div></section>

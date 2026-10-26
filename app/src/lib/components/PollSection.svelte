@@ -54,7 +54,7 @@
 </script>
 
 <h2 class="hd w" id="la-base">La base: <strong>media ponderada de encuestas</strong></h2>
-<p class="lede w">La proyección sigue la metodología de FiveThirtyEight, el modelo que popularizó Nate Silver en Estados Unidos, adaptada a las encuestas españolas: una media ponderada que premia las encuestas recientes, grandes y de empresas demoscópicas que acertaron en 2023, corrige el sesgo de cada empresa y reparte el resultado por provincias según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales. Después, D'Hondt reparte los escaños. Las encuestas se recogen cada día, de forma automática, de la recopilación de sondeos publicados que mantiene Wikipedia.</p>
+<p class="lede w">La proyección sigue la metodología de FiveThirtyEight, el modelo que popularizó Nate Silver en Estados Unidos, adaptada a las encuestas españolas: una media ponderada que premia las encuestas recientes, grandes y de las empresas que más acertaron.</p>
 <div class="cwrap c9" bind:clientWidth={cw}><div class="scrollx">
   <svg bind:this={svgEl} onpointermove={hover} onpointerleave={() => (hov = null)} class="chart" viewBox="0 0 {W} {H}" width={W} height={H} role="img" aria-label="Evolución de la media de encuestas">
     {#each [0, 10, 20, 30, 40] as v}<line class="grid" x1={m.l} x2={W - m.r} y1={Y(v)} y2={Y(v)} /><text x={m.l - 6} y={Y(v) + 4} text-anchor="end">{v}</text>{/each}
@@ -108,7 +108,7 @@
 <section class="meth w">
   <h3 class="hd">Cómo se calcula <strong>la proyección</strong></h3>
   <div class="prose">
-    <p>Una media de las {DATA.polls.length} encuestas publicadas desde octubre de 2025 que pesa más las recientes, las de más entrevistas y las de empresas demoscópicas que acertaron en 2023, y que corrige el sesgo de cada empresa. La media se reparte por provincias según dónde ha sido más fuerte o más débil cada partido en las generales de 2019 y 2023, y los escaños se asignan con D'Hondt y la barrera del 3 % en cada circunscripción. No es un pronóstico: refleja lo que dicen hoy las encuestas y no estima incertidumbre ni probabilidades.</p>
+    <p>Una media de las {DATA.polls.length} encuestas publicadas desde octubre de 2025 en la que pesan más las recientes, las de más entrevistas y las de empresas demoscópicas que acertaron en 2023, y que corrige el sesgo de cada empresa. La media se reparte por provincias según dónde ha sido más fuerte o más débil cada partido en las generales de 2019 y 2023, y los escaños se asignan mediante la fórmula D'Hondt teniendo en cuenta la barrera del 3 % en cada circunscripción. No es un pronóstico: refleja lo que dicen hoy las encuestas y no estima incertidumbre ni probabilidades.</p>
     <p class="more"><a href={href('/metodologia')}>Lee la metodología completa</a></p>
   </div>
 </section>
