@@ -8,6 +8,7 @@ HALF_LIFE = 14.0       # days: weight halves every two weeks (campaign-period de
 HE_WINDOW = 21         # days either side used to build the house-effect comparison average
 HE_SHRINK = 4          # pseudo-polls of shrinkage toward zero house effect
 UNRATED = 0.85
+AC_TO = {'JUNTS': 0.23, 'VOX': 0.22}   # CEO, 2nd wave 2026: where Aliança Catalana voters go in a general election
 
 def firm(name):
     if name.startswith('CIS'):   # «CIS» = official estimate; «CIS (X)» = X's re-estimate of the CIS microdata
@@ -27,7 +28,17 @@ def load():
         if v['FA'] is not None:
             v['SUMAR'] = v['FA'] + (v['COMP'] or 0)
             if v['COMP']: comp_split = v['COMP'] / v['SUMAR']
-        rows.append(dict(pollster=r['pollster'], firm=firm(r['pollster']), end=dt.date.fromisoformat(r['end']), fw=r['fw'],
+        # Aliança Catalana does not stand on 29N (announced 5 Oct 2026). The few polls that gave it a figure move
+        # it as the CEO measured its voters would: 23 % to Junts, 22 % to Vox; the rest stays with «otros».
+        if v['AC'] is not None:
+            if v['JUNTS'] is not None: v['JUNTS'] += AC_TO['JUNTS'] * v['AC']
+            if v['VOX'] is not None: v['VOX'] += AC_TO['VOX'] * v['AC']
+            v['AC'] = None
+        f = firm(r['pollster'])
+        # the CIS counts once per barometer: its own estimate. Third-party re-estimates of its microdata
+        # («CIS (Target Point)»…) are the same interviews, so they are kept in polls.csv but left out.
+        if f.startswith('CIS ('): continue
+        rows.append(dict(pollster=r['pollster'], firm=f, end=dt.date.fromisoformat(r['end']), fw=r['fw'],
                          n=int(r['n']) if r['n'] else None, v={k: v[k] for k in PARTIES}, comp_split=comp_split))
     return rows
 
@@ -54,9 +65,8 @@ def wavg(items):
 
 def average(rows, at=TODAY, he=None, use_rating=True):
     mae, rw = ratings()
-    # frequency: firms polling often share their weight (1/√k). All CIS-based estimates come from the
-    # same monthly survey, so they share one budget.
-    fk = lambda f: 'CIS' if f.startswith('CIS') else f
+    # frequency: firms polling often share their weight (1/√k)
+    fk = lambda f: f
     recent = {}
     for r in rows:
         if 0 <= (at - r['end']).days <= 30: recent[fk(r['firm'])] = recent.get(fk(r['firm']), 0) + 1

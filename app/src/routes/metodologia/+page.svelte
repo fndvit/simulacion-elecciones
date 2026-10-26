@@ -19,7 +19,7 @@
   ];
 
   // ── pollster ratings (2023) ───────────────────────────────────────────
-  // re-estimates of CIS microdata count as unrated, whatever their 2023 record
+  // re-estimates of CIS microdata are not in the average
   const ratings = Object.entries(DATA.ratings)
     .filter(([f]) => !f.startsWith('CIS ('))
     .map(([f, [mae, w]]) => ({ f, mae, w }))
@@ -35,7 +35,7 @@
   const sgn = (x: number | undefined) => { if (x == null) return '–'; const r = Math.round(x * 10) / 10; return (r > 0 ? '+' : r < 0 ? '−' : '') + dec(Math.abs(r)); };
 
   // ── today's national average (after correcting house effects) ─────────
-  const ORDERED = Object.entries(DATA.S).filter(([k]) => k !== 'OTROS').sort((a, b) => b[1] - a[1]);
+  const ORDERED = Object.entries(DATA.S).filter(([k, v]) => k !== 'OTROS' && v > 0).sort((a, b) => b[1] - a[1]);
   const name = (k: string) => PARTY[k as keyof typeof PARTY]?.n ?? k;
 
   // ── election weights for the provincial profile ───────────────────────
@@ -49,7 +49,6 @@
     { k: 'PP', e23: 'PP', e19: 'PP (en Navarra no cuenta: fue con Navarra Suma)' },
     { k: 'UPN', e23: 'UPN', e19: '— (dentro de Navarra Suma)' },
     { k: 'SALF', e23: '—', e19: '—', note: 'Sin historial: mitad perfil uniforme, mitad el de Vox' },
-    { k: 'Aliança Catalana', e23: '—', e19: '—', note: 'Sin historial: uniforme en las cuatro provincias catalanas' },
     { k: 'Adelante Andalucía', e23: 'Adelante Andalucía', e19: '—', note: 'Perfil supuesto, más fuerte en Cádiz y Sevilla' }
   ];
 
@@ -130,9 +129,9 @@
       la lista de encuestas que usamos, que se deriva de ellos, se comparte en las mismas condiciones en el repositorio del proyecto.
     </p>
     <p>
-      Se incluyen la estimación del <strong>CIS</strong> y las <strong>reestimaciones de sus microdatos</strong> que publican otras
-      empresas («CIS (Target Point)», «CIS (Ateneo del Dato)»…). Como todas salen de la misma encuesta, comparten un único presupuesto
-      de peso por frecuencia, y las reestimaciones no tienen valoración propia (cuentan como empresa sin historial).
+      El <strong>CIS</strong> cuenta una vez por barómetro, con su propia estimación, y su sesgo respecto a las demás empresas se corrige
+      como el de cualquier otra. Las <strong>reestimaciones de sus microdatos</strong> que publican otras empresas («CIS (Target Point)»,
+      «CIS (Ateneo del Dato)»…) no entran en la media: son las mismas entrevistas, y sumarlas daría a una sola encuesta el peso de varias.
     </p>
     <h3>Sumar, Frente Amplio y Compromís</h3>
     <p>
@@ -243,7 +242,13 @@
     </table>
     <p>
       Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
-      Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y apoya a ERC, con candidatos en sus listas (acuerdo del 12 de octubre de 2026).
+      Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y sus candidatos van en las listas de ERC (acuerdo del 12 de octubre de 2026);
+      las encuestas ya cuentan ese voto dentro de ERC.
+    </p>
+    <p>
+      <strong>Aliança Catalana</strong> no se presenta a estas elecciones (lo anunció el 5 de octubre de 2026) y no entra en la proyección.
+      La mayoría de las encuestas no le daba cifra propia; en las pocas que sí, su voto se reparte como estima el Centre d'Estudis
+      d'Opinió para unas generales: un 23 % a Junts, un 22 % a Vox, y el resto queda en «otros».
     </p>
     <p>
       Donde varios partidos van en una <strong>lista conjunta</strong>, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno. En la
@@ -291,7 +296,7 @@
       <li><strong>Un partido en toda España.</strong> Su nuevo porcentaje nacional se reparte entre provincias en proporción a los votos que ya tiene en cada una, con el mismo ajuste iterativo que reparte la media entre provincias. El resto de partidos cede (o gana) votos en proporción a su tamaño, provincia a provincia.</li>
       <li><strong>Un partido en una provincia.</strong> El cambio solo afecta a esa provincia; los demás partidos de esa provincia lo absorben en proporción a su tamaño.</li>
       <li><strong>La participación.</strong> Añade o quita votantes, entre el 20 % y el 98 % del censo. La participación no puede subir donde ya roza el techo: un cambio para toda España se reparte entre provincias según el margen de cada una. Si sube, cuenta la abstención (1 − participación); si baja, cae más donde ya se vota poco o a medias (participación × abstención). Así, 10 puntos más en toda España son unos 16 en Melilla y unos 7 en Cuenca. El cambio fijado en una provincia se suma tal cual.</li>
-      <li><strong>Quién se suma o se queda en casa.</strong> Por defecto, sale de las mesas electorales con más margen y vota como el resto de su mesa en las generales de 2023 (más de 60.000 mesas del Ministerio del Interior). Una subida se reparte entre mesas según su abstención y una bajada, según participación × abstención; sumando las mesas de cada provincia sale el perfil de esos votantes. Como la abstención se concentra en unos barrios y pueblos más que en otros, ese perfil no es el de la media: en Sevilla, por ejemplo, los que se suman votan algo menos al PP y algo más al PSOE que el conjunto de la provincia. Los partidos sin equivalente en 2023 (SALF, Aliança Catalana, Adelante Andalucía) votan como la media, y Frente Amplio, Compromís y Podemos toman el perfil de Sumar. Sobre ese punto de partida, cada partido puede captar entre nada (×0) y cuatro veces (×4) su parte de esos votantes. Sin cambio de participación, este control no tiene efecto.</li>
+      <li><strong>Quién se suma o se queda en casa.</strong> Por defecto, sale de las mesas electorales con más margen y vota como el resto de su mesa en las generales de 2023 (más de 60.000 mesas del Ministerio del Interior). Una subida se reparte entre mesas según su abstención y una bajada, según participación × abstención; sumando las mesas de cada provincia sale el perfil de esos votantes. Como la abstención se concentra en unos barrios y pueblos más que en otros, ese perfil no es el de la media: en Sevilla, por ejemplo, los que se suman votan algo menos al PP y algo más al PSOE que el conjunto de la provincia. Los partidos sin equivalente en 2023 (SALF, Adelante Andalucía) votan como la media, y Frente Amplio, Compromís y Podemos toman el perfil de Sumar. Sobre ese punto de partida, cada partido puede captar entre nada (×0) y cuatro veces (×4) su parte de esos votantes. Sin cambio de participación, este control no tiene efecto.</li>
     </ul>
     <p>
       El escenario se guarda en el navegador y se puede compartir: el enlace lleva codificados todos los cambios. Es una calculadora de
@@ -311,7 +316,7 @@
         {fmtN(DATA.trMeta.n)} entrevistas útiles— se cruza el recuerdo de voto en 2023 con la intención de voto, ponderando como el CIS. A quien
         aún no sabe a quién votará se le asigna el partido por el que siente simpatía; quien no tiene ninguno queda fuera. El voto en
         blanco va con «otros»; el nulo, la abstención y quien no podía votar en 2023 van con la abstención.</li>
-      <li><strong>Prudencia con los partidos pequeños.</strong> Un partido con pocos encuestados (Aliança Catalana, CC, UPN…) apenas
+      <li><strong>Prudencia con los partidos pequeños.</strong> Un partido con pocos encuestados (CC, UPN, SALF…) apenas
         dice nada fiable, así que su fila o su columna se apoya más en un punto de partida neutro: quien llega a un partido viene de
         cada opción de 2023 en proporción a su tamaño, y quien votó a un partido le es fiel en la proporción media del resto y reparte lo
         demás como el electorado de hoy. El peso de la encuesta es <code>n ÷ (n + 60)</code>, donde <code>n</code> son los encuestados.</li>
@@ -365,7 +370,7 @@
     <ul>
       <li><strong>Las encuestas pueden fallar todas a la vez.</strong> La media corrige el sesgo de cada empresa respecto a las demás, no el de todas respecto al resultado.</li>
       <li><strong>El perfil territorial es el del pasado.</strong> Si un partido crece o cae de forma desigual entre provincias, la proyección no lo ve hasta que lo vean las encuestas autonómicas, que no se usan.</li>
-      <li><strong>Los partidos nuevos tienen perfiles supuestos.</strong> SALF, Aliança Catalana y, en parte, Adelante Andalucía no tienen historial en generales.</li>
+      <li><strong>Los partidos nuevos tienen perfiles supuestos.</strong> SALF y, en parte, Adelante Andalucía no tienen historial en generales.</li>
       <li><strong>La participación es la de 2023.</strong> Un cambio grande de participación cambia los escaños más ajustados.</li>
       <li><strong>Quién se suma se deduce de dónde vive, no de cómo vota.</strong> Suponemos que los nuevos votantes votan como sus vecinos de mesa. Es una inferencia sobre agregados: si un partido moviliza más a sus abstencionistas que el resto, solo lo recoge el control «quién se suma».</li>
       <li><strong>El último escaño se decide por pocos votos.</strong> Diferencias de unos cientos o miles de votos están muy por debajo del error de cualquier encuesta.</li>

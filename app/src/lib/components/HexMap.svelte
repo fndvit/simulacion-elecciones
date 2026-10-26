@@ -124,8 +124,8 @@
     '46': 'Compromís: lista conjunta con Podemos.',
     '35': 'Unidad del Pueblo Canario: Nueva Canarias, Podemos, IU y Sumar.',
     '38': 'Unidad del Pueblo Canario: Nueva Canarias, Podemos, IU y Sumar.',
-    '08': 'Podemos no se presenta: apoya a ERC.', '17': 'Podemos no se presenta: apoya a ERC.',
-    '25': 'Podemos no se presenta: apoya a ERC.', '43': 'Podemos no se presenta: apoya a ERC.'
+    '08': 'Podemos no se presenta: sus candidatos van en las listas de ERC.', '17': 'Podemos no se presenta: sus candidatos van en las listas de ERC.',
+    '25': 'Podemos no se presenta: sus candidatos van en las listas de ERC.', '43': 'Podemos no se presenta: sus candidatos van en las listas de ERC.'
   };
   function pick(id: string) { scope = scope === id ? 'ES' : id; tip = null; }
   function move(e: MouseEvent, id: string) {

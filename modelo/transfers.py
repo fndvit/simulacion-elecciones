@@ -19,7 +19,7 @@ import numpy as np
 
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'datos')
 ROWS = ['PSOE', 'SUMAR', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPN', 'VOX', 'PP', 'OTROS', 'ABST']
-COLS = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPC', 'UPN', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
+COLS = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPC', 'UPN', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
 # the same party on both sides (Sumar's heirs: FA, Compromís, Podemos)
 SAME = {'PSOE': ['PSOE'], 'SUMAR': ['FA', 'COMP', 'PODEMOS'], 'ERC': ['ERC'], 'BILDU': ['BILDU'], 'BNG': ['BNG'], 'AA': ['AA'], 'PNV': ['PNV'],
         'JUNTS': ['JUNTS'], 'CC': ['CC'], 'UPN': ['UPN'], 'VOX': ['VOX'], 'PP': ['PP'], 'OTROS': ['OTROS'], 'ABST': ['ABST']}
@@ -27,9 +27,10 @@ SAME = {'PSOE': ['PSOE'], 'SUMAR': ['FA', 'COMP', 'PODEMOS'], 'ERC': ['ERC'], 'B
 REC = {1: 'PSOE', 2: 'PP', 3: 'VOX', 21: 'SUMAR', 101: 'AA', 503: 'CC', 901: 'ERC', 902: 'JUNTS', 1201: 'BNG', 1501: 'UPN', 1601: 'PNV',
        1602: 'BILDU', 9977: 'ABST', 9995: 'ABST', 9996: 'ABST', 9997: 'ABST'}
 INT = {1: 'PSOE', 2: 'PP', 3: 'VOX', 4: 'PODEMOS', 8: 'PODEMOS', 7: 'FA', 9: 'FA', 21: 'FA', 29: 'FA', 30: 'FA', 103: 'FA', 903: 'FA', 1301: 'FA',
-       1001: 'COMP', 28: 'SALF', 101: 'AA', 503: 'CC', 901: 'ERC', 902: 'JUNTS', 915: 'AC', 1201: 'BNG', 1501: 'UPN', 1601: 'PNV', 1602: 'BILDU',
+       1001: 'COMP', 28: 'SALF', 101: 'AA', 503: 'CC', 901: 'ERC', 902: 'JUNTS', 1201: 'BNG', 1501: 'UPN', 1601: 'PNV', 1602: 'BILDU',
        9977: 'ABST', 9997: 'ABST'}
 NOANSWER = {9998, 9999}
+WITHDRAWN = {915}   # Aliança Catalana: not standing on 29N; those who intended to vote for it are left out
 K = 60          # respondents at which the survey and the neutral starting point weigh the same
 # names of the barometers used (add the new one each month, with its zip)
 TITLES = {'3582': 'Barómetro de octubre de 2026'}
@@ -61,9 +62,10 @@ def survey(path=None):
         if rec is None or int(rec) in (9998, 9999): continue          # doesn't remember / no answer about 2023
         r = REC.get(int(rec), 'OTROS')
         it = int(it) if it is not None else 9999
+        if it in WITHDRAWN: continue
         if it in NOANSWER:                                             # undecided: their sympathy, if any
             s = int(sim) if sim is not None else 9999
-            if s in (9997, 9998, 9999): continue
+            if s in (9997, 9998, 9999) or s in WITHDRAWN: continue
             c = INT.get(s, 'OTROS')
         else:
             c = INT.get(it, 'OTROS')
@@ -140,7 +142,7 @@ if __name__ == '__main__':
     tot = {}
     for fl in flows.values():
         for a, b, v in fl: tot[(a, b)] = tot.get((a, b), 0) + v
-    show = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'JUNTS', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
+    show = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'JUNTS', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
     print('suma de provincias, miles de votos\n' + ' ' * 7 + ''.join(f'{c[:7]:>8}' for c in show))
     for r in ROWS:
         print(f'{r:7}' + ''.join(f'{tot.get((r, c), 0) / 1e3:8.0f}' for c in show))

@@ -7,8 +7,10 @@ SEATS_2026_CHANGES = {'28': 38, '11': 8}
 W_ELEC = {'g2023': 0.6, 'g2019n': 0.25, 'g2019a': 0.15}
 CAT = {'08','17','25','43'}; AND = {'04','11','14','18','21','23','29','41'}; VAL = {'03','12','46'}
 # parties that do not stand somewhere on 29N (structural zero in the projection)
-# Podemos: no list in Catalonia; it backs ERC and has candidates on its lists (pact of 12 Oct 2026)
-NOT_RUNNING = {'PODEMOS': CAT}
+# Podemos: no list in Catalonia; its candidates go on ERC's lists (pact of 12 Oct 2026). Polls already count
+# that vote inside ERC, so Podemos's national figure belongs to the provinces where it does stand.
+# Aliança Catalana: does not stand anywhere (announced 5 Oct 2026)
+NOT_RUNNING = {'PODEMOS': CAT, 'AC': CAT}
 # joint lists on 29N: the source party's projected vote there goes to the list (source, list, provinces)
 CAN = {'35','38'}
 LISTS = [('PODEMOS', 'COMP', VAL),      # Compromís-Front Valencià (Compromís, Podemos, EUPV…); Podemos heads Alicante
@@ -67,7 +69,7 @@ def indices():
             I[pr][P] = num / den if den else 0.0
         I[pr]['SALF'] = 0.5 + 0.5 * I[pr]['VOX']
         I[pr]['AA'] = AA_W.get(pr, 0)
-        I[pr]['AC'] = 1.0 if pr in CAT else 0
+        I[pr]['AC'] = 0.0
         I[pr]['UPC'] = 0.0
         for P, where in NOT_RUNNING.items():
             if pr in where: I[pr][P] = 0.0
@@ -126,7 +128,7 @@ if __name__ == '__main__':
     splits = [r['comp_split'] for r in rows if r['comp_split']]; cs = sum(splits) / len(splits)
     S = {'PP':avg['PP'],'PSOE':avg['PSOE'],'VOX':avg['VOX'],'FA':avg['SUMAR']*(1-cs),'COMP':avg['SUMAR']*cs,'PODEMOS':avg['PODEMOS'],
          'SALF':avg['SALF'],'ERC':avg['ERC'],'JUNTS':avg['JUNTS'],'BILDU':avg['BILDU'],'PNV':avg['PNV'],'BNG':avg['BNG'],'CC':avg['CC'],
-         'UPN':avg['UPN'],'AA':avg['AA'],'AC':avg['AC']}
+         'UPN':avg['UPN'],'AA':avg['AA'],'AC':0.0}
     sh, valid_p, S2 = project(S, I, B)
     seats = {}
     for pr in PROV:

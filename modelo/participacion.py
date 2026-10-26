@@ -10,7 +10,7 @@ abstención. Y cuando baja, baja sobre todo donde ya era media o baja (un despla
   · Baja: los que se quedan en casa son proporcionales a censo × t × (1 − t).
 En ambos casos votan (o votaban) como el resto de su mesa. Sumando las mesas de cada provincia sale el
 perfil de esos votantes, que se guarda como un multiplicador por partido sobre su voto en la provincia
-(×1 = como la media). Los partidos sin equivalente en 2023 (SALF, Aliança Catalana, Adelante Andalucía)
+(×1 = como la media). Los partidos sin equivalente en 2023 (SALF, Adelante Andalucía)
 quedan en ×1; los herederos de Sumar (Frente Amplio, Compromís, Podemos) toman el de Sumar.
 
 Uso: from participacion import profiles → ({prov: {'up': {...}, 'down': {...}}}, meta)
