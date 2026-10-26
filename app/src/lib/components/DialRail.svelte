@@ -67,7 +67,6 @@
     <span class="sel"><LibDrop bind:value={scope} options={scopeOpts} label="Circunscripción" filter /></span>
     si …
   </h1>
-  {#if !isES}<div class="tsrow"><ToSpain bind:scope /></div>{/if}
 
   <div class="gl">… el voto cambia así <small>puntos sobre el voto válido</small></div>
   <div class="dials" role="group" aria-label="Voto de cada partido">
@@ -114,11 +113,11 @@
     <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
     Restablecer {isES ? 'los ajustes nacionales' : BYID[scope].n}
   </button>
+  <ToSpain bind:scope />
 </div>
 
 <style>
   .rail { display: flex; flex-direction: column; gap: var(--s2); }
-  .tsrow { display: flex; justify-content: flex-end; margin-top: calc(-1 * var(--s2) + 4px); }
   .title { font-family: var(--font-ui); font-weight: 200; color: var(--ink); font-size: 24px; line-height: 36px; letter-spacing: -0.01em; margin: 0; }
   .sel { display: inline-flex; vertical-align: middle; }
   .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 3px 11px; font-weight: 200; }

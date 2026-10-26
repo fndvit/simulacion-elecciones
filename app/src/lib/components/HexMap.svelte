@@ -301,7 +301,7 @@
   .lostline { fill: none; stroke: var(--stroke); stroke-width: 5; stroke-linejoin: round; pointer-events: none; }
   .lostline.geo { stroke-width: 7; }
   :global(.hatchline) { stroke: #3a3a3a; stroke-width: 2.4; }
-  .tsrow { display: flex; margin-top: 10px; margin-bottom: -4px; }
+  .tsrow { display: flex; justify-content: flex-end; margin-top: 10px; margin-bottom: -4px; }
   .lk { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 5px; border-radius: 2px; }
   .lk.gk { border: 2.5px solid var(--stroke); box-sizing: border-box; background: none !important; }
   .lk.hk { background: repeating-linear-gradient(45deg, #3a3a3a 0 2px, transparent 2px 5px) !important; border: 2.5px solid var(--stroke); box-sizing: border-box; }
