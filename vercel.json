@@ -4,5 +4,5 @@
   "installCommand": "npm ci --prefix app",
   "buildCommand": "npm run build --prefix app",
   "outputDirectory": "app/build",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!_vercel/).*)", "destination": "/index.html" }]
 }
