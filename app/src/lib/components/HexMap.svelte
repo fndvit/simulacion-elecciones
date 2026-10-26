@@ -191,10 +191,9 @@
   {/if}
 </div>
 
-{#if scope !== 'ES'}<div class="tsrow c8w"><ToSpain bind:scope /></div>{/if}
-
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="mapwrap c8" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
+  {#if scope !== 'ES'}<div class="tsabs"><ToSpain bind:scope /></div>{/if}
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
     <defs>
       {#each GEO.cells as g, i}<clipPath id="vc{i}"><path d={g.d} /></clipPath>{/each}
@@ -301,7 +300,8 @@
   .lostline { fill: none; stroke: var(--stroke); stroke-width: 5; stroke-linejoin: round; pointer-events: none; }
   .lostline.geo { stroke-width: 7; }
   :global(.hatchline) { stroke: #3a3a3a; stroke-width: 2.4; }
-  .tsrow { display: flex; justify-content: flex-end; margin-top: 10px; margin-bottom: -4px; }
+  /* over the map's top-right corner (open sea), so showing it never moves the map */
+  .tsabs { position: absolute; top: 0; right: 0; z-index: 3; }
   .lk { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 5px; border-radius: 2px; }
   .lk.gk { border: 2.5px solid var(--stroke); box-sizing: border-box; background: none !important; }
   .lk.hk { background: repeating-linear-gradient(45deg, #3a3a3a 0 2px, transparent 2px 5px) !important; border: 2.5px solid var(--stroke); box-sizing: border-box; }
