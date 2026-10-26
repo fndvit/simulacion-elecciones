@@ -78,6 +78,7 @@
   <div class="cap"><b>{isES ? 'Congreso' : BYID[scope].n}</b> · {n} {n === 1 ? 'escaño' : 'escaños'}{isES ? ' · mayoría absoluta, 176' : ''}<span class="tsp"><ToSpain bind:scope /></span></div>
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="bars" class:hovering={hov} bind:this={barsEl} onpointerleave={() => (hov = null)}>
+    <span class="blab top" aria-hidden="true">23J</span>
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
       {#each segs as s (s.P)}{#if s.s}<span class:on={hov === s.P} style="width:{s.s * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
     </div>
@@ -87,6 +88,7 @@
     </svg>
     <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : "Escaños en tu escenario"}>
       {#each segs as s (s.P)}{#if s.f}<span class:on={hov === s.P} style="width:{s.f * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
+      <b class="blab in" aria-hidden="true">{projection ? 'Proyección' : 'Tu escenario'}</b>
     </div>
     {#if isES}<div class="maj" aria-hidden="true"></div>{/if}
     {#if hd}
@@ -98,7 +100,7 @@
       </div>
     {/if}
   </div>
-  <div class="note">Barra fina: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra gruesa: {projection ? 'la proyección' : 'tu escenario'}. En 2023, Frente Amplio es Sumar.</div>
+  <div class="note">Barra superior: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra inferior: {projection ? 'la proyección' : 'tu escenario'}. En 2023, Frente Amplio es Sumar.</div>
 
   {#if !projection}
   <div class="deltas" class:stack style="min-height:{Math.max(64, layout.rows * 62) + (stack ? 26 : 0)}px">
@@ -118,8 +120,8 @@
 
   {#if isES}
     <div class="sums">
-      <span>PP + Vox <b>{right}</b> {#if right >= 176}<span class="ok">mayoría</span>{:else}· a {176 - right} de la mayoría{/if}</span>
-      <span>Partidos de la investidura de 2023 <b>{inv}</b> {#if inv >= 176}<span class="ok">mayoría</span>{:else}· a {176 - inv}{/if}</span>
+      <span>PP + Vox <b>{right}</b> {#if right >= 176}<span class="ok">mayoría absoluta</span>{:else}· a {176 - right} de la mayoría absoluta{/if}</span>
+      <span>Partidos de la investidura de 2023 <b>{inv}</b> {#if inv >= 176}<span class="ok">mayoría absoluta</span>{:else}· a {176 - inv} de la mayoría absoluta{/if}</span>
     </div>
   {/if}
 </div>
@@ -142,7 +144,11 @@
   .hovering .bar span:not(.on) { opacity: 0.35; }
   .tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
   .bar.slim { height: 12px; opacity: 0.72; }
-  .bar.fat { height: 56px; }
+  .bar.fat { height: 56px; position: relative; }
+  /* small labels: 23J above the upper bar, the projection inside the lower one */
+  .blab { font-family: var(--font-ui); font-size: 11px; line-height: 1; pointer-events: none; }
+  .blab.top { position: absolute; left: 0; top: -16px; color: var(--muted); font-weight: 400; }
+  .blab.in { position: absolute; left: 8px; top: 7px; color: #fff; font-weight: 700; text-shadow: 0 0 3px rgb(0 0 0 / 0.35); }
   .maj { position: absolute; left: 50%; top: -6px; bottom: -6px; border-left: 2px dashed var(--stroke); }
   .maj::after { content: '176'; position: absolute; top: -18px; left: -12px; font-family: var(--font-ui); font-size: 11px; font-weight: 700; color: var(--ink); }
   .deltas { position: relative; margin-top: 6px; }
