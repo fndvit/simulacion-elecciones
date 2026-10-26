@@ -63,14 +63,14 @@
         }
       }
       HEX.byProv[id].forEach((h, i) => {
-        const k = parts[i], chg = mode === 'party' ? gain[i] : since ? since[i] : k !== BASE_HEX[id][i];
+        const k = parts[i], chg = mode === 'party' ? gain[i] || lost[i] : since ? since[i] : k !== BASE_HEX[id][i];
         const fill = mode === 'seats' ? (k ? PARTY[k as keyof typeof PARTY].c : 'var(--map-empty)') : share > 0 ? mixFill(PARTY[focusParty as keyof typeof PARTY].c, share / den) : 'var(--map-empty)';
         out.push({ key: id + ':' + i, id, gi: h.i, pts: poly(h, HEX.R), inner: poly(h, HEX.R * 0.86), fill, chg, gain: gain[i], lost: lost[i] });
       });
     }
     return out;
   });
-  const nChg = $derived(cells.filter((c) => c.chg).length);
+  const nChg = $derived(cells.filter((c) => (mode === 'party' ? c.gain : c.chg)).length);
   const nLost = $derived(cells.filter((c) => c.lost).length);
   const pName = $derived(PARTY[focusParty as keyof typeof PARTY]?.n ?? focusParty);
   const hb = HEX.canBox, gb = GEO.canBox;
@@ -162,7 +162,7 @@
       Escaños que gana {pName}&nbsp;({nChg})
     </span>
     <span class="map-heading">
-      <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><defs><pattern id="hatch-key" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#3a3a3a" stroke-width="1.6" /></pattern></defs><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="url(#hatch-key)" stroke="#3a3a3a" stroke-width="1" /></svg>
+      <svg width="16" height="16" viewBox="-10 -10 20 20" aria-hidden="true"><defs><pattern id="hatch-key" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#3a3a3a" stroke-width="1.6" /></pattern></defs><polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4" fill="url(#hatch-key)" stroke="currentColor" stroke-width="3" /></svg>
       que pierde&nbsp;({nLost})
     </span>
   {:else}
@@ -176,7 +176,6 @@
     <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en tu escenario</button>
     <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compareSel = '2023')}>desde 2023</button>
   </div>{/if}
-  <span class="tsp"><ToSpain bind:scope /></span>
 </div>
 </div>
 
@@ -191,6 +190,8 @@
     <span>0 %<span class="ramp" style="background:linear-gradient(90deg, var(--map-empty), {PARTY[focusParty as keyof typeof PARTY].c})"></span>{Math.round(den * 100)} %</span>
   {/if}
 </div>
+
+{#if scope !== 'ES'}<div class="tsrow c8w"><ToSpain bind:scope /></div>{/if}
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="mapwrap c8" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
@@ -220,7 +221,8 @@
       {#if mode === 'party'}
         {#each cells as c (c.key)}
           {#if c.lost}
-            {#if t === 1}<polygon class="lostc" points={c.pts} />{:else}<path class="lostc" d={GEO.cells[c.gi].d} />{/if}
+            {#if t === 1}<polygon class="lostc" points={c.inner} /><polygon class="lostline" points={c.inner} />
+            {:else}<path class="lostc" d={GEO.cells[c.gi].d} /><path class="lostline geo" d={GEO.cells[c.gi].d} clip-path="url(#vc{c.gi})" />{/if}
           {/if}
         {/each}
       {/if}
@@ -296,11 +298,13 @@
   .lines { pointer-events: none; }
   .tnote { margin-top: 4px; color: var(--muted); }
   .lostc { fill: url(#hatch); stroke: none; pointer-events: none; }
+  .lostline { fill: none; stroke: var(--stroke); stroke-width: 5; stroke-linejoin: round; pointer-events: none; }
+  .lostline.geo { stroke-width: 7; }
   :global(.hatchline) { stroke: #3a3a3a; stroke-width: 2.4; }
-  .tsp { margin-left: auto; }
+  .tsrow { display: flex; margin-top: 10px; margin-bottom: -4px; }
   .lk { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 5px; border-radius: 2px; }
   .lk.gk { border: 2.5px solid var(--stroke); box-sizing: border-box; background: none !important; }
-  .lk.hk { background: repeating-linear-gradient(45deg, #3a3a3a 0 2px, transparent 2px 5px) !important; border: 1px solid #3a3a3a; box-sizing: border-box; }
+  .lk.hk { background: repeating-linear-gradient(45deg, #3a3a3a 0 2px, transparent 2px 5px) !important; border: 2.5px solid var(--stroke); box-sizing: border-box; }
   .pvl.geo { stroke-width: 1.2; stroke-linejoin: round; }
   .cal.geo { stroke-width: 5; stroke-linejoin: round; }
   .pvl { fill: none; stroke: var(--bg); stroke-width: 1.8; stroke-linecap: round; pointer-events: none; }
