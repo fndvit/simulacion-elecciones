@@ -20,6 +20,7 @@
   import VitLogo from './VitLogo.svelte';
   // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
   import logo350 from '$lib/assets/logo-350.svg?raw';
+  import cocina from '$lib/assets/cocina.webp?inline';
   const favicon = 'data:image/svg+xml,' + encodeURIComponent(logo350.replace(/viewBox="[^"]*"/, 'viewBox="0 -170.475 799.31 799.31"'));
   import ShareButton from './ShareButton.svelte';
   import { blank, run, historyEntries, BASE } from '$lib/model';
@@ -178,6 +179,7 @@
       <section class="sec" in:fade={{ duration: 300 }}>
         <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
         <p class="lede w">Pronto podrás explorar escenarios ya preparados para el 29 de noviembre. Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula</a> el tuyo.</p>
+        <figure class="cocina w"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /></figure>
       </section>
     {:else}
     {#if sim}
@@ -383,4 +385,6 @@
   @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; } .ti { width: 16px; height: 16px; }
     .mast.hero .brand :global(.vitlogo) { transform: translateY(10px) scale(1.3); }
     .h350 :global(svg) { height: 72px; } .h-title { font-size: 28px; line-height: 26px; } .h-tabs a { font-size: 12px; } .h-tabs .ti { width: 24px; height: 24px; } }
+  .cocina { margin: 32px auto 0; }
+  .cocina img { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; border-radius: 12px; }
 </style>
