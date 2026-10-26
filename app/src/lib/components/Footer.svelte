@@ -40,6 +40,7 @@
       <a href={href('/escenarios')}>Escenarios</a>
       <a href={href('/metodologia')}>Metodología</a>
       <a href={href('/quienes-somos')}>Quiénes somos</a>
+      <a href={href('/privacidad')}>Privacidad</a>
     </nav>
 
     <div class="col">
