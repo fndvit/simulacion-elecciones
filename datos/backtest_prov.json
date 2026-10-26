@@ -1,0 +1,66 @@
+{
+ "g2023": {
+  "res": {
+   "PP": {
+    "n": 52,
+    "sd_ccaa": 0.076,
+    "sd_prov": 0.047,
+    "rmse_pts": 3.03
+   },
+   "PSOE": {
+    "n": 52,
+    "sd_ccaa": 0.088,
+    "sd_prov": 0.023,
+    "rmse_pts": 2.83
+   },
+   "VOX": {
+    "n": 51,
+    "sd_ccaa": 0.113,
+    "sd_prov": 0.032,
+    "rmse_pts": 1.39
+   },
+   "SUM": {
+    "n": 52,
+    "sd_ccaa": 0.098,
+    "sd_prov": 0.053,
+    "rmse_pts": 1.43
+   }
+  },
+  "wrong": 18
+ },
+ "g2019n": {
+  "res": {
+   "PP": {
+    "n": 52,
+    "sd_ccaa": 0.051,
+    "sd_prov": 0.022,
+    "rmse_pts": 1.2
+   },
+   "PSOE": {
+    "n": 52,
+    "sd_ccaa": 0.071,
+    "sd_prov": 0.018,
+    "rmse_pts": 1.85
+   },
+   "VOX": {
+    "n": 52,
+    "sd_ccaa": 0.084,
+    "sd_prov": 0.028,
+    "rmse_pts": 1.43
+   },
+   "SUM": {
+    "n": 52,
+    "sd_ccaa": 0.069,
+    "sd_prov": 0.035,
+    "rmse_pts": 1.17
+   },
+   "CS": {
+    "n": 50,
+    "sd_ccaa": 0.066,
+    "sd_prov": 0.04,
+    "rmse_pts": 0.5
+   }
+  },
+  "wrong": 15
+ }
+}
