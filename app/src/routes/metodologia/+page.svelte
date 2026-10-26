@@ -252,8 +252,10 @@
     </p>
     <p>
       <strong>Aliança Catalana</strong> no se presenta a estas elecciones (lo anunció el 5 de octubre de 2026) y no entra en la proyección.
-      La mayoría de las encuestas no le daba cifra propia; en las pocas que sí, su voto se reparte como estima el Centre d'Estudis
-      d'Opinió para unas generales: un 23 % a Junts, un 22 % a Vox, y el resto queda en «otros».
+      La mayoría de las encuestas no le daba cifra propia. En las pocas que sí, repartimos su voto según lo publicado sobre el
+      último barómetro del Centre d'Estudis d'Opinió, que no difunde esa tabla: un 23 % a Junts y un 22 % a Vox, según el diario
+      <em>Ara</em>; el resto queda en «otros». Otras lecturas del mismo barómetro dan cifras algo distintas, pero el efecto en la media
+      es mínimo.
     </p>
     <p>
       Donde varios partidos van en una <strong>lista conjunta</strong>, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno. En la
