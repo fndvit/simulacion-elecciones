@@ -179,7 +179,7 @@
       <section class="sec" in:fade={{ duration: 300 }}>
         <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
         <p class="lede w">Pronto podrás explorar escenarios ya preparados para el 29 de noviembre. Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula</a> el tuyo.</p>
-        <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /></figure>
+        <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /><figcaption class="note">Ilustración @oyematias</figcaption></figure>
       </section>
     {:else}
     {#if sim}
@@ -387,4 +387,5 @@
     .h350 :global(svg) { height: 72px; } .h-title { font-size: 28px; line-height: 26px; } .h-tabs a { font-size: 12px; } .h-tabs .ti { width: 24px; height: 24px; } }
   .cocina { margin: 24px auto 0; max-width: 1200px; }
   .cocina img { display: block; width: 100%; height: auto; border-radius: 12px; }
+  .cocina figcaption { margin-top: 8px; text-align: right; }
 </style>
