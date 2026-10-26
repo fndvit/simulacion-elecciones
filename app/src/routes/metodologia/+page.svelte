@@ -96,7 +96,7 @@
       <strong>calculadora de supuestos</strong>: parte de la proyección y deja que cada cual mueva votos y vea qué pasa con los escaños.
     </p>
     <p>
-      El método sigue la escuela de FiveThirtyEight —el agregador de encuestas que lanzó Nate Silver en 2008—, adaptada al sistema
+      El método sigue la escuela de <a href="https://es.wikipedia.org/wiki/FiveThirtyEight" target="_blank" rel="noopener">FiveThirtyEight</a> —el agregador de encuestas que lanzó Nate Silver en 2008—, adaptada al sistema
       español: una <strong>media ponderada</strong> que da más peso a las encuestas recientes, grandes y de empresas demoscópicas que
       acertaron en 2023; una <strong>corrección del sesgo</strong> sistemático de cada empresa; un <strong>reparto por provincias</strong>
       según dónde ha sido más fuerte o más débil cada partido en las tres últimas generales, y la fórmula <strong>D'Hondt</strong> en cada
@@ -109,7 +109,7 @@
   <div class="prose well">
     <h2>Las <strong>encuestas</strong></h2>
     <p>
-      La materia prima es la tabla de sondeos publicados que mantiene la comunidad de Wikipedia en español para estas elecciones: es la
+      La materia prima es la <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">tabla de sondeos publicados</a> que mantiene la comunidad de Wikipedia en español para estas elecciones: es la
       recopilación pública más completa, cada fila cita la publicación de la que sale y cada cambio queda registrado con su autor y su
       fecha. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
       y se normaliza fila a fila: empresa y medio, fechas de campo, tamaño de la muestra, estimación de voto de cada partido en porcentaje
@@ -118,7 +118,7 @@
     <h3>Comprobación cruzada y aprobación</h3>
     <p>
       Lo que se descarga no entra directamente en la media. Primero se compara con la lista de encuestas ya aprobadas, y cada encuesta
-      nueva o cambiada se busca en la tabla de la <strong>Wikipedia en inglés</strong>, que mantienen en buena parte otras personas: si
+      nueva o cambiada se busca en la <a href="https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election" target="_blank" rel="noopener">tabla de la <strong>Wikipedia en inglés</strong></a>, que mantienen en buena parte otras personas: si
       PP, PSOE o Vox no coinciden (misma empresa, fin de campo con un día de margen), se marca. Después, <strong>una persona del equipo
       revisa</strong> las novedades —con el enlace a la fuente de cada una— y las aprueba o las corrige. Solo entonces se recalcula la
       media.{#if DATA.fuente?.wikipedia_es} Las encuestas aprobadas ahora salen de la <a href={DATA.fuente.wikipedia_es.url} target="_blank" rel="noopener">revisión
@@ -234,7 +234,7 @@
     <p>
       El índice final es el promedio ponderado de los tres. Si un partido no se presentó en una provincia en alguna de esas elecciones,
       ese año no cuenta para esa provincia y el índice se calcula con los otros dos: no haberse presentado no significa no tener
-      votantes. Por ejemplo, Vox en Santa Cruz de Tenerife en 2023.
+      votantes. Por ejemplo, <a href="https://rtvc.es/archivada-la-demanda-de-vox-por-el-23-j/" target="_blank" rel="noopener">Vox en Santa Cruz de Tenerife en 2023</a>.
     </p>
     <h3>Las familias de partidos</h3>
     <p>Entre 2019 y 2026 el espacio a la izquierda del PSOE se ha recompuesto. Cada partido de hoy hereda el perfil de sus antecesores:</p>
@@ -247,20 +247,20 @@
     </table>
     <p>
       Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
-      Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y sus candidatos van en las listas de ERC (acuerdo del 12 de octubre de 2026);
+      Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y sus candidatos van en las listas de ERC (<a href="https://www.elespanol.com/espana/politica/20261012/montero-rufian-pactan-podemos-no-presentara-cataluna-erc-pedira-voto-resto-espana/1003744417179_0.html" target="_blank" rel="noopener">acuerdo del 12 de octubre de 2026</a>);
       las encuestas ya cuentan ese voto dentro de ERC.
     </p>
     <p>
-      <strong>Aliança Catalana</strong> no se presenta a estas elecciones (lo anunció el 5 de octubre de 2026) y no entra en la proyección.
+      <strong>Aliança Catalana</strong> no se presenta a estas elecciones (<a href="https://www.eldebate.com/espana/cataluna/20261005/alianca-catalana-no-presentara-elecciones-generales-cuando-hagan-cataluna-me-avisais_466273.html" target="_blank" rel="noopener">lo anunció el 5 de octubre de 2026</a>) y no entra en la proyección.
       La mayoría de las encuestas no le daba cifra propia. En las pocas que sí, repartimos su voto según lo publicado sobre el
       último barómetro del Centre d'Estudis d'Opinió, que no difunde esa tabla: un 23 % a Junts y un 22 % a Vox, según el diario
-      <em>Ara</em>; el resto queda en «otros». Otras lecturas del mismo barómetro dan cifras algo distintas, pero el efecto en la media
+      <a href="https://en.ara.cat/politics/what-do-the-polls-for-the-spanish-elections-of-november-29-say_1_5874100.html" target="_blank" rel="noopener"><em>Ara</em></a>; el resto queda en «otros». Otras lecturas del mismo barómetro dan cifras algo distintas, pero el efecto en la media
       es mínimo.
     </p>
     <p>
       Donde varios partidos van en una <strong>lista conjunta</strong>, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno. En la
-      Comunitat Valenciana, Podemos va dentro de <strong>Compromís</strong> (Compromís-Front Valencià; en Alicante la lista la encabeza Podemos). En Canarias,
-      Frente Amplio y Podemos van en <strong>Unidad del Pueblo Canario</strong>, con Nueva Canarias e IU; el voto propio de Nueva Canarias, que no tiene
+      Comunitat Valenciana, Podemos va dentro de <strong>Compromís</strong> (<a href="https://www.eldiario.es/comunitat-valenciana/politica/maria-teresa-perez-encabezara-lista-compromis-front-valencia-alicante-29n_1_13600710.html" target="_blank" rel="noopener">Compromís-Front Valencià; en Alicante la lista la encabeza Podemos</a>). En Canarias,
+      Frente Amplio y Podemos van en <a href="https://www.eldiario.es/canariasahora/politica/acuerdo-historico-izquierda-canaria-suma-confluencia-llamara-unidad-pueblo-canario_1_13589265.html" target="_blank" rel="noopener"><strong>Unidad del Pueblo Canario</strong></a>, con Nueva Canarias e IU; el voto propio de Nueva Canarias, que no tiene
       historial separado en nuestros datos, queda en «otros», así que esa lista puede estar algo infravalorada.
     </p>
     <h3>El ajuste</h3>
@@ -284,7 +284,7 @@
     <p>
       Los escaños son los de la convocatoria: respecto a 2023, <strong>Madrid pasa de 37 a 38 y Cádiz de 9 a 8</strong>. En cada
       circunscripción se aplica la <strong>regla D'Hondt</strong> con la barrera legal del <strong>3 % del voto válido</strong> (el blanco
-      cuenta como válido), como fija la LOREG. Ceuta y Melilla eligen un diputado cada una. Como comprobación, el mismo código reproduce
+      cuenta como válido), como fija la <a href="https://www.boe.es/buscar/act.php?id=BOE-A-1985-11672" target="_blank" rel="noopener">LOREG</a>. Ceuta y Melilla eligen un diputado cada una. Como comprobación, el mismo código reproduce
       los repartos oficiales de abril de 2019, noviembre de 2019 y julio de 2023 en las 52 circunscripciones.
     </p>
     <h3>El último escaño</h3>
@@ -342,7 +342,7 @@
     <p>
       En el mapa <strong>cada celda es un escaño</strong>. Dentro de cada provincia, el territorio se divide en tantas celdas como
       diputados elige (un diagrama de Voronoi con puntos repartidos sobre la provincia), y cada celda toma el color del partido que gana
-      ese escaño. Los límites provinciales y autonómicos vienen de es-atlas (IGN). La vista de hexágonos es un cartograma con un hexágono
+      ese escaño. Los límites provinciales y autonómicos vienen de <a href="https://github.com/martgnz/es-atlas" target="_blank" rel="noopener">es-atlas</a> (IGN). La vista de hexágonos es un cartograma con un hexágono
       por escaño, siguiendo el <a href="https://www.ralphstraumann.ch/blog/2013/05/creating-a-hexagonal-cartogram/" target="_blank" rel="noopener">método de Ralph Straumann</a> que utilizó
       <em>The Guardian</em> en las elecciones generales británicas de 2015. «Escaños que cambian de manos» compara con 2023 en la proyección; en el simulador se puede comparar con la
       proyección o con 2023.
