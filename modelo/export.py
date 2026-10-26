@@ -12,7 +12,7 @@ def toS(a):
     return {'PP':a['PP'],'PSOE':a['PSOE'],'VOX':a['VOX'],'FA':a['SUMAR']*(1-cs),'COMP':a['SUMAR']*cs,'PODEMOS':a['PODEMOS'],'SALF':a['SALF'],
             'ERC':a['ERC'],'JUNTS':a['JUNTS'],'BILDU':a['BILDU'],'PNV':a['PNV'],'BNG':a['BNG'],'CC':a['CC'],'UPN':a['UPN'],'AA':a['AA'],'AC':a['AC']}
 S = toS(avg)
-sh, valid_p, S2 = project(S, I, B)
+sh, valid_p, S2 = project_lists(S, I, B)
 SHORT = {'Alacant/Alicante':'Alicante','Araba/Álava':'Álava','Castelló/Castellón':'Castellón','València/Valencia':'Valencia','Illes Balears':'Illes Balears'}
 geo = json.load(open(os.path.join(D, 'geo.json')))
 g23 = E['g2023']

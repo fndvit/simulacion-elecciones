@@ -19,7 +19,7 @@ import numpy as np
 
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'datos')
 ROWS = ['PSOE', 'SUMAR', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPN', 'VOX', 'PP', 'OTROS', 'ABST']
-COLS = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPN', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
+COLS = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPC', 'UPN', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST']
 # the same party on both sides (Sumar's heirs: FA, Compromís, Podemos)
 SAME = {'PSOE': ['PSOE'], 'SUMAR': ['FA', 'COMP', 'PODEMOS'], 'ERC': ['ERC'], 'BILDU': ['BILDU'], 'BNG': ['BNG'], 'AA': ['AA'], 'PNV': ['PNV'],
         'JUNTS': ['JUNTS'], 'CC': ['CC'], 'UPN': ['UPN'], 'VOX': ['VOX'], 'PP': ['PP'], 'OTROS': ['OTROS'], 'ABST': ['ABST']}

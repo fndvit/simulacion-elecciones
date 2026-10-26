@@ -1,6 +1,6 @@
 export type PartyKey =
   | 'PP' | 'PSOE' | 'VOX' | 'FA' | 'PODEMOS' | 'SALF' | 'COMP' | 'ERC' | 'JUNTS'
-  | 'BILDU' | 'PNV' | 'BNG' | 'CC' | 'UPN' | 'AA' | 'AC' | 'OTROS';
+  | 'BILDU' | 'PNV' | 'BNG' | 'CC' | 'UPC' | 'UPN' | 'AA' | 'AC' | 'OTROS';
 
 export interface Province {
   id: string; n: string; ca: string; seats: number; seats23: number; census: number;

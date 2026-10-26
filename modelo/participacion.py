@@ -23,7 +23,7 @@ ZIP = os.path.join(D, 'interior', '02202307_MESA.zip')
 NAT = {'000005': 'PP', '000002': 'PSOE', '000006': 'VOX', '000010': 'SUMAR', '000050': 'ERC', '000057': 'JUNTS', '000071': 'BILDU',
        '000075': 'PNV', '000065': 'BNG', '000031': 'CC', '000074': 'UPN'}
 # partido de 2026 → familia de 2023 de la que toma el perfil
-HEIR = {'PP': 'PP', 'PSOE': 'PSOE', 'VOX': 'VOX', 'FA': 'SUMAR', 'COMP': 'SUMAR', 'PODEMOS': 'SUMAR', 'ERC': 'ERC', 'JUNTS': 'JUNTS',
+HEIR = {'PP': 'PP', 'PSOE': 'PSOE', 'VOX': 'VOX', 'FA': 'SUMAR', 'COMP': 'SUMAR', 'PODEMOS': 'SUMAR', 'UPC': 'SUMAR', 'ERC': 'ERC', 'JUNTS': 'JUNTS',
         'BILDU': 'BILDU', 'PNV': 'PNV', 'BNG': 'BNG', 'CC': 'CC', 'UPN': 'UPN', 'OTROS': 'OTROS', 'BL': 'BLANK'}
 MIN_SHARE = 0.002      # por debajo, el partido es demasiado pequeño en la provincia para fiarse: ×1
 CLIP = (0.5, 2.0)

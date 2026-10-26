@@ -117,6 +117,16 @@
   function clear(e: MouseEvent) { if (!(e.target as Element).classList?.contains('hx')) { scope = 'ES'; tip = null; } }
   function lbl(id: string) { const h = HEX.byProv[id][0], g = GEO.cells[h.i].c; return { x: lerp(g[0], h.x), y: lerp(g[1], h.y) }; }
 
+  // joint lists on 29N, explained where they stand
+  const LIST_NOTE: Record<string, string> = {
+    '03': 'Compromís: lista conjunta con Podemos, que la encabeza en Alicante.',
+    '12': 'Compromís: lista conjunta con Podemos.',
+    '46': 'Compromís: lista conjunta con Podemos.',
+    '35': 'Unidad del Pueblo Canario: Nueva Canarias, Podemos, IU y Sumar.',
+    '38': 'Unidad del Pueblo Canario: Nueva Canarias, Podemos, IU y Sumar.',
+    '08': 'Podemos no se presenta: apoya a ERC.', '17': 'Podemos no se presenta: apoya a ERC.',
+    '25': 'Podemos no se presenta: apoya a ERC.', '43': 'Podemos no se presenta: apoya a ERC.'
+  };
   function pick(id: string) { scope = scope === id ? 'ES' : id; tip = null; }
   function move(e: MouseEvent, id: string) {
     const b = wrapEl.getBoundingClientRect();
@@ -248,6 +258,7 @@
         <div>{PARTY[k as keyof typeof PARTY].n}: <b>{pct(v / tipData.r.valid)}</b>{#if Math.abs(v / tipData.r.valid - bs) > 0.0005} ({pct(bs)} en la proyección){/if}</div>
       {/each}
       <div>Participación: <b>{pct(tipData.r.turnout)}</b></div>
+      {#if LIST_NOTE[tipData.p.id]}<div class="tnote">{LIST_NOTE[tipData.p.id]}</div>{/if}
       {#if tipData.r.last && tipData.r.chal}<div>Último escaño: <b>{PARTY[tipData.r.last.k as keyof typeof PARTY].n}</b>; {PARTY[tipData.r.chal.k as keyof typeof PARTY].n} lo gana con {fmtN(tipData.r.chal.need)} votos más.</div>{/if}
     </div>
   {/if}
@@ -283,6 +294,7 @@
   .hx.chg { stroke: var(--stroke); stroke-width: 5; stroke-linejoin: round; }
   .hx.chg.geo { stroke-width: 7; }
   .lines { pointer-events: none; }
+  .tnote { margin-top: 4px; color: var(--muted); }
   .lostc { fill: url(#hatch); stroke: none; pointer-events: none; }
   :global(.hatchline) { stroke: #3a3a3a; stroke-width: 2.4; }
   .tsp { margin-left: auto; }

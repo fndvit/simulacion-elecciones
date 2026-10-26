@@ -16,7 +16,7 @@
   const opts = [{ value: 'ES', label: 'toda España' }, ...[...PROV].sort((a, b) => sortEs(a.n, b.n)).map((p) => ({ value: p.id, label: p.n }))];
 
   const GREY = '#a59c92';
-  const ORDER = ['PSOE', 'SUMAR', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPN', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST'];
+  const ORDER = ['PSOE', 'SUMAR', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'UPC', 'CC', 'UPN', 'AC', 'SALF', 'VOX', 'PP', 'OTROS', 'ABST'];
   const rank = (k: string) => { const i = ORDER.indexOf(k); return i < 0 ? 99 : i; };
   const nodeLabel = (n: string) => (n === 'SUMAR' ? 'Sumar' : partyLabel(n));
   const nodeColor = (n: string) => (n === 'ABST' ? GREY : n === 'SUMAR' ? partyColor('FA') : partyColor(n));

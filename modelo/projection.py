@@ -9,8 +9,12 @@ CAT = {'08','17','25','43'}; AND = {'04','11','14','18','21','23','29','41'}; VA
 # parties that do not stand somewhere on 29N (structural zero in the projection)
 # Podemos: no list in Catalonia; it backs ERC and has candidates on its lists (pact of 12 Oct 2026)
 NOT_RUNNING = {'PODEMOS': CAT}
+# joint lists on 29N: the source party's projected vote there goes to the list (source, list, provinces)
+CAN = {'35','38'}
+LISTS = [('PODEMOS', 'COMP', VAL),      # Compromís-Front Valencià (Compromís, Podemos, EUPV…); Podemos heads Alicante
+         ('FA', 'UPC', CAN), ('PODEMOS', 'UPC', CAN)]   # Unidad del Pueblo Canario (Nueva Canarias, Podemos, IU, Sumar)
 AA_W = {'11':1.6,'41':1.2,'29':1.0,'18':1.0,'14':0.9,'21':0.9,'23':0.8,'04':0.6}
-PARTIES = ['PP','PSOE','VOX','FA','COMP','PODEMOS','SALF','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN','AA','AC']
+PARTIES = ['PP','PSOE','VOX','FA','COMP','PODEMOS','SALF','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN','AA','AC','UPC']
 
 E = {e: load(e) for e in W_ELEC}
 PROV = sorted(E['g2023'])
@@ -64,6 +68,7 @@ def indices():
         I[pr]['SALF'] = 0.5 + 0.5 * I[pr]['VOX']
         I[pr]['AA'] = AA_W.get(pr, 0)
         I[pr]['AC'] = 1.0 if pr in CAT else 0
+        I[pr]['UPC'] = 0.0
         for P, where in NOT_RUNNING.items():
             if pr in where: I[pr][P] = 0.0
     return I, nat
@@ -95,6 +100,25 @@ def project(S, I, B, iters=200):
             t = sum(sh[pr].values()); target = 1 - B[pr]['blank']
             for P in sh[pr]: sh[pr][P] *= target / t
     return sh, valid_p, S
+
+def project_lists(S, I, B, iters=200):
+    """project(), then fold each joint list's member parties into it where they stand together, keeping every
+    national total: the moved votes leave the member's national target and join the list's"""
+    S = dict(S); S.setdefault('UPC', 0.0)
+    sh, vp, _ = project(S, I, B, iters)
+    V = sum(vp.values()); old = dict(S)
+    I = {pr: dict(I[pr]) for pr in I}
+    new = {pr: {} for pr in PROV}
+    for src, dst, where in LISTS:
+        m = sum(sh[pr][src] * vp[pr] for pr in where)
+        S[src] -= m / V * 100; S[dst] += m / V * 100
+        for pr in where:
+            new[pr][dst] = new[pr].get(dst, sh[pr].get(dst, 0)) + sh[pr][src]; new[pr][src] = 0.0
+    for P in {d for _, d, _ in LISTS} | {s for s, _, _ in LISTS}:
+        for pr in PROV:
+            if P in new[pr]: I[pr][P] = new[pr][P] / (S[P] / 100) if S[P] > 0 else 0.0
+            elif S[P] > 0 and old.get(P): I[pr][P] *= old[P] / S[P]
+    return project(S, I, B, iters)
 
 if __name__ == '__main__':
     I, nat = indices(); B = base_inputs()

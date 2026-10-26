@@ -245,6 +245,12 @@
       Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
       Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y apoya a ERC, con candidatos en sus listas (acuerdo del 12 de octubre de 2026).
     </p>
+    <p>
+      Donde varios partidos van en una <strong>lista conjunta</strong>, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno. En la
+      Comunitat Valenciana, Podemos va dentro de <strong>Compromís</strong> (Compromís-Front Valencià; en Alicante la lista la encabeza Podemos). En Canarias,
+      Frente Amplio y Podemos van en <strong>Unidad del Pueblo Canario</strong>, con Nueva Canarias e IU; el voto propio de Nueva Canarias, que no tiene
+      historial separado en nuestros datos, queda en «otros», así que esa lista puede estar algo infravalorada.
+    </p>
     <h3>El ajuste</h3>
     <p>
       Multiplicar la media nacional por el índice de cada provincia no basta: las provincias no suman exactamente la media nacional

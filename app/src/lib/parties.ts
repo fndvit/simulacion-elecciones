@@ -14,17 +14,18 @@ export const PARTY: Record<PartyKey, { n: string; c: string; statewide?: boolean
   PNV: { n: 'PNV', c: '#0aa04b' },
   BNG: { n: 'BNG', c: '#6a9bca' },
   CC: { n: 'CC', c: '#e0b000' },
+  UPC: { n: 'Unidad P. Canario', c: '#a3528c' },
   UPN: { n: 'UPN', c: '#2a52be' },
   AA: { n: 'Adelante And.', c: '#45b37a' },
   AC: { n: 'Aliança Cat.', c: '#3f7f9f' },
   OTROS: { n: 'Otros', c: '#b9b3aa' }
 };
 /** by national size — sliders, table */
-export const ORDER: PartyKey[] = ['PP', 'PSOE', 'VOX', 'FA', 'PODEMOS', 'SALF', 'ERC', 'JUNTS', 'BILDU', 'PNV', 'COMP', 'BNG', 'AA', 'AC', 'CC', 'UPN'];
+export const ORDER: PartyKey[] = ['PP', 'PSOE', 'VOX', 'FA', 'PODEMOS', 'SALF', 'ERC', 'JUNTS', 'BILDU', 'PNV', 'COMP', 'BNG', 'AA', 'AC', 'CC', 'UPC', 'UPN'];
 /** by bloc — seat bar, map legend: PSOE far left … PP far right */
-export const BLOC: PartyKey[] = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'CC', 'UPN', 'AC', 'SALF', 'VOX', 'PP'];
+export const BLOC: PartyKey[] = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'BILDU', 'BNG', 'AA', 'PNV', 'JUNTS', 'UPC', 'CC', 'UPN', 'AC', 'SALF', 'VOX', 'PP'];
 /** parties that voted for the 2023 investiture (Sumar ≈ FA + Compromís + Podemos) */
-export const INVEST23: PartyKey[] = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'JUNTS', 'BILDU', 'PNV', 'BNG', 'CC'];
+export const INVEST23: PartyKey[] = ['PSOE', 'FA', 'COMP', 'PODEMOS', 'ERC', 'JUNTS', 'BILDU', 'PNV', 'BNG', 'CC', 'UPC'];
 
 export const partyLabel = (k: string) => (k === 'ABST' ? 'Abstención' : k === 'OTROS' ? 'Otros y blanco' : (PARTY[k as PartyKey]?.n ?? k));
 export const partyColor = (k: string) => PARTY[k as PartyKey]?.c ?? '#b9b3aa';
