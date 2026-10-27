@@ -386,8 +386,10 @@
        handle shows. The page above scrolls on its own, so every change is seen at once. The history (the
        right rail on desktop) is the sheet's second tab; sharing stays in the title bar. */
     .sim .rail.left { display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 35;
-      height: 25dvh; max-height: none; overflow: hidden; background: var(--bg); border-radius: 16px 16px 0 0;
-      box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.18); transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+      height: 25dvh; max-height: none; overflow: hidden; border-radius: 16px 16px 0 0;
+      /* glass, as the floating headings: the page shows through, blurred */
+      background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12); transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .sim .rail.left.big { height: calc(100dvh - 56px); }
     .sim .rail.right { display: none; }
     .sim .center { grid-row: 1; }
