@@ -51,8 +51,9 @@
   // in-page jump without touching the hash (the router lives there)
   function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const entries = $derived(historyEntries(st));
-  // phones: the controls live in a bottom sheet (open or folded) with two tabs, controls and history
-  let sheetOpen = $state(true);
+  // phones: the controls live in a bottom sheet (a quarter of the screen, or expanded to almost all of it)
+  // with two tabs, controls and history
+  let sheetBig = $state(false);
   let sheetTab = $state<'ctl' | 'hist'>('ctl');
 
   // ── hero (Proyección only) ───────────────────────────────────────────────────────────────────────
@@ -154,7 +155,6 @@
 <header class="mast" class:instant class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
   <nav class="tabs" aria-label="Secciones" bind:this={headTabs} inert={!tabsUp}>{@render tablinks()}</nav>
-  {#if sim}<div class="share-top" transition:fade={{ duration: 200 }}><ShareButton {entries} {st} cur={scen} /></div>{/if}
 </header>
 
 {#if heroOn}
@@ -173,19 +173,22 @@
 
 {#if tab !== 'page'}
 <div class="scn" class:sim>
-  <aside class="rail left" class:folded={!sheetOpen} aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
+  <aside class="rail left" class:big={sheetBig} aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
     <!-- phones only: the sheet's handle and tabs -->
     <div class="sheet-head">
-      <button type="button" class="sheet-fold" aria-expanded={sheetOpen} aria-label={sheetOpen ? 'Plegar los controles' : 'Desplegar los controles'} onclick={() => (sheetOpen = !sheetOpen)}>
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <button type="button" class="sheet-fold" aria-expanded={sheetBig} aria-label={sheetBig ? 'Reducir los controles' : 'Ampliar los controles'} onclick={() => (sheetBig = !sheetBig)}>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </button>
       <div class="sheet-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={sheetTab === 'ctl'} class:on={sheetTab === 'ctl'} onclick={() => { sheetTab = 'ctl'; sheetOpen = true; }}>Ajustes</button>
-        <button type="button" role="tab" aria-selected={sheetTab === 'hist'} class:on={sheetTab === 'hist'} onclick={() => { sheetTab = 'hist'; sheetOpen = true; }}>Paso a paso{#if entries.length} <span class="sheet-n">{entries.length}</span>{/if}</button>
+        <button type="button" role="tab" aria-selected={sheetTab === 'ctl'} class:on={sheetTab === 'ctl'} onclick={() => (sheetTab = 'ctl')}>Ajustes</button>
+        <button type="button" role="tab" aria-selected={sheetTab === 'hist'} class:on={sheetTab === 'hist'} onclick={() => (sheetTab = 'hist')}>Paso a paso{#if entries.length} <span class="sheet-n">{entries.length}</span>{/if}</button>
       </div>
     </div>
     <div class="rin sheet-body" class:off={sheetTab !== 'ctl'}><DialRail bind:scope bind:st cur={scen} bind:focusParty /></div>
-    <div class="rin sheet-body sheet-hist" class:off={sheetTab !== 'hist'}><HistoryRail {entries} bind:st cur={scen} /></div>
+    <div class="rin sheet-body sheet-hist" class:off={sheetTab !== 'hist'}>
+      <div class="sheet-share"><ShareButton {entries} {st} cur={scen} /></div>
+      <HistoryRail {entries} bind:st cur={scen} />
+    </div>
   </aside>
 
   <main class="center">
@@ -269,7 +272,6 @@
   .soon em { margin-right: -2px; }
   .soon:not(.on) { opacity: 0.55; }
   .soon em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
-  .share-top { display: none; }
 
   /* page grid: rail · gap · centre · gutter · rail. In the projection the rail tracks are 0 and the
      rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
@@ -373,11 +375,9 @@
   @media (max-width: 1100px) {
     :global(:root) { --nav-h: 92px; }
     .tabs { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 22px; overflow-x: auto; scrollbar-width: none; }
-    .share-top { margin-left: auto; }
   }
   /* small screens: one column, as the atlas below 900 px */
   @media (max-width: 900px) {
-    .share-top { display: block; }
     .share-rail { display: none; }
     .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6) { max-width: none; }
     .scn, .scn.sim { grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; transition: none; }
@@ -386,18 +386,17 @@
        handle shows. The page above scrolls on its own, so every change is seen at once. The history (the
        right rail on desktop) is the sheet's second tab; sharing stays in the title bar. */
     .sim .rail.left { display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 35;
-      height: 36dvh; max-height: none; overflow: hidden; background: var(--bg); border-radius: 16px 16px 0 0;
+      height: 25dvh; max-height: none; overflow: hidden; background: var(--bg); border-radius: 16px 16px 0 0;
       box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.18); transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .sim .rail.left.folded { height: calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .sim .rail.left.big { height: calc(100dvh - 56px); }
     .sim .rail.right { display: none; }
     .sim .center { grid-row: 1; }
     /* room under the page (footer included) so nothing stays hidden behind the sheet */
-    :global(body:has(.scn.sim)) { padding-bottom: 36dvh; }
-    :global(body:has(.scn.sim .rail.left.folded)) { padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)); }
+    :global(body:has(.scn.sim)) { padding-bottom: 25dvh; }
     .sheet-head { display: flex; align-items: center; gap: 10px; flex: none; height: 48px; padding: 0 12px; border-bottom: 1px solid var(--line); }
     .sheet-fold { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: var(--panel); color: var(--ink); cursor: pointer; }
     .sheet-fold svg { transition: transform 0.3s ease; }
-    .folded .sheet-fold svg { transform: rotate(180deg); }
+    .big .sheet-fold svg { transform: rotate(180deg); }
     .sheet-tabs { display: flex; gap: 4px; padding: 2px; border-radius: var(--radius); background: var(--panel); }
     .sheet-tabs button { font-family: var(--font-ui); font-size: 14px; line-height: 22px; font-weight: 400; padding: 2px 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
     .sheet-tabs button.on { background: var(--highlight); color: var(--hl-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
@@ -405,7 +404,10 @@
     .rail.left .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
     .sheet-hist { display: block; }
     .sim .center :global(.sec.intro) { display: none; }
-    .sheet-body.off, .folded .sheet-body { display: none; }
+    .sheet-body.off { display: none; }
+    .sheet-share { margin-bottom: 16px; }
+    .sheet-share :global(.share) { width: 100%; justify-content: center; padding: 10px 14px; }
+    .sheet-share :global(.lbl) { display: inline; }
     .left .rin, .right .rin { width: auto; padding-right: 0; }
     .center { grid-template-columns: minmax(0, 1fr); }
     .center :global(.sec > .w6), .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }

@@ -24,7 +24,7 @@
       {/each}
     </ol>
   {:else}
-    <p class="hempty">Mueve los controles de la izquierda: cada ajuste aparecerá aquí con los escaños que mueve por sí solo, frente a la proyección.</p>
+    <p class="hempty">Mueve los controles<span class="desk"> de la izquierda</span>: cada ajuste aparecerá aquí con los escaños que mueve por sí solo, frente a la proyección.</p>
   {/if}
 </div>
 
@@ -42,4 +42,5 @@
   .himpact .zero { color: var(--muted); background: var(--panel); font-weight: 400; }
   .hx { align-self: flex-start; background: none; border: 0; padding: 0; font-family: var(--font-ui); font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; }
   .hempty { font-family: var(--font-ui); font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0; font-weight: 400; }
+  @media (max-width: 900px) { .desk { display: none; } }
 </style>
