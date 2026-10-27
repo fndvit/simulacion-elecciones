@@ -202,7 +202,7 @@
       </section>
     {:else}
     {#if sim}
-    <section class="sec intro">
+    <section class="sec simintro">
         <p class="lede deck w6">Personaliza <strong>la proyección de nuestro modelo</strong>: cambia el voto de cada partido y la participación, en toda España o provincia a provincia, mira cómo se mueven los 350 escaños y <strong>comparte tu escenario</strong>.</p>
       <p class="updated w6">Datos actualizados a {longDate(DATA.today)}</p>
     </section>
@@ -403,7 +403,7 @@
     .sheet-n { margin-left: 4px; display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: var(--bg); font-size: 11px; line-height: 18px; font-weight: 700; text-align: center; }
     .rail.left .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
     .sheet-hist { display: block; }
-    .sim .center :global(.sec.intro) { display: none; }
+    .sim .center :global(.sec.simintro) { display: none; }
     .sheet-body.off { display: none; }
     .sheet-share { margin-bottom: 16px; }
     .sheet-share :global(.share) { width: 100%; justify-content: center; padding: 10px 14px; }

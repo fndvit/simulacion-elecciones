@@ -24,7 +24,7 @@
       {/each}
     </ol>
   {:else}
-    <p class="hempty">Mueve los controles<span class="desk"> de la izquierda</span>: cada ajuste aparecerá aquí con los escaños que mueve por sí solo, frente a la proyección.</p>
+    <p class="hempty">Mueve los controles<span class="desk">{' '}de la izquierda</span>: cada ajuste aparecerá aquí con los escaños que mueve por sí solo, frente a la proyección.</p>
   {/if}
 </div>
 
