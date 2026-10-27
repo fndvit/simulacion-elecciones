@@ -31,6 +31,8 @@
       <div class="col-title">Contacto</div>
       <div>Karma Peiró</div>
       <a href="mailto:karma@fundaciovit.org">karma@fundaciovit.org</a>
+      <a class="sep" href={href('/quienes-somos')}>Quiénes somos</a>
+      <a href={href('/privacidad')}>Privacidad</a>
     </div>
 
     <nav class="col links" aria-label="Mapa web">
@@ -39,8 +41,6 @@
       <a href={href('/simula')}>Simula</a>
       <a href={href('/escenarios')}>Escenarios</a>
       <a href={href('/metodologia')}>Metodología</a>
-      <a href={href('/quienes-somos')}>Quiénes somos</a>
-      <a href={href('/privacidad')}>Privacidad</a>
     </nav>
 
     <div class="col">
@@ -75,6 +75,7 @@
   .col-title { color: #a9a3a5; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
   .col a { color: inherit; text-decoration: none; }
   .col a:hover { color: #fff; text-decoration: underline; }
+  .col .sep { margin-top: 14px; }
   .social { display: flex; align-items: center; gap: 24px; margin-top: 2px; }
   .social a { display: inline-flex; color: #f7f4ef; }
   .social a:hover { color: #fff; text-decoration: none; opacity: 0.8; }
