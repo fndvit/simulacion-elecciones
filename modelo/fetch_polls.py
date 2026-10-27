@@ -41,12 +41,25 @@ def log(*a):
     print(*a, file=sys.stderr)
 
 
-UA = {'User-Agent': 'simulador-29n/1.0 (datos electorales; contacto: fndvit)'}
+# Wikimedia's API limits (since 2026) depend on how the client identifies itself: a request without a proper
+# User-Agent (name/version plus a URL or e-mail to contact) counts as unidentified and gets ~10 requests per
+# minute per IP — on GitHub's shared runners that limit is used up by others, hence the HTTP 429 errors.
+UA = {'User-Agent': 'TresCincuentaBot/1.1 (https://trescincuenta.es; karma@fundaciovit.org) python-urllib'}
 
 
-def _get(url):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
-        return json.load(r)
+def _get(url, tries=6):
+    """GET + JSON; on HTTP 429/503 waits what the server asks (Retry-After) and tries again"""
+    import time, urllib.error
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 503) or i == tries - 1:
+                raise
+            wait = e.headers.get('Retry-After')
+            wait = int(wait) if wait and wait.isdigit() else 0
+            time.sleep(max(wait, 5 * 2 ** i))
 
 
 def fetch_page(page=PAGE, lang='es'):
@@ -94,13 +107,19 @@ def grid(table):
             if not tds: break
             td = tds.pop(0)
             txt = cell_text(td) if td.tag == 'td' else td
-            span_c, span_r = int(td.get('colspan', 1)), int(td.get('rowspan', 1))
+            span_c, span_r = _span(td.get('colspan')), _span(td.get('rowspan'))
             for k in range(span_c):
                 out[col + k] = (txt, True)
                 if span_r > 1: carry[col + k] = (txt, span_r - 1)
             col += span_c
         rows.append([out[i] for i in sorted(out)])
     return rows
+
+
+def _span(v):
+    """colspan/rowspan as browsers read it: digits at the start, anything else (empty, junk) counts as 1"""
+    m = re.match(r'\s*(\d+)', v or '')
+    return max(1, int(m.group(1))) if m else 1
 
 
 def header_parties(table):

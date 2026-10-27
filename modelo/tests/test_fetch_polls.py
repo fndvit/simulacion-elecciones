@@ -42,6 +42,13 @@ def test_sources():
     assert by[('EM-Analytics/Electomanía', dt.date(2026, 1, 3))]['src'] == ''          # no footnote → empty
 
 
+def test_empty_spans():
+    # an editor left rowspan="" in the table (October 2026): browsers read it as 1, so must we
+    assert F._span('') == 1 and F._span(None) == 1 and F._span('3') == 3 and F._span(' 2;') == 2 and F._span('x') == 1
+    from lxml import html as LH
+    t = LH.fromstring('<table><tr><td rowspan="">a</td><td colspan="">b</td></tr><tr><td>c</td><td>d</td></tr></table>')
+    assert len(F.grid(t)) == 2
+
 if __name__ == '__main__':
     for name, fn in list(globals().items()):
         if name.startswith('test_'): fn(); print('ok', name)
