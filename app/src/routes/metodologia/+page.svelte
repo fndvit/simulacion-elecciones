@@ -130,8 +130,7 @@
       «CIS (Ateneo del Dato)»…) no entran en la media: son las mismas entrevistas, y sumarlas daría a una sola encuesta el peso de varias.
     </p>
     <p>
-      Los datos de Wikipedia se publican con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>;
-      la lista de encuestas que usamos, que se deriva de ellos, se comparte en las mismas condiciones en el repositorio del proyecto.
+      Los datos de Wikipedia se publican con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>.
     </p>
     <h3>Sumar, Frente Amplio y Compromís</h3>
     <p>
