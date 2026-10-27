@@ -2,6 +2,7 @@
   // Metodología: the whole method, step by step, with the live numbers the model uses today
   // (pollster ratings, house effects, weights). After the atlas's «De dónde vienen los datos».
   import PageHead from '$lib/components/PageHead.svelte';
+  import ScrollX from '$lib/components/ScrollX.svelte';
   import { DATA } from '$lib/data';
   import { PARTY } from '$lib/parties';
   import { fmtN, dec, longDate } from '$lib/format';
@@ -151,13 +152,13 @@
       El peso de cada encuesta se calcula combinando cuatro factores. Ninguno descarta encuestas: las viejas, pequeñas o de empresas que fallaron
       cuentan menos, pero cuentan.
     </p>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <caption>Peso de una encuesta = recencia × muestra × valoración × frecuencia</caption>
       <thead><tr><th>Factor</th><th>Fórmula</th><th>Qué hace</th></tr></thead>
       <tbody>
         {#each weights as w}<tr><td class="k">{w.k}</td><td class="mono nowrap">{w.f}</td><td>{w.d}</td></tr>{/each}
       </tbody>
-    </table>
+    </table></ScrollX>
     <p>
       Para cada partido, la media es el promedio de sus estimaciones con esos pesos, ya corregidas del sesgo de cada empresa (ver abajo).
       La línea del gráfico de la proyección repite el cálculo semana a semana con lo que se sabía en cada fecha. La tabla de
@@ -170,14 +171,14 @@
       en PP, PSOE, Vox y Sumar. El multiplicador es <code>(error medio de todas ÷ error de la empresa)²</code>, acotado entre 0,6 y 1,4:
       las que más acertaron pesan hasta un 40 % más; las que más fallaron, un 40 % menos.
     </p>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <caption>Valoración · error en las generales de 2023 y multiplicador</caption>
       <thead><tr><th>Empresa</th><th class="r">Error medio (puntos)</th><th class="r">Multiplicador</th></tr></thead>
       <tbody>
         {#each ratings as r}<tr><td>{r.f}</td><td class="r num">{dec(r.mae)}</td><td class="r num"><span class="bar" style="width:{Math.round(r.w * 40)}px"></span>{dec(r.w)}</td></tr>{/each}
         <tr><td class="muted">Sin historial en 2023</td><td class="r num muted">–</td><td class="r num"><span class="bar" style="width:34px"></span>0,85</td></tr>
       </tbody>
-    </table>
+    </table></ScrollX>
   </div>
 
   <!-- ── house effects ─────────────────────────────────────────────────── -->
@@ -193,7 +194,7 @@
       donde <code>k</code> es el número de encuestas de la empresa. Con 4 encuestas se aplica la mitad; con 36, el 90 %. El efecto se
       resta a cada estimación antes de promediar.
     </p>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <caption>Efecto de la casa hoy · puntos por encima (+) o por debajo (−) del resto · empresas con 5 encuestas o más</caption>
       <thead><tr><th>Empresa</th><th class="r">Encuestas</th>{#each HE_P as p}<th class="r">{heLab[p]}</th>{/each}</tr></thead>
       <tbody>
@@ -201,7 +202,7 @@
           <tr><td>{h.f}</td><td class="r num muted">{h.n}</td>{#each HE_P as p}<td class="r num" class:pos={(h.v[p] ?? 0) >= 0.5} class:neg={(h.v[p] ?? 0) <= -0.5}>{sgn(h.v[p])}</td>{/each}</tr>
         {/each}
       </tbody>
-    </table>
+    </table></ScrollX>
   </div>
 
   <!-- ── national average today ────────────────────────────────────────── -->
@@ -223,13 +224,13 @@
       el <strong>perfil territorial</strong> de cada partido: su fuerza relativa en cada circunscripción, es decir, su porcentaje allí
       dividido por su porcentaje en toda España. Un partido con índice 1,5 en una provincia saca allí un 50 % más que su media nacional.
     </p>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <caption>Elecciones que forman el perfil territorial</caption>
       <thead><tr><th>Elección</th><th class="r">Peso</th></tr></thead>
       <tbody>
         {#each Object.entries(DATA.wElec) as [e, w]}<tr><td>{ELEC[e] ?? e}</td><td class="r num">{dec(w, 2)}</td></tr>{/each}
       </tbody>
-    </table>
+    </table></ScrollX>
     <p>
       El índice final es el promedio ponderado de los tres. Si un partido no se presentó en una provincia en alguna de esas elecciones,
       ese año no cuenta para esa provincia y el índice se calcula con los otros dos: no haberse presentado no significa no tener
@@ -237,13 +238,13 @@
     </p>
     <h3>Las familias de partidos</h3>
     <p>Entre 2019 y 2026 el espacio a la izquierda del PSOE se ha recompuesto. Cada partido de hoy hereda el perfil de sus antecesores:</p>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <caption>Continuidad de los partidos</caption>
       <thead><tr><th>Partido en 2026</th><th>En 2023</th><th>En 2019</th></tr></thead>
       <tbody>
         {#each lineage as l}<tr><td class="k">{l.k}</td><td>{l.e23}</td><td>{l.e19}{#if l.note}<div class="muted small">{l.note}</div>{/if}</td></tr>{/each}
       </tbody>
-    </table>
+    </table></ScrollX>
     <p>
       Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
       Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y sus candidatos van en las listas de ERC (<a href="https://www.elespanol.com/espana/politica/20261012/montero-rufian-pactan-podemos-no-presentara-cataluna-erc-pedira-voto-resto-espana/1003744417179_0.html" target="_blank" rel="noopener">acuerdo del 12 de octubre de 2026</a>);
@@ -387,12 +388,12 @@
   <!-- ── sources ───────────────────────────────────────────────────────── -->
   <div class="prose well">
     <h2>Fuentes</h2>
-    <table class="tbl">
+    <ScrollX><table class="tbl">
       <thead><tr><th>Dato</th><th>Fuente</th><th>Actualización</th></tr></thead>
       <tbody>
         {#each sources as s}<tr><td class="k">{s.q}</td><td>{#if s.u}<a href={s.u} target="_blank" rel="noopener">{s.s}</a>{:else}{s.s}{/if}</td><td class="muted nowrap">{s.d}</td></tr>{/each}
       </tbody>
-    </table>
+    </table></ScrollX>
   </div>
 
   <!-- ── cite ──────────────────────────────────────────────────────────── -->
@@ -442,7 +443,6 @@
   .tbl td.neg { color: #b3261e; font-weight: 700; }
   .tbl a { color: var(--fg); }
   .bar { display: inline-block; height: 8px; margin-right: 8px; border-radius: 2px; background: var(--fg); opacity: 0.55; vertical-align: middle; }
-  @media (max-width: 600px) { .tbl { display: block; overflow-x: auto; } }
 
   .avg { display: flex; flex-direction: column; gap: 6px; margin: var(--s1) 0 var(--s2); font-family: var(--font-ui); font-size: 14px; }
   .avg .row { display: grid; grid-template-columns: 130px minmax(0, 1fr) 64px; align-items: center; gap: 10px; }

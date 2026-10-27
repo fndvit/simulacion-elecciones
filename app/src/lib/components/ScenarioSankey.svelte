@@ -4,6 +4,7 @@
   // constituency. The constituency picker is shared with the map, the controls and the last seat.
   import LibDrop from './LibDrop.svelte';
   import ToSpain from './ToSpain.svelte';
+  import { isTouch, dismiss, tipStyle } from '$lib/touch';
   import { PROV, DATA } from '$lib/data';
   import { partyColor, partyLabel } from '$lib/parties';
   import { transfers } from '$lib/model';
@@ -100,8 +101,10 @@
   let host = $state<HTMLDivElement>();
   let box = $state<HTMLDivElement>();
   let datum = $state<LinkTip | NodeTip | null>(null);
-  let tx = $state(0), ty = $state(0), tw = $state(0);
-  function tmove(e: PointerEvent) { if (!box) return; const r = box.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; tw = r.width; }
+  // set once the figure is drawn: drops the tooltip and the highlight (tap elsewhere or scroll on a phone)
+  let closeTip = $state(() => { datum = null; });
+  let tx = $state(0), ty = $state(0), tw = $state(0), th = $state(0);
+  function tmove(e: PointerEvent) { if (!box) return; const r = box.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; tw = r.width; th = r.height; }
   let figW = $state(560);
   const NS = 'http://www.w3.org/2000/svg';
 
@@ -145,7 +148,7 @@
       if (!f) continue;
       path.style.cursor = 'pointer'; path.style.transition = 'fill-opacity 0.12s ease';
       path.addEventListener('pointerenter', () => { clearTimeout(timer); timer = setTimeout(() => { datum = { kind: 'link', from: f.from, to: f.to, votes: f.votes }; paint((q) => q === path); }, 120); });
-      path.addEventListener('pointerleave', () => { clearTimeout(timer); datum = null; paint(null); });
+      path.addEventListener('pointerleave', (e) => { if (isTouch(e)) return; clearTimeout(timer); datum = null; paint(null); });
     }
     // hover on a party's name: its flows stay lit, the rest dim, and the tooltip lists where its votes go
     // (2023 side) or where they come from (projection side)
@@ -157,10 +160,14 @@
         if (!n) return;
         t.style.cursor = 'pointer';
         const mine = (q: SVGPathElement) => { const f = info(q); return !!f && (side === 'source' ? f.a : f.b) === n.key; };
-        t.addEventListener('pointerenter', () => { clearTimeout(timer); datum = model.party(n.key, side); paint(mine); t.style.fontWeight = '700'; });
-        t.addEventListener('pointerleave', () => { datum = null; paint(null); t.style.fontWeight = ''; });
+        t.addEventListener('pointerenter', () => { clearTimeout(timer); for (const o of svg.querySelectorAll<SVGTextElement>('g[aria-label="text"] text')) o.style.fontWeight = ''; datum = model.party(n.key, side); paint(mine); t.style.fontWeight = '700'; });
+        t.addEventListener('pointerleave', (e) => { if (isTouch(e)) return; datum = null; paint(null); t.style.fontWeight = ''; });
       });
     });
+    closeTip = () => {
+      clearTimeout(timer); datum = null; paint(null);
+      for (const o of svg.querySelectorAll<SVGTextElement>('g[aria-label="text"] text')) o.style.fontWeight = '';
+    };
     return () => { clearTimeout(timer); fig.remove(); };
   });
 </script>
@@ -169,13 +176,13 @@
 <h2 class="hd w stickyui">Transferencia de voto <strong>de 2023 a la proyección</strong> en <span class="sel"><LibDrop bind:value={scope} options={opts} label="Ámbito de la transferencia" filter /></span></h2>
 <p class="lede w">Este diagrama estima cómo podría moverse el voto del 23J. El modelo parte de lo que responden los encuestados del barómetro del CIS sobre qué votaron entonces y qué votarían hoy, y ajusta esos trasvases para que cuadren con el resultado de 2023 y con nuestra proyección. Hay que cogerlo con cautela: es una única encuesta, la gente tiende a recordar mal su historial electoral, y con los partidos pequeños hay tan pocos encuestados que nos apoyamos más en supuestos que en sus respuestas. Aunque lo parezca, no muestra cambios de voto individuales, sino la combinación de trasvases más coherente con la encuesta y con la proyección.</p>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerleave={() => (datum = null)}>
+<div class="sankey c7" bind:this={box} onpointermove={tmove} onpointerdown={tmove} onpointerleave={(e) => { if (!isTouch(e)) datum = null; }} use:dismiss={closeTip}>
   {#if scope !== 'ES'}<div class="tsrow"><ToSpain bind:scope /></div>{/if}
   <div class="ends" aria-hidden="true"><b>Resultados 23J</b><b>Proyección 29N</b></div>
   <div class="fig" bind:this={host} bind:clientWidth={figW}
     role="img" aria-label="Transferencias de voto de 2023 a la proyección"></div>
   {#if datum}
-    <div class="tip" style="left:{tx}px;top:{ty}px;transform:translate({tx > tw - 264 ? 'calc(-100% - 14px)' : '14px'}, 12px)">
+    <div class="tip" style={tipStyle(tx, ty, tw, th, 264)}>
       {#if datum.kind === 'link'}
         <h4>{datum.from} → {datum.to}</h4>
         <div>Votos: <b>{fmtN(datum.votes)}</b></div>

@@ -6,6 +6,7 @@
   // gaps in the page colour (thin / wide). Click a constituency to tune it.
   import LibDrop from './LibDrop.svelte';
   import ToSpain from './ToSpain.svelte';
+  import { isTouch, dismiss, tipStyle } from '$lib/touch';
   import { BYID } from '$lib/data';
   import { PARTY, BLOC, ORDER } from '$lib/parties';
   import { HEX, GEO, VIEWBOX, BASE_HEX, hexParties, changedSince2023, poly, morphPath } from '$lib/hex';
@@ -30,7 +31,7 @@
   const shapes = $derived(moving ? HEX.H.map((h) => morphPath(h.i, t)) : null);
   const fadeGeo = $derived(Math.max(0, 1 - t * 4)), fadeHex = $derived(Math.max(0, t * 4 - 3));
   const lerp = (a: number, b: number) => a + (b - a) * t;
-  let tip = $state<{ id: string; x: number; y: number } | null>(null);
+  let tip = $state<{ id: string; x: number; y: number; w: number; h: number; touch: boolean } | null>(null);
   let wrapEl: HTMLDivElement;
 
   const den = $derived.by(() => {
@@ -113,7 +114,7 @@
   const balGeo = bboxOf(bal.flatMap((h) => GEO.cells[h.i].ring)), balHex = bboxOf(bal.map((h) => [h.x, h.y + HEX.R]));
   const keyTop = $derived((lerp(balGeo[3], balHex[3]) + 46 - VY) / VH * 100);
   // pointer over the sea, a gap or the inset box: no province is hovered any more
-  function offCell(e: MouseEvent) { if (tip && !(e.target as Element).classList?.contains('hx')) tip = null; }
+  function offCell(e: PointerEvent) { if (tip && !(e.target as Element).classList?.contains('hx')) tip = null; }
   function clear(e: MouseEvent) { if (!(e.target as Element).classList?.contains('hx')) { scope = 'ES'; tip = null; } }
   function lbl(id: string) { const h = HEX.byProv[id][0], g = GEO.cells[h.i].c; return { x: lerp(g[0], h.x), y: lerp(g[1], h.y) }; }
 
@@ -127,10 +128,11 @@
     '08': 'Podemos no se presenta: sus candidatos van en las listas de ERC.', '17': 'Podemos no se presenta: sus candidatos van en las listas de ERC.',
     '25': 'Podemos no se presenta: sus candidatos van en las listas de ERC.', '43': 'Podemos no se presenta: sus candidatos van en las listas de ERC.'
   };
-  function pick(id: string) { scope = scope === id ? 'ES' : id; tip = null; }
-  function move(e: MouseEvent, id: string) {
+  // a click selects the province; with a finger the tooltip stays open too (tap again to deselect)
+  function pick(id: string) { scope = scope === id ? 'ES' : id; if (!tip?.touch || scope === 'ES') tip = null; }
+  function move(e: PointerEvent, id: string) {
     const b = wrapEl.getBoundingClientRect();
-    tip = { id, x: Math.min(e.clientX - b.left, b.width - 270), y: e.clientY - b.top };
+    tip = { id, x: e.clientX - b.left, y: e.clientY - b.top, w: b.width, h: b.height, touch: isTouch(e) };
   }
   const tipData = $derived.by(() => {
     if (!tip) return null;
@@ -192,7 +194,7 @@
 </div>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="mapwrap c8" bind:this={wrapEl} role="presentation" onmouseleave={() => (tip = null)} onmousemove={offCell} onclick={clear}>
+<div class="mapwrap c8" bind:this={wrapEl} role="presentation" onpointerleave={(e) => { if (!isTouch(e)) tip = null; }} onpointermove={offCell} onclick={clear} use:dismiss={() => (tip = null)}>
   {#if scope !== 'ES'}<div class="tsabs"><ToSpain bind:scope /></div>{/if}
   <svg class="map" viewBox={VIEWBOX} role="img" aria-label="Mapa de los 350 escaños por circunscripción">
     <defs>
@@ -202,8 +204,8 @@
     <path class="canbox" d="M{cb[0]},{cb[1]}H{cb[2]}V{cb[3]}" />
     {#each cells as c (c.key)}
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-      {#if t === 1}<polygon class="hx" points={c.pts} style="fill:{dimmed(c)};stroke:{dimmed(c)}" onclick={() => pick(c.id)} onmousemove={(e) => move(e, c.id)} />
-      {:else}<path class="hx" d={shapes ? shapes[c.gi] : GEO.cells[c.gi].d} style="fill:{dimmed(c)};stroke:{dimmed(c)}" onclick={() => pick(c.id)} onmousemove={(e) => move(e, c.id)} />{/if}
+      {#if t === 1}<polygon class="hx" points={c.pts} style="fill:{dimmed(c)};stroke:{dimmed(c)}" onclick={() => pick(c.id)} onpointermove={(e) => move(e, c.id)} onpointerdown={(e) => move(e, c.id)} />
+      {:else}<path class="hx" d={shapes ? shapes[c.gi] : GEO.cells[c.gi].d} style="fill:{dimmed(c)};stroke:{dimmed(c)}" onclick={() => pick(c.id)} onpointermove={(e) => move(e, c.id)} onpointerdown={(e) => move(e, c.id)} />{/if}
     {/each}
     {#if fadeGeo > 0}
       <g style="opacity:{fadeGeo}" class="lines">{#each Object.values(GEO.prov) as d}<path class="pvl geo" {d} />{/each}<path class="cal geo" d={GEO.ca} /></g>
@@ -213,8 +215,8 @@
       {#each cells as c (c.key)}
         {#if c.chg}
           <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-          {#if t === 1}<polygon class="hx chg" points={c.inner} style="fill:{dimmed(c)}" onclick={() => pick(c.id)} onmousemove={(e) => move(e, c.id)} />
-          {:else}<path class="hx chg geo" d={GEO.cells[c.gi].d} clip-path="url(#vc{c.gi})" style="fill:{dimmed(c)}" onclick={() => pick(c.id)} onmousemove={(e) => move(e, c.id)} />{/if}
+          {#if t === 1}<polygon class="hx chg" points={c.inner} style="fill:{dimmed(c)}" onclick={() => pick(c.id)} onpointermove={(e) => move(e, c.id)} onpointerdown={(e) => move(e, c.id)} />
+          {:else}<path class="hx chg geo" d={GEO.cells[c.gi].d} clip-path="url(#vc{c.gi})" style="fill:{dimmed(c)}" onclick={() => pick(c.id)} onpointermove={(e) => move(e, c.id)} onpointerdown={(e) => move(e, c.id)} />{/if}
         {/if}
       {/each}
       {#if mode === 'party'}
@@ -251,7 +253,7 @@
   </div>
 
   {#if tipData && tip}
-    <div class="tip" style="left:{tip.x}px;top:{tip.y}px">
+    <div class="tip" style={tipStyle(tip.x, tip.y, tip.w, tip.h)}>
       <h4>{tipData.p.n} · {tipData.p.seats} {tipData.p.seats === 1 ? 'escaño' : 'escaños'}</h4>
       <div class="chips">{#each tipData.seats as P}<span class="chip"><i style="background:{PARTY[P].c}"></i>{PARTY[P].n} {tipData.r.seats[P]}</span>{/each}</div>
       {#each tipData.top as [k, v]}

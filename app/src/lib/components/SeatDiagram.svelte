@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ScrollX from './ScrollX.svelte';
   // Atlas SeatDiagram: D'Hondt quotient grid for one constituency, with the last (most fragile)
   // seat and the next in the queue outlined.
   import { PARTY, ORDER } from '$lib/parties';
@@ -15,7 +16,8 @@
 </script>
 
 <div class="diagram">
-  <div class="dgrid scrollx" style="grid-template-columns: 30px repeat({grid.cols.length}, minmax(54px, 1fr))">
+  <ScrollX>
+  <div class="dgrid" style="grid-template-columns: 30px repeat({grid.cols.length}, minmax(54px, 1fr))">
     <div></div>
     {#each grid.cols as P}<div class="chead" style="color:{PARTY[P].c}">{PARTY[P].n}</div>{/each}
     {#each grid.rows as d}
@@ -27,6 +29,7 @@
       {/each}
     {/each}
   </div>
+  </ScrollX>
   <p class="legend">
     <span class="c" style="background:var(--muted)"></span> escaño asignado ·
     <span class="c last"></span> último escaño ·

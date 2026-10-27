@@ -53,6 +53,8 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+/* nothing (a tooltip, a wide chart) may widen the page on a phone and leave an empty strip on the right */
+html, body { overflow-x: clip; }
 body {
   font-family: var(--font-body); font-weight: 300; color: var(--fg); background: var(--bg);
   font-variant-numeric: tabular-nums;

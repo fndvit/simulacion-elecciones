@@ -4,14 +4,21 @@
   import { PARTY } from '$lib/parties';
   import { fmtN, dec, longDate } from '$lib/format';
   import { href } from '$lib/nav';
+  import { isTouch, dismiss, tipStyle, NARROW } from '$lib/touch';
+  import ScrollX from './ScrollX.svelte';
 
   const KEYS = ['PP', 'PSOE', 'VOX', 'SUMAR', 'PODEMOS', 'SALF'] as const;
   const col = (k: string) => (k === 'SUMAR' ? PARTY.FA.c : PARTY[k as keyof typeof PARTY].c);
   const lab = (k: string) => (k === 'SUMAR' ? 'Sumar / FA + Compromís' : PARTY[k as keyof typeof PARTY].n);
+  // short labels at the end of the lines on phones, so the chart fits the screen
+  const short = (k: string) => (k === 'SUMAR' ? 'FA+C' : PARTY[k as keyof typeof PARTY].n);
 
   // the chart spans the full 12 columns: drawn at its real pixel width so text and marks keep their size
   let cw = $state(760);
-  const W = $derived(Math.max(560, Math.round(cw))), H = 340, m = { l: 34, r: 196, t: 12, b: 26 };
+  // on a phone it fits the screen (shorter end labels) so a finger can drag along it instead of scrolling it
+  const narrow = $derived(cw < NARROW);
+  const W = $derived(narrow ? Math.round(cw) : Math.max(560, Math.round(cw))), H = 340;
+  const m = $derived({ l: 34, r: narrow ? 84 : 196, t: 12, b: 26 });
   const SER = DATA.series;
   const t0 = new Date(SER[0].d).getTime(), t1 = new Date(DATA.today).getTime();
   const X = $derived((d: string) => m.l + ((new Date(d).getTime() - t0) / (t1 - t0)) * (W - m.l - m.r));
@@ -33,7 +40,7 @@
   let svgEl: SVGSVGElement;
   type Dot = { x: number; y: number; c: string; k: (typeof KEYS)[number]; p: (typeof DATA.polls)[number] };
   let hov = $state<{ kind: 'poll'; d: Dot } | { kind: 'avg'; i: number } | null>(null);
-  let hpos = $state({ x: 0, y: 0, left: true });
+  let hpos = $state({ x: 0, y: 0, w: 0, h: 0 });
   function hover(e: PointerEvent) {
     const m = svgEl.getScreenCTM(); if (!m) return;
     const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
@@ -46,7 +53,7 @@
       hov = { kind: 'avg', i };
     } else hov = null;
     const r = svgEl.getBoundingClientRect();
-    hpos = { x: e.clientX - r.left, y: Math.min(Math.max(e.clientY - r.top, 95), r.height - 60), left: e.clientX - r.left < r.width * 0.6 };
+    hpos = { x: e.clientX - r.left, y: Math.min(Math.max(e.clientY - r.top, 95), r.height - 60), w: r.width, h: r.height };
   }
   const recent = DATA.polls.slice(0, 30);
   const maxW = Math.max(...recent.map((p) => p.w));
@@ -56,13 +63,13 @@
 <h2 class="hd w" id="la-base">La base: <strong>media ponderada de encuestas</strong></h2>
 <p class="lede w">La proyección sigue la metodología de FiveThirtyEight, el modelo que popularizó Nate Silver en Estados Unidos, adaptada a las encuestas españolas: una media ponderada que premia las encuestas recientes, grandes y de las empresas que más acertaron.</p>
 <div class="cwrap c9" bind:clientWidth={cw}><div class="scrollx">
-  <svg bind:this={svgEl} onpointermove={hover} onpointerleave={() => (hov = null)} class="chart" viewBox="0 0 {W} {H}" width={W} height={H} role="img" aria-label="Evolución de la media de encuestas">
+  <svg bind:this={svgEl} onpointermove={hover} onpointerdown={hover} onpointerleave={(e) => { if (!isTouch(e)) hov = null; }} use:dismiss={() => (hov = null)} class="chart" viewBox="0 0 {W} {H}" width={W} height={H} role="img" aria-label="Evolución de la media de encuestas">
     {#each [0, 10, 20, 30, 40] as v}<line class="grid" x1={m.l} x2={W - m.r} y1={Y(v)} y2={Y(v)} /><text x={m.l - 6} y={Y(v) + 4} text-anchor="end">{v}</text>{/each}
-    {#each months as mo}<text x={mo.x} y={H - 6} text-anchor="middle">{mo.t}</text>{/each}
+    {#each months as mo, i}{#if !narrow || i % 3 === 0}<text x={mo.x} y={H - 6} text-anchor="middle">{mo.t}</text>{/if}{/each}
     {#each dots as d}<circle cx={d.x} cy={d.y} r="2" fill={d.c} opacity="0.28" />{/each}
     {#each lines as l}<path d={l.d} fill="none" stroke={col(l.k)} stroke-width="2.4" stroke-linejoin="round" />{/each}
     {#each KEYS as k}<circle cx={X(last.d)} cy={Y(last[k])} r="4" fill={col(k)} />{/each}
-    {#each labels as L}<text class="lbl" x={W - m.r + 10} y={L.y + 4} fill={col(L.k)}>{dec(L.v)} {lab(L.k)}</text>{/each}
+    {#each labels as L}<text class="lbl" x={W - m.r + 10} y={L.y + 4} fill={col(L.k)}>{dec(L.v)} {narrow ? short(L.k) : lab(L.k)}</text>{/each}
     {#if hov?.kind === 'avg'}
       {@const s = SER[hov.i]}
       <line class="rule" x1={X(s.d)} x2={X(s.d)} y1={m.t} y2={H - m.b} />
@@ -73,7 +80,7 @@
   </svg>
   </div>
   {#if hov}
-    <div class="tip" style="left:{hpos.x}px;top:{hpos.y}px;transform:translate({hpos.left ? '14px' : 'calc(-100% - 14px)'}, -50%)">
+    <div class="tip" style={tipStyle(hpos.x, hpos.y, hpos.w, hpos.h)}>
       {#if hov.kind === 'avg'}
         {@const s = SER[hov.i]}
         <h4>Media a {longDate(s.d)}</h4>
@@ -90,7 +97,7 @@
 </div>
 <p class="method w">Líneas: media ajustada semana a semana con los datos disponibles en cada fecha. Puntos: cada encuesta publicada, sin ajustar. % de voto válido.</p>
 
-<div class="scrollx c7">
+<ScrollX cls="c7">
   <table class="ptable">
     <thead><tr><th>Empresa demoscópica / medio</th><th>Campo</th><th>Muestra</th><th>PP</th><th>PSOE</th><th>Vox</th><th>Sumar/FA</th><th>Podemos</th><th>SALF</th><th style="text-align:left">Peso hoy</th></tr></thead>
     <tbody>
@@ -103,7 +110,7 @@
       {/each}
     </tbody>
   </table>
-</div>
+</ScrollX>
 
 <section class="meth w">
   <h3 class="hd">Cómo se calcula <strong>la proyección</strong></h3>

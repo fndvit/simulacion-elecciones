@@ -1,5 +1,6 @@
 <script lang="ts">
   import ToSpain from './ToSpain.svelte';
+  import { isTouch, dismiss, tipStyle } from '$lib/touch';
   // Atlas SeatBar: slim bar = 2023 result, fat bar = scenario, both ordered by bloc (PSOE far left … PP far
   // right) with the 176 majority line. Between them, a small Sankey links each party's 2023 seats to its
   // scenario seats, with the change since 2023 in small type. Under the fat bar, in big type, what YOUR
@@ -62,9 +63,9 @@
 
   // hover (either bar or the band between them): the party stands out, the rest fade, tooltip with its numbers
   let hov = $state<PartyKey | null>(null);
-  let tip = $state({ x: 0, y: 0 });
+  let tip = $state({ x: 0, y: 0, h: 0 });
   let barsEl: HTMLDivElement;
-  function over(e: PointerEvent, P: PartyKey) { const r = barsEl.getBoundingClientRect(); hov = P; tip = { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  function over(e: PointerEvent, P: PartyKey) { const r = barsEl.getBoundingClientRect(); hov = P; tip = { x: e.clientX - r.left, y: e.clientY - r.top, h: r.height }; }
   const hd = $derived.by(() => {
     if (!hov) return null;
     const v = scopeVotes(cur, scope), val = scopeValid(cur, scope);
@@ -77,22 +78,22 @@
 <div class="seatbar" bind:clientWidth={W}>
   <div class="cap"><b>{isES ? 'Congreso' : BYID[scope].n}</b> · {n} {n === 1 ? 'escaño' : 'escaños'}{isES ? ' · mayoría absoluta, 176' : ''}<span class="tsp"><ToSpain bind:scope /></span></div>
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="bars" class:hovering={hov} bind:this={barsEl} onpointerleave={() => (hov = null)}>
+  <div class="bars" class:hovering={hov} bind:this={barsEl} onpointerleave={(e) => { if (!isTouch(e)) hov = null; }} use:dismiss={() => (hov = null)}>
     <span class="blab top" aria-hidden="true">23J</span>
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
-      {#each segs as s (s.P)}{#if s.s}<span class:on={hov === s.P} style="width:{s.s * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
+      {#each segs as s (s.P)}{#if s.s}<span class:on={hov === s.P} style="width:{s.s * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)} onpointerdown={(e) => over(e, s.P)}></span>{/if}{/each}
     </div>
     <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label={projection ? "De los escaños de 2023 a los de la proyección" : "De los escaños de 2023 a los de tu escenario"}>
-      {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity={hov ? (hov === b.P ? 0.6 : 0.12) : 0.28} onpointermove={(e) => over(e, b.P)} />{/each}
+      {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity={hov ? (hov === b.P ? 0.6 : 0.12) : 0.28} onpointermove={(e) => over(e, b.P)} onpointerdown={(e) => over(e, b.P)} />{/each}
       {#each band as b (b.P)}{#if b.show}<text x={b.lx} y={BAND - 7} text-anchor="middle" class:up={b.d > 0} class:down={b.d < 0}>{sgnInt(b.d)}</text>{/if}{/each}
     </svg>
     <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : "Escaños en tu escenario"}>
-      {#each segs as s (s.P)}{#if s.f}<span class:on={hov === s.P} style="width:{s.f * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)}></span>{/if}{/each}
+      {#each segs as s (s.P)}{#if s.f}<span class:on={hov === s.P} style="width:{s.f * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)} onpointerdown={(e) => over(e, s.P)}></span>{/if}{/each}
       <b class="blab in" aria-hidden="true">{projection ? 'Proyección' : 'Tu escenario'}</b>
     </div>
     {#if isES}<div class="maj" aria-hidden="true"></div>{/if}
     {#if hd}
-      <div class="tip" style="left:{tip.x}px;top:{tip.y}px;transform:translate({tip.x > W - 270 ? 'calc(-100% - 14px)' : '14px'}, 14px)">
+      <div class="tip" style={tipStyle(tip.x, tip.y, W, tip.h * 3)}>
         <h4><span class="sw" style="background:{PARTY[hd.P].c}"></span>{PARTY[hd.P].n}</h4>
         <div>{projection ? 'Proyección' : 'Tu escenario'}: <b>{hd.seats} {hd.seats === 1 ? 'escaño' : 'escaños'}</b> · {pct(hd.share)} del voto</div>
         <div>En 2023: <b>{hd.s23}</b>{#if hd.seats - hd.s23} ({sgnInt(hd.seats - hd.s23)}){/if}</div>
