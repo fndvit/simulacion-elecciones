@@ -145,8 +145,10 @@
   .drow .pc { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
   .drow input { margin: 0; }
 
-  .reset { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; color: var(--fg); background: none; border: 0; padding: 0; cursor: pointer; }
-  .reset:disabled { opacity: 0.35; cursor: default; }
+  /* the same pill as «Compartir mi escenario» and «Ver toda España»; greyed out while there is nothing to undo */
+  .reset { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 16px 7px 12px; }
+  .reset:hover:not(:disabled) { opacity: 0.85; }
+  .reset:disabled { background: var(--panel); color: var(--muted); cursor: default; }
 
   @media (max-width: 820px) { .title, .sel :global(.word) { font-size: 24px; line-height: 34px; } }
   /* phones (inside the bottom sheet): tighter, so more dials fit in a third of the screen */
