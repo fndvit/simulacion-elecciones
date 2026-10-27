@@ -79,7 +79,7 @@
           <span class="pct">{#if Math.abs(now - d.baseShare) > 0.0005}{pct(d.baseShare)} → <b>{pct(now)}</b>{:else}<b>{pct(d.baseShare)}</b>{/if}</span>
         </label>
         <input id="v-{d.P}" type="range" min={d.min} max={d.max} step="0.1" value={v} oninput={(e) => setVote(d.P, +e.currentTarget.value)} />
-        <div class="ends"><span>−</span>{#if v}<span class="val" style={pos(v, d.min, d.max)}><b>{pp(v)} p. · {fmtSigned((v / 100) * valid0)} votos</b></span>{/if}<span>+</span></div>
+        <div class="ends"><span>−</span>{#if v}<span class="val" style={pos(v, d.min, d.max)}><b>{pp(v)} p.<span class="vv"> · {fmtSigned((v / 100) * valid0)} votos</span></b></span>{/if}<span>+</span></div>
       </div>
     {/each}
   </div>
@@ -91,7 +91,7 @@
       <span class="pct">{#if Math.abs(tNow - t0) > 0.0005}{pct(t0)} → <b>{pct(tNow)}</b>{:else}<b>{pct(t0)}</b>{/if}</span>
     </label>
     <input id="turn" type="range" min="-15" max={tMax} step="0.5" value={tv} oninput={(e) => setTurn(+e.currentTarget.value)} />
-    <div class="ends"><span>−</span>{#if tv}<span class="val" style={pos(tv, -15, tMax)}><b>{pp(tv)} p. · {fmtSigned((tv / 100) * census)} votantes</b></span>{/if}<span>+</span></div>
+    <div class="ends"><span>−</span>{#if tv}<span class="val" style={pos(tv, -15, tMax)}><b>{pp(tv)} p.<span class="vv"> · {fmtSigned((tv / 100) * census)} votantes</span></b></span>{/if}<span>+</span></div>
   </div>
   {#if !isES && st.turnNat}<p class="note">Los {pp(st.turnNat)} puntos fijados para toda España son aquí {pp(provTurnShift(BYID[scope], st.turnNat))}, según cuánto margen tiene la provincia; esto se suma.</p>{/if}
 
@@ -149,4 +149,17 @@
   .reset:disabled { opacity: 0.35; cursor: default; }
 
   @media (max-width: 820px) { .title, .sel :global(.word) { font-size: 24px; line-height: 34px; } }
+  /* phones (inside the bottom sheet): tighter, so more dials fit in a third of the screen */
+  @media (max-width: 900px) {
+    .rail { gap: 12px; }
+    .title, .sel :global(.word) { font-size: 20px; line-height: 28px; }
+    .gl { font-size: 16px; line-height: 22px; }
+    .dials { gap: 2px; }
+    .dlabel { font-size: 14px; line-height: 18px; }
+    .dial input[type='range'] { margin: 2px 0 0; height: 22px; }
+    .ends { height: 14px; font-size: 11px; line-height: 14px; }
+    .dist { gap: 2px; margin-top: -4px; }
+    .drow input { height: 22px; }
+    .vv { display: none; }   /* the vote count would run off the edge: points only */
+  }
 </style>

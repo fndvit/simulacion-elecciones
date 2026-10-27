@@ -51,6 +51,9 @@
   // in-page jump without touching the hash (the router lives there)
   function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const entries = $derived(historyEntries(st));
+  // phones: the controls live in a bottom sheet (open or folded) with two tabs, controls and history
+  let sheetOpen = $state(true);
+  let sheetTab = $state<'ctl' | 'hist'>('ctl');
 
   // ── hero (Proyección only) ───────────────────────────────────────────────────────────────────────
   // A dark intro with the big 350 lockup, the deck and the tabs. As in the atlas homepage, the title bar
@@ -170,8 +173,19 @@
 
 {#if tab !== 'page'}
 <div class="scn" class:sim>
-  <aside class="rail left" aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
-    <div class="rin"><DialRail bind:scope bind:st cur={scen} bind:focusParty /></div>
+  <aside class="rail left" class:folded={!sheetOpen} aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
+    <!-- phones only: the sheet's handle and tabs -->
+    <div class="sheet-head">
+      <button type="button" class="sheet-fold" aria-expanded={sheetOpen} aria-label={sheetOpen ? 'Plegar los controles' : 'Desplegar los controles'} onclick={() => (sheetOpen = !sheetOpen)}>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <div class="sheet-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={sheetTab === 'ctl'} class:on={sheetTab === 'ctl'} onclick={() => { sheetTab = 'ctl'; sheetOpen = true; }}>Ajustes</button>
+        <button type="button" role="tab" aria-selected={sheetTab === 'hist'} class:on={sheetTab === 'hist'} onclick={() => { sheetTab = 'hist'; sheetOpen = true; }}>Paso a paso{#if entries.length} <span class="sheet-n">{entries.length}</span>{/if}</button>
+      </div>
+    </div>
+    <div class="rin sheet-body" class:off={sheetTab !== 'ctl'}><DialRail bind:scope bind:st cur={scen} bind:focusParty /></div>
+    <div class="rin sheet-body sheet-hist" class:off={sheetTab !== 'hist'}><HistoryRail {entries} bind:st cur={scen} /></div>
   </aside>
 
   <main class="center">
@@ -185,7 +199,7 @@
       </section>
     {:else}
     {#if sim}
-    <section class="sec">
+    <section class="sec intro">
         <p class="lede deck w6">Personaliza <strong>la proyección de nuestro modelo</strong>: cambia el voto de cada partido y la participación, en toda España o provincia a provincia, mira cómo se mueven los 350 escaños y <strong>comparte tu escenario</strong>.</p>
       <p class="updated w6">Datos actualizados a {longDate(DATA.today)}</p>
     </section>
@@ -275,6 +289,8 @@
   .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
+  /* the sheet's handle, tabs and history copy only exist on phones */
+  .sheet-head, .sheet-hist { display: none; }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
 
   /* centre: the atlas 12-column grid (1262 px) */
@@ -366,10 +382,30 @@
     .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6) { max-width: none; }
     .scn, .scn.sim { grid-template-columns: 0px 0px minmax(0, 1fr) 0px 0px; transition: none; }
     .rail { display: none; }
-    .sim .rail { display: block; grid-column: 1 / -1; position: static; max-height: none; overflow: visible; }
-    .sim .rail.left { grid-row: 1; }
-    .sim .center { grid-row: 2; padding-top: var(--s3); }
-    .sim .rail.right { grid-row: 3; }
+    /* the controls: a sheet fixed to the bottom third of the screen, with its own scroll; folded, only its
+       handle shows. The page above scrolls on its own, so every change is seen at once. The history (the
+       right rail on desktop) is the sheet's second tab; sharing stays in the title bar. */
+    .sim .rail.left { display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 35;
+      height: 36dvh; max-height: none; overflow: hidden; background: var(--bg); border-radius: 16px 16px 0 0;
+      box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.18); transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .sim .rail.left.folded { height: calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .sim .rail.right { display: none; }
+    .sim .center { grid-row: 1; }
+    /* room under the page (footer included) so nothing stays hidden behind the sheet */
+    :global(body:has(.scn.sim)) { padding-bottom: 36dvh; }
+    :global(body:has(.scn.sim .rail.left.folded)) { padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .sheet-head { display: flex; align-items: center; gap: 10px; flex: none; height: 48px; padding: 0 12px; border-bottom: 1px solid var(--line); }
+    .sheet-fold { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: var(--panel); color: var(--ink); cursor: pointer; }
+    .sheet-fold svg { transition: transform 0.3s ease; }
+    .folded .sheet-fold svg { transform: rotate(180deg); }
+    .sheet-tabs { display: flex; gap: 4px; padding: 2px; border-radius: var(--radius); background: var(--panel); }
+    .sheet-tabs button { font-family: var(--font-ui); font-size: 14px; line-height: 22px; font-weight: 400; padding: 2px 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
+    .sheet-tabs button.on { background: var(--highlight); color: var(--hl-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+    .sheet-n { margin-left: 4px; display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: var(--bg); font-size: 11px; line-height: 18px; font-weight: 700; text-align: center; }
+    .rail.left .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+    .sheet-hist { display: block; }
+    .sim .center :global(.sec.intro) { display: none; }
+    .sheet-body.off, .folded .sheet-body { display: none; }
     .left .rin, .right .rin { width: auto; padding-right: 0; }
     .center { grid-template-columns: minmax(0, 1fr); }
     .center :global(.sec > .w6), .sim .center :global(.sec > .w), .sim .center :global(.sec > .w6), .sim .center :global(.sec > .c7), .sim .center :global(.sec > .c7w) { grid-column: 1 / -1; }
