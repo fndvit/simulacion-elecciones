@@ -62,7 +62,7 @@
     { q: 'Censo y escaños del 29N', s: 'Real decreto de convocatoria y censo electoral (incluidos los residentes en el extranjero)', u: '', d: 'Fijo' },
     { q: 'Valoración de las empresas', s: 'Último sondeo publicado por cada empresa antes del 23J de 2023, frente al resultado', u: '', d: 'Fijo' },
     { q: 'Límites provinciales', s: 'es-atlas (Instituto Geográfico Nacional)', u: 'https://github.com/martgnz/es-atlas', d: 'Fijo' },
-    { q: 'Cartograma de hexágonos', s: 'Utiliza el método de Ralph Straumann, hexágonos sobre la base de un algoritmo de difusión', u: 'https://www.ralphstraumann.ch/blog/2013/05/creating-a-hexagonal-cartogram/', d: 'Fijo' }
+    { q: 'Cartograma de hexágonos', s: 'Hexágonos sobre la base de un algoritmo de difusión, Ralph Straumann', u: 'https://www.ralphstraumann.ch/blog/2013/05/creating-a-hexagonal-cartogram/', d: 'Fijo' }
   ];
 
   const bibtex = `@misc{trescincuenta_29n,
@@ -351,12 +351,12 @@
 
   <!-- ── daily update ──────────────────────────────────────────────────── -->
   <div class="prose well">
-    <h2>Actualización diaria y <strong>respaldo</strong></h2>
+    <h2>Actualización diaria y <strong>verificación</strong></h2>
     <p>
-      Todo el proceso corre solo cada mañana (a las 07:17 UTC, las 08:17 en Madrid en invierno) en GitHub Actions, en dos partes. La
-      primera descarga y valida las encuestas y, si hay novedades, las propone para su aprobación. La segunda recalcula la media y la
-      proyección para la fecha del día con las encuestas aprobadas, las comprueba y publica la web; también se lanza al momento cuando se
-      aprueban encuestas nuevas. Solo se proponen descargas que superan estas comprobaciones:
+      Todo el proceso se ejecuta automáticamente en dos partes cada mañana a través de GitHub Actions. La primera descarga y valida las
+      encuestas y, si hay novedades, las propone para su aprobación. La segunda recalcula la media y la proyección con las encuestas
+      aprobadas, las comprueba y publica la web; también se lanza al momento cuando se aprueban encuestas nuevas. Solo se proponen
+      descargas que pasan estas comprobaciones:
     </p>
     <ul>
       <li>al menos 50 encuestas, y no más de un 10 % menos que la lista aprobada;</li>
@@ -368,13 +368,21 @@
     </p>
     <p>
       Si algo falla, la web sigue con el <strong>último día bueno</strong> (la fecha de «Datos actualizados» es la de esos datos) y se abre
-      un aviso para revisarlo a mano. Cada versión anterior de la lista aprobada se guarda con su fecha (las 30 últimas), además del historial completo del repositorio. Los microdatos del barómetro del CIS, que alimentan las transferencias de voto, se añaden a mano cada mes, cuando el CIS los publica.
+      un aviso para revisarlo a mano. Cada versión anterior de la lista aprobada se guarda con su fecha (las 30 últimas), además del historial completo del repositorio. Los microdatos del barómetro del CIS, que alimentan las transferencias de voto, se añaden independientemente, cuando el CIS los publica.
     </p>
   </div>
 
   <!-- ── limits ────────────────────────────────────────────────────────── -->
   <div class="prose well">
     <h2>Límites</h2>
+    <p>
+      Algunos recordamos cómo las proyecciones "fallaron estrepitosamente" en el <a href="https://www.theguardian.com/politics/2015/may/09/election-polls-made-three-key-errors" target="_blank" rel="noopener">Reino Unido en 2015</a>
+      —mientras trabajábamos en <em>The Guardian</em>—, en <a href="https://www.nytimes.com/interactive/2016/11/13/upshot/putting-the-polling-miss-of-2016-in-perspective.html" target="_blank" rel="noopener">Estados Unidos en 2016</a>,
+      o <a href="https://elpais.com/espana/elecciones-generales/2023-07-23/que-tal-lo-han-hecho-las-encuestas-juicio-y-reivindicacion.html" target="_blank" rel="noopener">en España en 2023</a>. No vamos a escribir aquí nada que no se sepa ya, porque buscando
+      la frase “Por qué fallan las encuestas” nos topamos con centenares de artículos periodísticos, académicos y despotriques. Las encuestas
+      no son infalibles, pero siguen siendo la mejor herramienta de la que disponemos para estimar la intención de voto, con métodos propios
+      de las ciencias sociales.
+    </p>
     <ul>
       <li><strong>Las encuestas pueden fallar todas a la vez.</strong> La media corrige el sesgo de cada empresa respecto a las demás, no el de todas respecto al resultado.</li>
       <li><strong>El perfil territorial es el del pasado.</strong> Si un partido crece o cae de forma desigual entre provincias, la proyección no lo ve hasta que lo vean las encuestas autonómicas, que no se usan.</li>
