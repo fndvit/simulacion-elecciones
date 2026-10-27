@@ -147,7 +147,7 @@
 <div class="map-top">
   <div class="toggle" role="group" aria-label="Cómo colorear el mapa">
     <button class:on={mode === 'seats'} aria-pressed={mode === 'seats'} onclick={() => (mode = 'seats')}>Escaños</button>
-    <button class:on={mode === 'party'} aria-pressed={mode === 'party'} onclick={() => (mode = 'party')}>Voto a un partido</button>
+    <button class:on={mode === 'party'} aria-pressed={mode === 'party'} onclick={() => (mode = 'party')}><span class="long">Voto a un partido</span><span class="short">Por partido</span></button>
   </div>
   {#if mode === 'party'}
     <span class="pdrop"><LibDrop bind:value={focusParty} options={ORDER.map((P) => ({ value: P as string, label: PARTY[P].n }))} label="Partido del mapa" /></span>
@@ -285,6 +285,14 @@
   .toggle.small button { font-size: 14px; line-height: 20px; padding: 2px 12px; border-radius: 999px; }
   .pdrop :global(.word) { font-size: 17px; line-height: 26px; padding: 2px 10px; }
   .pdrop :global(.opt) { font-size: 16px; }
+  .short { display: none; }
+  /* phones: shorter label and tighter buttons so both toggles share one line; the party picker goes below */
+  @media (max-width: 560px) {
+    .long { display: none; } .short { display: inline; }
+    .map-top { gap: 8px 8px; }
+    .map-top .toggle button { font-size: 14px; padding: 2px 8px; }
+    .map-top .pdrop { order: 3; flex-basis: 100%; }
+  }
   .map-heading { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--fg); }
   .mapwrap { position: relative; }
   .map { width: 100%; height: auto; display: block; }
