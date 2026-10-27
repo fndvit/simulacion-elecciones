@@ -125,13 +125,13 @@
       {DATA.fuente.wikipedia_es.revid}</a> de la Wikipedia en español, del {longDate(DATA.fuente.wikipedia_es.timestamp.slice(0, 10))}.{/if}
     </p>
     <p>
-      Los datos de Wikipedia se publican con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>;
-      la lista de encuestas que usamos, que se deriva de ellos, se comparte en las mismas condiciones en el repositorio del proyecto.
-    </p>
-    <p>
       El <strong>CIS</strong> cuenta una vez por barómetro, con su propia estimación, y su sesgo respecto a las demás empresas se corrige
       como el de cualquier otra. Las <strong>reestimaciones de sus microdatos</strong> que publican otras empresas («CIS (Target Point)»,
       «CIS (Ateneo del Dato)»…) no entran en la media: son las mismas entrevistas, y sumarlas daría a una sola encuesta el peso de varias.
+    </p>
+    <p>
+      Los datos de Wikipedia se publican con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>;
+      la lista de encuestas que usamos, que se deriva de ellos, se comparte en las mismas condiciones en el repositorio del proyecto.
     </p>
     <h3>Sumar, Frente Amplio y Compromís</h3>
     <p>
@@ -149,7 +149,7 @@
   <div class="prose well">
     <h2>La <strong>media ponderada</strong></h2>
     <p>
-      Cada encuesta pesa el producto de cuatro factores. Ninguno descarta encuestas: las viejas, pequeñas o de empresas que fallaron
+      El peso de cada encuesta se calcula combinando cuatro factores. Ninguno descarta encuestas: las viejas, pequeñas o de empresas que fallaron
       cuentan menos, pero cuentan.
     </p>
     <table class="tbl">
@@ -185,7 +185,7 @@
   <div class="prose well">
     <h2>El <strong>sesgo</strong> de cada empresa</h2>
     <p>
-      Algunas empresas dan sistemáticamente más (o menos) a un partido que el resto. Para medirlo, cada encuesta se compara con la
+      Algunas empresas dan sistemáticamente más (o menos) votos a un partido que el resto. Para medirlo, cada encuesta se compara con la
       media de las <strong>demás empresas</strong> en una ventana de ±21 días (ponderada por cercanía en el tiempo y tamaño de muestra).
       La desviación media de cada empresa con cada partido es su <strong>efecto de la casa</strong>.
     </p>

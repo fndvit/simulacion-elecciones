@@ -17,7 +17,7 @@
       rol: 'Dirección editorial',
       bio: [
         'Es cofundadora y directora de la Fundació ViT. Periodista especializada en tecnología desde 1995. Ha trabajado para <em>en.red.ando</em>, <em>La Vanguardia</em>, <em>Catalunya Ràdio</em>, <em>TV3</em> y <em>Nació Digital</em>, entre otros medios. Actualmente, también es profesora asociada a la UdG y la URL-Blanquerna.',
-        'Activista de datos: en las últimas dos décadas ha impulsado actividades para el conocimiento, análisis y concienciación del uso de los datos abiertos. En diferentes formatos: jornadas, workshops, hackathons o expediciones de datos. El objetivo siempre ha sido el mismo: que la ciudadanía ejerza su derecho de acceso a la información pública.'
+        'Activista de datos: en las últimas dos décadas ha impulsado actividades para el conocimiento, análisis y concienciación del uso de los datos abiertos. El objetivo siempre ha sido el mismo: que la ciudadanía ejerza su derecho de acceso a la información pública.'
       ],
       email: 'karma@fundaciovit.org',
       photo: karma
