@@ -208,7 +208,7 @@
     </section>
     {/if}
     <section class="sec">
-      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}Esto dicen <strong>las encuestas</strong> hoy.{/if}</h2>
+      <h2 class="hd w">{#if sim}Así quedaría <strong>el Congreso</strong> con tus cambios.{:else}¿Qué nos dicen hoy <strong>las encuestas</strong>?{/if}</h2>
       <div class="f"><SeatBar {cur} bind:scope projection={!sim} /></div>
     </section>
     <section class="sec">
