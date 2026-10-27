@@ -15,6 +15,8 @@ export default {
     adapter: adapter({ pages: 'build', assets: 'build', fallback: paths ? 'index.html' : undefined, strict: true }),
     output: { bundleStrategy: 'inline' },
     router: { type: paths ? 'pathname' : 'hash' },
-    paths: { relative: !paths }
+    paths: { relative: !paths },
+    // on Vercel, src/lib/assets is also published as is, so the share image has a fixed address (/og.png)
+    files: { assets: paths ? 'src/lib/assets' : 'static' }
   }
 };
