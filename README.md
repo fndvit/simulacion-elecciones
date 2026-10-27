@@ -61,3 +61,7 @@ La carpeta ya es un repositorio git con un primer commit en `main`. Para subirlo
 Nota: GitHub desactiva los workflows programados de un repositorio sin actividad durante 60 días. Como este hace un commit cada día que hay datos, no debería pasar; si pasa, se reactiva en la pestaña Actions.
 
 A mano: `pip install -r modelo/requirements.txt && REVISION_MD=/tmp/revision.md python3 modelo/actualizar.py && python3 modelo/export.py && python3 modelo/comprobar.py && cd app && npm run data && npm run build`.
+
+## Licencia
+
+El código y los datos propios del proyecto se publican con licencia **MIT** (ver `LICENSE`), © 2026 Fundació VIT, Visualització per a la Transparència. La excepción son las listas de encuestas que derivan de la Wikipedia (`datos/polls.csv`, `datos/polls2023_final.csv`, `datos/hist_polls.csv` y las copias de `datos/respaldo/`), que mantienen la licencia **CC BY-SA 4.0** de la fuente.
