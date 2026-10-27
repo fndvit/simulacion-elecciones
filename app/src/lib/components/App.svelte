@@ -287,7 +287,7 @@
     opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
   .rail.left { grid-column: 1; grid-row: 1; transform: translateX(-32px); }
   .rail.right { grid-column: 5; grid-row: 1; transform: translateX(32px); padding-top: 14px; }
-  .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); }
+  .left .rin { width: calc(3 * var(--c) + 2 * var(--g)); padding-bottom: 40px; }
   .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
@@ -403,7 +403,7 @@
     .sheet-tabs button { font-family: var(--font-ui); font-size: 14px; line-height: 22px; font-weight: 400; padding: 2px 12px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; }
     .sheet-tabs button.on { background: var(--highlight); color: var(--hl-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
     .sheet-n { margin-left: 4px; display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: var(--bg); font-size: 11px; line-height: 18px; font-weight: 700; text-align: center; }
-    .rail.left .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+    .rail.left .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px calc(56px + env(safe-area-inset-bottom, 0px)); }
     .sheet-hist { display: block; }
     .sim .center :global(.sec.simintro) { display: none; }
     .sheet-body.off { display: none; }
