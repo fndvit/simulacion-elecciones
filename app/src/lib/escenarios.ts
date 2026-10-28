@@ -73,7 +73,7 @@ const LIST: Escenario[] = [
   {
     slug: 'vivienda',
     date: '2026-10-28',
-    title: '¿Y si la vivienda moviera <strong>el voto joven</strong>?',
+    title: '¿Y si es <strong>la crisis de la vivienda</strong> —que desató la convocatoria electoral— lo que decide?',
     body: (c) => {
       const provs = listEs(VIVIENDA_HOT.map((id) => BYID[id].n));
       // the 2023 investiture parties against a PP + Vox pact, as under the seat bar
