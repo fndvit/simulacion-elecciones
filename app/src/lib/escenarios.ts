@@ -3,24 +3,46 @@
 //  · title and body are HTML (title takes <strong> for the bold half, as the section headings)
 //  · st: only what the scenario moves; the rest stays as in the projection (same shape as the simulator)
 import type { Scenario } from './types';
-import { blank } from './model';
+import { blank, run, BASE } from './model';
+import { PROV } from './data';
 
 export interface Escenario {
   slug: string;          // anchor (#slug) and key
   date: string;          // YYYY-MM-DD, publication date
   title: string;
   body: string;
-  st: Partial<Scenario>;
+  /** the adjustments, or a function that works them out from the day's projection (so the scenario
+   *  keeps its meaning when the polls move) */
+  st: Partial<Scenario> | (() => Partial<Scenario>);
+}
+
+/** Party P gives up, in each province where D'Hondt hands it the last seat, the fewest votes (to the tenth of a
+ *  point, as the simulator's controls) for that seat to go to someone else. The votes it loses go to the
+ *  other parties in proportion to their size, as any province adjustment in the simulator. */
+function sinUltimoEscano(P: string): Partial<Scenario> {
+  const prov: Scenario['prov'] = {};
+  for (const p of PROV) {
+    const b = BASE.prov[p.id];
+    if (b.last?.k !== P) continue;
+    const loses = (d: number) => (run({ ...blank(), prov: { [p.id]: { [P]: -d } } }).prov[p.id].seats[P] || 0) < (b.seats[P] || 0);
+    let lo = 0, hi = 100 * (b.votes[P] || 0) / b.valid;
+    if (!loses(hi)) continue;
+    for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (loses(m)) hi = m; else lo = m; }
+    let d = Math.ceil(hi * 10) / 10;
+    while (!loses(d)) d = Math.round(d * 10 + 1) / 10;
+    prov[p.id] = { [P]: -d };
+  }
+  return { prov };
 }
 
 const LIST: Escenario[] = [
   {
-    // PLACEHOLDER: layout test, to be replaced by the first real scenario
-    slug: 'borrador',
+    slug: 'vox-sin-ultimo-escano',
     date: '2026-10-28',
-    title: 'Título del escenario, <strong>en negrita la parte que importa</strong>',
-    body: 'Párrafo de presentación: la pregunta, de dónde salen los supuestos y qué conviene mirar en el resultado. Texto provisional para probar la maqueta.',
-    st: { nat: { PSOE: 1.5, PP: -1.5 }, turnNat: 2 }
+    // TEXT PENDING (Xaquín): headline and paragraph
+    title: '¿Y si Vox no se llevara <strong>el último escaño</strong>?',
+    body: '[Texto pendiente]',
+    st: () => sinUltimoEscano('VOX')
   },
   {
     // PLACEHOLDER: older scenario, to test the compact layout
@@ -41,4 +63,8 @@ const LIST: Escenario[] = [
 ];
 
 export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date));
-export const scenarioOf = (e: Escenario): Scenario => ({ ...blank(), ...JSON.parse(JSON.stringify(e.st)) });
+const cache = new Map<string, Scenario>();
+export const scenarioOf = (e: Escenario): Scenario => {
+  if (!cache.has(e.slug)) cache.set(e.slug, { ...blank(), ...JSON.parse(JSON.stringify(typeof e.st === 'function' ? e.st() : e.st)) });
+  return JSON.parse(JSON.stringify(cache.get(e.slug)));
+};
