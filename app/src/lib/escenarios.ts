@@ -97,6 +97,14 @@ const LIST: Escenario[] = [
     st: () => vivienda(75)
   },
   {
+    slug: 'periferia',
+    date: '2026-10-28',
+    // TEXT PENDING (Xaquín): headline and paragraphs
+    title: '¿Y si ERC, EH Bildu y el BNG <strong>tocan techo</strong>?',
+    body: '[Texto pendiente]',
+    st: () => periferia()
+  },
+  {
     // PLACEHOLDER: older scenario, to test the compact layout
     slug: 'borrador-2',
     date: '2026-10-21',
@@ -148,6 +156,39 @@ function vivienda(turnoutTo = 75): Partial<Scenario> {
   let lo = -20, hi = 30;
   for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (run({ ...blank(), turnNat: m, turnProv }).turnout * 100 < turnoutTo) lo = m; else hi = m; }
   return { turnNat: Math.round(hi * 10) / 10, turnProv, ...quarters() };
+}
+
+/** The periphery. Three adjustments, by province, worked out on the day's projection:
+ *   · ERC reaches ERC_TARGET % of the valid vote in Spain, taking the same share of the voters of the comuns'
+ *     list (Frente Amplio) and of the small parties («otros», where the CUP is) in each Catalan province;
+ *   · EH Bildu passes BILDU_TARGET votes between the Basque Country and Navarre;
+ *   · the BNG reaches BNG_TARGET votes in Galicia.
+ *  Bildu and BNG grow by the same proportion in each of their provinces, taking votes from all the other
+ *  parties in proportion to their size, as any province adjustment in the simulator. Points to the tenth. */
+const ERC_TARGET = 2.5, BILDU_TARGET = 400000, BNG_TARGET = 300000;
+const PERI = { CAT: ['08', '17', '25', '43'], EUS_NAV: ['01', '20', '48', '31'], GAL: ['15', '27', '32', '36'] };
+const shareOf = (id: string, k: string) => (100 * (BASE.prov[id].votes[k] || 0)) / BASE.prov[id].valid;
+const r1 = (x: number) => Math.round(x * 10) / 10;
+/** ERC takes a fraction phi of FA's and the small parties' voters in each Catalan province */
+function ercFrom(phi: number): Scenario['prov'] {
+  return Object.fromEntries(PERI.CAT.map((id) => {
+    const fa = shareOf(id, 'FA'), ot = shareOf(id, 'OTROS');
+    return [id, { ERC: r1(phi * (fa + ot)), FA: -r1(phi * fa), OTROS: -r1(phi * ot) }];
+  }));
+}
+/** party k grows by the same proportion in the provinces ids until it has `votes` votes there */
+function growTo(ids: string[], k: string, votes: number): Scenario['prov'] {
+  const at = (f: number) => Object.fromEntries(ids.map((id) => [id, { [k]: Math.ceil(shareOf(id, k) * (f - 1) * 10) / 10 }]));
+  const got = (f: number) => { const R = run({ ...blank(), prov: at(f) }); return ids.reduce((a, id) => a + (R.prov[id].votes[k] || 0), 0); };
+  let lo = 1, hi = 4;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (got(m) >= votes) hi = m; else lo = m; }
+  return at(hi);
+}
+export const PERIFERIA = { ERC_TARGET, BILDU_TARGET, BNG_TARGET, ...PERI };
+function periferia(): Partial<Scenario> {
+  let lo = 0, hi = 1;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; const R = run({ ...blank(), prov: ercFrom(m) }); if ((100 * R.votes.ERC) / R.valid >= ERC_TARGET) hi = m; else lo = m; }
+  return { prov: { ...ercFrom(hi), ...growTo(PERI.EUS_NAV, 'BILDU', BILDU_TARGET), ...growTo(PERI.GAL, 'BNG', BNG_TARGET) } };
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
