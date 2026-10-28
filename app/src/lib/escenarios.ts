@@ -17,9 +17,10 @@ export interface Escenario {
 }
 
 /** Party P gives up, in each province where D'Hondt hands it the last seat, the fewest votes (to the tenth of a
- *  point, as the simulator's controls) for that seat to go to someone else. The votes it loses go to the
- *  other parties in proportion to their size, as any province adjustment in the simulator. */
-function sinUltimoEscano(P: string): Partial<Scenario> {
+ *  point, as the simulator's controls) for that seat to go to someone else, as long as that takes no more than
+ *  `max` points (a loss within a poll's margin of error). The votes it loses go to the other parties in
+ *  proportion to their size, as any province adjustment in the simulator. */
+function sinUltimoEscano(P: string, max = 3): Partial<Scenario> {
   const prov: Scenario['prov'] = {};
   for (const p of PROV) {
     const b = BASE.prov[p.id];
@@ -30,6 +31,7 @@ function sinUltimoEscano(P: string): Partial<Scenario> {
     for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (loses(m)) hi = m; else lo = m; }
     let d = Math.ceil(hi * 10) / 10;
     while (!loses(d)) d = Math.round(d * 10 + 1) / 10;
+    if (d > max) continue;
     prov[p.id] = { [P]: -d };
   }
   return { prov };
@@ -42,7 +44,7 @@ const LIST: Escenario[] = [
     // TEXT PENDING (Xaquín): headline and paragraph
     title: '¿Y si Vox no se llevara <strong>el último escaño</strong>?',
     body: '[Texto pendiente]',
-    st: () => sinUltimoEscano('VOX')
+    st: () => sinUltimoEscano('VOX', 3)
   },
   {
     // PLACEHOLDER: older scenario, to test the compact layout
