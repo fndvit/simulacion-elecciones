@@ -1,5 +1,5 @@
 # Idealista, informes de precios de vivienda, septiembre de 2026 (provincia; Alicante y Castellón, filas provinciales de la Comunitat Valenciana)
-# tensionada = alquiler >= 13.5 €/m² al mes o venta >= 2900 €/m²
+# tensionada = alquiler >= 13.5 €/m² al mes o venta >= 2900 €/m²; o bien alquiler >= 11.8 y venta >= 2000 €/m²
 provincia,alquiler_eur_m2,alquiler_var_anual,venta_eur_m2,venta_var_anual,tensionada
 Madrid,21.6,5.7,5065.0,6.9,1
 Illes Balears,20.2,3.6,5593.0,4.1,1
@@ -11,11 +11,11 @@ Santa Cruz de Tenerife,15.3,4.5,3514.0,3.7,1
 Las Palmas,15.1,4.0,3113.0,10.4,1
 Valencia,14.2,5.0,2208.0,15.1,1
 Girona,13.9,7.3,2934.0,9.9,1
-Alicante,12.7,7.1,2767.0,7.8,0
-Sevilla,12.2,4.1,2080.0,14.7,0
-Álava,12.0,-4.0,2652.0,6.0,0
+Alicante,12.7,7.1,2767.0,7.8,1
+Sevilla,12.2,4.1,2080.0,14.7,1
+Álava,12.0,-4.0,2652.0,6.0,1
 Segovia,11.9,6.2,1601.0,12.7,0
-Cantabria,11.8,5.4,2408.0,14.6,0
+Cantabria,11.8,5.4,2408.0,14.6,1
 Zaragoza,11.7,9.7,1777.0,14.4,0
 Cádiz,11.6,5.2,2539.0,9.9,0
 Melilla,11.3,8.6,2086.0,4.0,0

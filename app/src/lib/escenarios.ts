@@ -98,21 +98,22 @@ const LIST: Escenario[] = [
 
 export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date));
 /** Housing. Provinces where housing is a hot issue: rent of 13.5 €/m² a month or more, or a sale price of
- *  2,900 €/m² or more, in Idealista's September 2026 reports (datos/vivienda_idealista_2026-09.csv; the INE
+ *  2,900 €/m² or more; and, a step below, rent of 11.8 €/m² or more with a sale price of 2,000 €/m² or more
+ *  (Alicante, Sevilla, Álava, Cantabria; not Segovia, cheap to buy), in Idealista's September 2026 reports (datos/vivienda_idealista_2026-09.csv; the INE
  *  housing price index rises between 9.5 % and 15.2 % a year in every region, so it is the price level that
  *  tells them apart). There:
- *   · young voters turn out more: 18–34 year olds, about a fifth of the census, close YOUTH_LIFT points of their
- *     turnout gap, i.e. YOUTH_SHARE × YOUTH_LIFT more points of turnout in the province;
+ *   · young voters turn out more: YOUTH_EXTRA more points of turnout in the province (18–34 year olds are
+ *     about a fifth of the census: as if their turnout rose some 25 points);
  *   · half of those young newcomers vote for the lists that carry Frente Amplio and Podemos (in Catalonia, the
  *     comuns' list; in the Valencian Community, with Compromís; in the Canaries, Unidad del Pueblo Canario);
  *     the other half, and everyone else who turns out, vote as newcomers usually do there.
  *  And overall turnout rises to 75 %, voting as newcomers usually do. */
-export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17'];
-const YOUTH_SHARE = 0.2, YOUTH_LIFT = 12;
+export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17', '03', '41', '01', '39'];
+const YOUTH_EXTRA = 5;
 const LEFT_LISTS = ['FA', 'PODEMOS', 'COMP', 'UPC'];
 function vivienda(turnoutTo = 75): Partial<Scenario> {
   const turnNat = Math.round((turnoutTo - 100 * BASE.turnout) * 10) / 10;
-  const extra = YOUTH_SHARE * YOUTH_LIFT;
+  const extra = YOUTH_EXTRA;
   const turnProv: Scenario['turnProv'] = {}, distProv: Scenario['distProv'] = {};
   for (const id of VIVIENDA_HOT) {
     const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
