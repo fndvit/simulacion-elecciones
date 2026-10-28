@@ -3,7 +3,7 @@
 //  · title and body are HTML (title takes <strong> for the bold half, as the section headings)
 //  · st: only what the scenario moves; the rest stays as in the projection (same shape as the simulator)
 import type { Scenario, RunResult, PartyKey } from './types';
-import { blank, run, BASE } from './model';
+import { blank, run, BASE, provTurnShift } from './model';
 import { PROV, BYID, DATA } from './data';
 import { PARTY } from './parties';
 import { longDate } from './format';
@@ -71,6 +71,14 @@ const LIST: Escenario[] = [
     st: () => sinUltimoEscano('VOX', 3)
   },
   {
+    slug: 'vivienda',
+    date: '2026-10-28',
+    // TEXT PENDING (Xaquín): headline and paragraphs
+    title: '¿Y si la vivienda moviera <strong>el voto joven</strong>?',
+    body: '[Texto pendiente]',
+    st: () => vivienda(75)
+  },
+  {
     // PLACEHOLDER: older scenario, to test the compact layout
     slug: 'borrador-2',
     date: '2026-10-21',
@@ -89,6 +97,39 @@ const LIST: Escenario[] = [
 ];
 
 export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date));
+/** Housing. Provinces where housing is a hot issue: rent of 13.5 €/m² a month or more, or a sale price of
+ *  2,900 €/m² or more, in Idealista's September 2026 reports (datos/vivienda_idealista_2026-09.csv; the INE
+ *  housing price index rises between 9.5 % and 15.2 % a year in every region, so it is the price level that
+ *  tells them apart). There:
+ *   · young voters turn out more: 18–34 year olds, about a fifth of the census, close YOUTH_LIFT points of their
+ *     turnout gap, i.e. YOUTH_SHARE × YOUTH_LIFT more points of turnout in the province;
+ *   · half of those young newcomers vote for the lists that carry Frente Amplio and Podemos (in Catalonia, the
+ *     comuns' list; in the Valencian Community, with Compromís; in the Canaries, Unidad del Pueblo Canario);
+ *     the other half, and everyone else who turns out, vote as newcomers usually do there.
+ *  And overall turnout rises to 75 %, voting as newcomers usually do. */
+export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17'];
+const YOUTH_SHARE = 0.2, YOUTH_LIFT = 12;
+const LEFT_LISTS = ['FA', 'PODEMOS', 'COMP', 'UPC'];
+function vivienda(turnoutTo = 75): Partial<Scenario> {
+  const turnNat = Math.round((turnoutTo - 100 * BASE.turnout) * 10) / 10;
+  const extra = YOUTH_SHARE * YOUTH_LIFT;
+  const turnProv: Scenario['turnProv'] = {}, distProv: Scenario['distProv'] = {};
+  for (const id of VIVIENDA_HOT) {
+    const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
+    const L = LEFT_LISTS.filter((k) => (row[k] || 0) > 0);
+    // how newcomers vote here by default: share of the left lists (tau) and of everyone else
+    let A = 0, B = p.bl * (prof.BL ?? 1);
+    for (const k in row) { const w = row[k] * (prof[k] ?? 1); if (L.includes(k)) A += w; else B += w; }
+    const tau = A / (A + B), young = extra, general = provTurnShift(p, turnNat);
+    // share of ALL newcomers in the province the left lists must get: half of the young ones, the usual share of the rest
+    const T = (0.5 * young + tau * general) / (young + general);
+    const f = Math.round(((T * B) / (A * (1 - T))) * 100) / 100;
+    turnProv[id] = Math.round(extra * 10) / 10;
+    distProv[id] = Object.fromEntries(L.map((k) => [k, f]));
+  }
+  return { turnNat, turnProv, distProv };
+}
+
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
 /** parties that take an article in running text */
 const ART: Partial<Record<PartyKey, string>> = { PP: 'el PP', PSOE: 'el PSOE', PNV: 'el PNV', BNG: 'el BNG' };
