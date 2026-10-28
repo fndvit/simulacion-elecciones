@@ -99,7 +99,7 @@
   .slist li { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 5px; }
   .slist li:first-child { padding-top: 0; }
   .slist li:last-child { padding-bottom: 0; border-bottom: 0; }
-  .stext { font-family: var(--font-ui); font-size: 14px; line-height: 1.45; color: var(--muted); }
+  .stext { font-family: var(--font-ui); font-size: 14px; line-height: 1.45; color: var(--muted); font-weight: 400; }
   .stext :global(strong) { font-weight: 700; color: var(--ink); }
   .simpact { display: flex; flex-wrap: wrap; gap: 4px; }
   .simpact span { font-family: var(--font-ui); font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; padding: 2px 7px; border-radius: 4px; }
