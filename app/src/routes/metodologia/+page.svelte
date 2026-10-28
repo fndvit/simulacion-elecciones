@@ -430,8 +430,7 @@
   .prose p { margin: 0 0 1em; }
   .prose ul { margin: 0 0 1em; padding-left: 1.1em; }
   .prose li { margin-bottom: 0.45em; }
-  .prose a { color: inherit; text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
-  .prose a:hover { text-decoration-color: var(--fg); }
+  /* links in the text: app.css (.prose a), the same everywhere */
   .prose code, .mono { font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace; font-size: 0.86em; }
   .prose code { background: var(--panel); padding: 1px 5px; border-radius: 4px; }
   .nowrap { white-space: nowrap; }

@@ -73,6 +73,9 @@ button, input, select { font: inherit; }
 .sub { font-family: var(--font-ui); font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 640px; font-weight: 400; }
 .sub b { color: var(--fg); }
 .lede { font-family: var(--font-body); font-size: 16px; line-height: 1.72; color: var(--fg); margin: 0; max-width: 62ch; }
+/* links in running text (ledes, prose), as in the methodology */
+.lede a, .prose a { color: inherit; text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.lede a:hover, .prose a:hover { text-decoration-color: var(--fg); }
 /* «Clica» with a mouse, «Toca» on touch screens */
 .on-touch { display: none; }
 @media (hover: none) { .on-touch { display: inline; } .on-mouse { display: none; } }
