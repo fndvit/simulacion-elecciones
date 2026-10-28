@@ -3,7 +3,7 @@
 //  · title and body are HTML (title takes <strong> for the bold half, as the section headings)
 //  · st: only what the scenario moves; the rest stays as in the projection (same shape as the simulator)
 import type { Scenario, RunResult, PartyKey } from './types';
-import { blank, run, BASE, provTurnShift } from './model';
+import { blank, run, BASE, provTurnShift, INVEST } from './model';
 import { PROV, BYID, DATA } from './data';
 import { PARTY } from './parties';
 import { longDate } from './format';
@@ -73,9 +73,27 @@ const LIST: Escenario[] = [
   {
     slug: 'vivienda',
     date: '2026-10-28',
-    // TEXT PENDING (Xaquín): headline and paragraphs
     title: '¿Y si la vivienda moviera <strong>el voto joven</strong>?',
-    body: '[Texto pendiente]',
+    body: (c) => {
+      const provs = listEs(VIVIENDA_HOT.map((id) => BYID[id].n));
+      // the 2023 investiture parties against a PP + Vox pact, as under the seat bar
+      const right = (c.cur.seats.PP || 0) + (c.cur.seats.VOX || 0);
+      const inv = INVEST.reduce((a, k) => a + (c.cur.seats[k] || 0), 0);
+      const gap = right - inv;
+      const ine = '<a href="https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736152838&menu=ultiDatos&idp=1254735976607" target="_blank" rel="noopener">Índice de precios de vivienda del INE</a>';
+      const ide = '<a href="https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/alquiler/report/" target="_blank" rel="noopener">alquiler</a> y <a href="https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/report/" target="_blank" rel="noopener">venta</a>';
+      return [
+        'El desahucio de Maricarmen fue la chispa. Enseguida llegaron las protestas; la reacción legislativa del gobierno, que tumbó el Congreso; y la convocatoria electoral.',
+        'La vivienda, poder comprar o alquilar, es una de las mayores preocupaciones de la sociedad española. Es una carga en niveles históricos y es la juventud la clase más afectada —los y las y les menores de 35 años—.',
+        `En ${provs} la vivienda está disparada, según datos del ${ine} y los informes de precios en ${ide} de Idealista. Aquí es donde objetivamente podría ser un factor decisivo.`,
+        'Si la izquierda —el espacio que lleva en sus manifiestos políticos más propuestas concretas para atajar la problemática— fuese capaz de movilizar a ese electorado, que tiende a quedarse más en casa que sus progenitores cuando se llama a las urnas, el panorama sería muy distinto al que han venido pintando las encuestas. ' +
+          (gap > 0
+            ? `Aunque no sería suficiente para darle la vuelta al marcador, estarían aún a ${gap} ${gap === 1 ? 'escaño' : 'escaños'} de un pacto PP + Vox.`
+            : gap === 0
+              ? 'Empatarían en escaños con un pacto PP + Vox.'
+              : `Le darían la vuelta al marcador: superarían en ${-gap} ${gap === -1 ? 'escaño' : 'escaños'} a un pacto PP + Vox.`)
+      ];
+    },
     st: () => vivienda(75)
   },
   {
