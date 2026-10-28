@@ -68,6 +68,7 @@
 
 <style>
   .esc { row-gap: var(--s3); padding-top: var(--s4); border-top: 1px solid var(--line); }
+  :global(.esc:first-child) { padding-top: 0; border-top: 0; }
   .esc :global(.updated) { margin: -8px 0 0; font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: #c4314b; }
   /* the adjustments, as the simulator's step-by-step panel */
   .supuestos { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-radius: 10px; background: var(--panel); }

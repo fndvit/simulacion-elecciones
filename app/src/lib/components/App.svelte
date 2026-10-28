@@ -22,7 +22,6 @@
   import { ESCENARIOS } from '$lib/escenarios';
   // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
   import logo350 from '$lib/assets/logo-350.svg?raw';
-  import cocina from '$lib/assets/cocina.webp?inline';
   const favicon = 'data:image/svg+xml,' + encodeURIComponent(logo350.replace(/viewBox="[^"]*"/, 'viewBox="0 -170.475 799.31 799.31"'));
   import ShareButton from './ShareButton.svelte';
   import { blank, run, historyEntries, BASE } from '$lib/model';
@@ -196,13 +195,6 @@
 
   <main class="center">
     {#if tab === 'esc'}
-      <section class="sec" in:fade={{ duration: 300 }}>
-        <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
-        <p class="lede w">Estamos cocinando escenarios para el 29N. Preguntas concretas convertidas en cambios de voto y de participación, con los supuestos a la vista. ¿Qué pasaría si votan los barrios más jóvenes, esos donde hoy más gente se queda en casa? ¿Y si la vivienda mueve el voto donde el alquiler más aprieta? ¿Y si las encuestas se equivocan con Vox, como cuando en 2016 anunciaron un <em>sorpasso</em> que nunca cuajó, o al revés?</p>
-        <p class="lede w">Ninguno de estos escenarios es una predicción. Son preguntas del tipo «¿qué pasaría si…?», y cada una muestra cuánto se reordenaría el hemiciclo y en qué provincias se decidiría. Y, de paso, sirven de trampolín para tus propios escenarios.</p>
-        <p class="lede w">Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula tu escenario</a>.</p>
-        <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /><figcaption class="note">Ilustración @oyematias</figcaption></figure>
-      </section>
       <!-- newest first: each new scenario pushes the rest down -->
       {#each ESCENARIOS as e (e.slug)}<Escenario {e} />{/each}
     {:else}
@@ -432,7 +424,4 @@
   @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; } .ti { width: 16px; height: 16px; }
     .mast.hero .brand :global(.vitlogo) { transform: translateY(10px) scale(1.3); }
     .h350 :global(svg) { height: 72px; } .h-title { font-size: 28px; line-height: 26px; } .h-tabs a { font-size: 12px; } .h-tabs .ti { width: 24px; height: 24px; } }
-  .cocina { margin: 24px auto 0; max-width: 1200px; }
-  .cocina img { display: block; width: 100%; height: auto; border-radius: 12px; }
-  .cocina figcaption { margin-top: 8px; text-align: right; }
 </style>
