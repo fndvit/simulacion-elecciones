@@ -102,14 +102,15 @@ export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date))
  *  (Alicante, Sevilla, Álava, Cantabria; not Segovia, cheap to buy), in Idealista's September 2026 reports (datos/vivienda_idealista_2026-09.csv; the INE
  *  housing price index rises between 9.5 % and 15.2 % a year in every region, so it is the price level that
  *  tells them apart). There:
- *   · young voters turn out more: YOUTH_EXTRA more points of turnout in the province (18–34 year olds are
- *     about a fifth of the census: as if their turnout rose some 25 points);
- *   · those young newcomers split in quarters: a quarter to the PSOE, a quarter to Frente Amplio's space, a
- *     quarter to the space of Podemos, ERC or Compromís (by region) and the last quarter to the rest of the
- *     parties, as newcomers usually vote there. In the Canaries both spaces go together in Unidad del Pueblo
- *     Canario (half); in Catalonia, where Podemos does not run, its quarter goes to ERC; in the Valencian
- *     Community, to Compromís. Everyone else who turns out votes as newcomers usually do there.
- *  And overall turnout rises to 75 %, voting as newcomers usually do. */
+ *   · young voters turn out more there: YOUTH_EXTRA more points of turnout in the province (18–34 year olds
+ *     are about a fifth of the census: as if their turnout rose some 25 points);
+ *  and overall turnout reaches 75 %: whatever is missing after those extra points comes in every province, as
+ *  any national rise does. All the newcomers, everywhere, are young voters who split in quarters: a quarter to
+ *  the PSOE, a quarter to Frente Amplio's space, a quarter to the space of Podemos, ERC or Compromís (by region)
+ *  and the last quarter to the rest of the parties, as newcomers usually vote there. In the Canaries both spaces
+ *  go together in Unidad del Pueblo Canario (half); in Catalonia, where Podemos does not run, its quarter goes to
+ *  ERC; in the Valencian Community, to Compromís. Where a space has no list, its quarter goes to the rest.
+ *  So the young vote moves to the left everywhere, and more where housing is a hotter issue. */
 export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17', '03', '41', '01', '39'];
 const YOUTH_EXTRA = 5;
 const CAT = ['08', '17', '25', '43'], VAL = ['03', '12', '46'], CAN = ['35', '38'];
@@ -118,29 +119,24 @@ function youthGroups(id: string): string[][] {
   if (CAN.includes(id)) return [['PSOE'], ['UPC'], ['UPC']];
   return [['PSOE'], ['FA'], CAT.includes(id) ? ['ERC'] : VAL.includes(id) ? ['COMP'] : ['PODEMOS']];
 }
+/** newcomer multipliers that give each targeted list its quarter of the newcomers; the rest keep their usual proportions */
+function quarters(id: string): Record<string, number> {
+  const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
+  const youth: Record<string, number> = {};
+  for (const g of youthGroups(id)) { const ok = g.filter((k) => (row[k] || 0) > 0); for (const k of ok) youth[k] = (youth[k] || 0) + 0.25 / ok.length; }
+  const qRest = 1 - Object.values(youth).reduce((a, b) => a + b, 0);
+  let W = p.bl * (prof.BL ?? 1), rest = W;
+  const w: Record<string, number> = {};
+  for (const k in row) { w[k] = row[k] * (prof[k] ?? 1); W += w[k]; if (!(k in youth)) rest += w[k]; }
+  return Object.fromEntries(Object.entries(youth).map(([k, q]) => [k, Math.round(((q / (w[k] / W)) / (qRest / (rest / W))) * 100) / 100]));
+}
 function vivienda(turnoutTo = 75): Partial<Scenario> {
-  const turnNat = Math.round((turnoutTo - 100 * BASE.turnout) * 10) / 10;
-  const young = YOUTH_EXTRA;
-  const turnProv: Scenario['turnProv'] = {}, distProv: Scenario['distProv'] = {};
-  for (const id of VIVIENDA_HOT) {
-    const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
-    // target share of the young newcomers per list (lists named in two quarters add them up)
-    const youth: Record<string, number> = {};
-    for (const g of youthGroups(id)) { const ok = g.filter((k) => (row[k] || 0) > 0); for (const k of ok) youth[k] = (youth[k] || 0) + 0.25 / ok.length; }
-    const yRest = 1 - Object.values(youth).reduce((a, b) => a + b, 0);
-    // how newcomers vote here by default (tau), for each targeted list and for everyone else (blank included)
-    const w: Record<string, number> = {};
-    let W = p.bl * (prof.BL ?? 1), rest = W;
-    for (const k in row) { w[k] = row[k] * (prof[k] ?? 1); W += w[k]; if (!(k in youth)) rest += w[k]; }
-    const general = provTurnShift(p, turnNat), all = young + general;
-    // share of ALL newcomers each list must get; the rest keep their usual proportions (multiplier 1)
-    const restT = (yRest * young + (rest / W) * general) / all;
-    distProv[id] = Object.fromEntries(Object.entries(youth).map(([k, q]) => {
-      const T = (q * young + (w[k] / W) * general) / all;
-      return [k, Math.round(((T / (w[k] / W)) / (restT / (rest / W))) * 100) / 100];
-    }));
-    turnProv[id] = young;
-  }
+  const turnProv: Scenario['turnProv'] = Object.fromEntries(VIVIENDA_HOT.map((id) => [id, YOUTH_EXTRA]));
+  // the national rise that, with the hot provinces' extra points, takes turnout to the target
+  let lo = -20, hi = 30;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (run({ ...blank(), turnNat: m, turnProv }).turnout * 100 < turnoutTo) lo = m; else hi = m; }
+  const turnNat = Math.round(hi * 10) / 10;
+  const distProv: Scenario['distProv'] = Object.fromEntries(PROV.map((p) => [p.id, quarters(p.id)]));
   return { turnNat, turnProv, distProv };
 }
 
