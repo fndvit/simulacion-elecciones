@@ -21,6 +21,22 @@ const LIST: Escenario[] = [
     title: 'Título del escenario, <strong>en negrita la parte que importa</strong>',
     body: 'Párrafo de presentación: la pregunta, de dónde salen los supuestos y qué conviene mirar en el resultado. Texto provisional para probar la maqueta.',
     st: { nat: { PSOE: 1.5, PP: -1.5 }, turnNat: 2 }
+  },
+  {
+    // PLACEHOLDER: older scenario, to test the compact layout
+    slug: 'borrador-2',
+    date: '2026-10-21',
+    title: 'Un escenario anterior, <strong>empujado hacia abajo</strong>',
+    body: 'Texto provisional para probar cómo se ven los escenarios antiguos.',
+    st: { nat: { VOX: 2, PP: -2 } }
+  },
+  {
+    // PLACEHOLDER: older scenario, to test the compact layout
+    slug: 'borrador-3',
+    date: '2026-10-14',
+    title: 'Otro escenario más antiguo, <strong>con la participación a la baja</strong>',
+    body: 'Texto provisional para probar cómo se ven los escenarios antiguos.',
+    st: { turnNat: -4, nat: { FA: 1 } }
   }
 ];
 
