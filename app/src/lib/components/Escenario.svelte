@@ -51,7 +51,7 @@
       <p class="lede w">{@html e.body}</p>
       <div class="w supuestos">
         <div class="shead">Los supuestos</div>
-        <a class="tosim" href={simHref} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="tip">Abrir en el simulador</span></a>
+        <a class="tosim" href={simHref} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
         <ol class="slist">
           {#each entries as x (x.key)}
             <li>
@@ -105,14 +105,15 @@
   .simpact span { font-family: var(--font-ui); font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; padding: 2px 7px; border-radius: 4px; }
   .simpact .up { background: var(--up-bg); } .simpact .down { background: var(--down-bg); }
   .simpact .zero { color: var(--muted); background: var(--bg); font-weight: 400; }
-  /* open in the simulator: icon-only button floating top right of the box, its name on hover */
-  .tosim { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 999px; background: var(--ink); color: var(--bg); }
-  .tosim:hover { opacity: 0.85; }
-  .tosim svg { width: 20px; height: 20px; fill: currentColor; }
-  .tosim .tip { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s ease;
-    font-family: var(--font-ui); font-size: 13px; line-height: 18px; padding: 4px 10px; border-radius: 6px; color: var(--ink);
-    background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--shadow); }
-  .tosim:hover .tip, .tosim:focus-visible .tip { opacity: 1; }
+  /* open in the simulator: the site's button, folded to its icon at the top right of the box; on hover
+     (or keyboard focus) it unfolds to the left into the full button with its name */
+  .tosim { position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; height: 32px; padding: 0 7px; border-radius: 999px;
+    background: var(--ink); color: var(--bg); text-decoration: none; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; white-space: nowrap; }
+  .tosim svg { flex: none; width: 18px; height: 18px; fill: currentColor; }
+  .tosim .lbl { max-width: 0; overflow: hidden; opacity: 0; transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin 0.3s ease; }
+  .tosim:hover, .tosim:focus-visible { padding: 0 16px 0 12px; }
+  .tosim:hover .lbl, .tosim:focus-visible .lbl { max-width: 200px; opacity: 1; margin-left: 7px; }
+  .tosim { transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .more button { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer;
     border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 12px 7px 16px; }
   .more button:hover { opacity: 0.85; }
