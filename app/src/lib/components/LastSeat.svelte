@@ -9,8 +9,8 @@
   import { fmtN, pct } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
-  let { cur, scope = $bindable(), projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
-  const of = $derived(projection ? 'de la proyección' : 'de tu escenario');
+  let { cur, scope = $bindable(), projection = false, who = 'tu' }: { cur: RunResult; scope: string; projection?: boolean; who?: 'tu' | 'este' } = $props();
+  const of = $derived(projection ? 'de la proyección' : who === 'este' ? 'de este escenario' : 'de tu escenario');
   // a sentence ending in an abbreviated name («Adelante And.») takes no second full stop
   const end = (t: string) => (t.endsWith('.') ? '' : '.');
   const nm = (k: string) => PARTY[k as PartyKey].n, col = (k: string) => PARTY[k as PartyKey].c;

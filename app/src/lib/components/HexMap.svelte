@@ -16,7 +16,8 @@
   import { pct, fmtN } from '$lib/format';
   import type { RunResult } from '$lib/types';
 
-  let { cur, scope = $bindable(), focusParty = $bindable(), projection = false }: { cur: RunResult; scope: string; focusParty: string; projection?: boolean } = $props();
+  let { cur, scope = $bindable(), focusParty = $bindable(), projection = false, who = 'tu' }: { cur: RunResult; scope: string; focusParty: string; projection?: boolean; who?: 'tu' | 'este' } = $props();
+  const esc = $derived(who === 'este' ? 'este escenario' : 'tu escenario');
 
   let mode = $state<'seats' | 'party'>('seats');
   let compareSel = $state<'scenario' | '2023'>('scenario');
@@ -175,7 +176,7 @@
   {/if}
   {#if projection}<span class="since">desde 2023</span>{:else}
   <div class="toggle small" role="group" aria-label="Escaños que cambian de manos: respecto a">
-    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en tu escenario</button>
+    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en {esc}</button>
     <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compareSel = '2023')}>desde 2023</button>
   </div>{/if}
 </div>
@@ -268,7 +269,7 @@
 </div>
 
 <p class="sub w">
-  {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid, también se cuenta el escaño nuevo).{/if}
+  {#if compare === 'scenario'}El trazo negro marca los escaños que {esc} cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid, también se cuenta el escaño nuevo).{/if}
   <span class="on-mouse">Clica en una provincia</span><span class="on-touch">Toca una provincia</span> para seleccionarla en toda la página.
 </p>
 

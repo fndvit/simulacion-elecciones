@@ -12,7 +12,10 @@
   import { sgnInt } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
-  let { cur, scope = $bindable(), projection = false }: { cur: RunResult; scope: string; projection?: boolean } = $props();
+  let { cur, scope = $bindable(), projection = false, who = 'tu' }: { cur: RunResult; scope: string; projection?: boolean; who?: 'tu' | 'este' } = $props();
+  // the simulator speaks of «tu escenario»; a published scenario, of «este escenario»
+  const esc = $derived(who === 'este' ? 'este escenario' : 'tu escenario');
+  const Esc = $derived(esc[0].toUpperCase() + esc.slice(1));
   let W = $state(800);
 
   const isES = $derived(scope === 'ES');
@@ -83,29 +86,29 @@
     <div class="bar slim" role="img" aria-label="Escaños en 2023">
       {#each segs as s (s.P)}{#if s.s}<span class:on={hov === s.P} style="width:{s.s * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)} onpointerdown={(e) => over(e, s.P)}></span>{/if}{/each}
     </div>
-    <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label={projection ? "De los escaños de 2023 a los de la proyección" : "De los escaños de 2023 a los de tu escenario"}>
+    <svg class="band" width={W} height={BAND} viewBox="0 0 {W} {BAND}" aria-label={projection ? "De los escaños de 2023 a los de la proyección" : `De los escaños de 2023 a los de ${esc}`}>
       {#each band as b (b.P)}<polygon points={b.pts} fill={PARTY[b.P].c} opacity={hov ? (hov === b.P ? 0.6 : 0.12) : 0.28} onpointermove={(e) => over(e, b.P)} onpointerdown={(e) => over(e, b.P)} />{/each}
       {#each band as b (b.P)}{#if b.show}<text x={b.lx} y={BAND - 7} text-anchor="middle" class:up={b.d > 0} class:down={b.d < 0}>{sgnInt(b.d)}</text>{/if}{/each}
     </svg>
-    <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : "Escaños en tu escenario"}>
+    <div class="bar fat" role="img" aria-label={projection ? "Escaños en la proyección" : `Escaños en ${esc}`}>
       {#each segs as s (s.P)}{#if s.f}<span class:on={hov === s.P} style="width:{s.f * 100}%;background:{PARTY[s.P].c}" onpointermove={(e) => over(e, s.P)} onpointerdown={(e) => over(e, s.P)}></span>{/if}{/each}
-      <b class="blab in" aria-hidden="true">{projection ? 'Proyección' : 'Tu escenario'}</b>
+      <b class="blab in" aria-hidden="true">{projection ? 'Proyección' : Esc}</b>
     </div>
     {#if isES}<div class="maj" aria-hidden="true"></div>{/if}
     {#if hd}
       <div class="tip" style={tipStyle(tip.x, tip.y, W, tip.h * 3)}>
         <h4><span class="sw" style="background:{PARTY[hd.P].c}"></span>{PARTY[hd.P].n}</h4>
-        <div>{projection ? 'Proyección' : 'Tu escenario'}: <b>{hd.seats} {hd.seats === 1 ? 'escaño' : 'escaños'}</b> · {pct(hd.share)} del voto</div>
+        <div>{projection ? 'Proyección' : Esc}: <b>{hd.seats} {hd.seats === 1 ? 'escaño' : 'escaños'}</b> · {pct(hd.share)} del voto</div>
         <div>En 2023: <b>{hd.s23}</b>{#if hd.seats - hd.s23} ({sgnInt(hd.seats - hd.s23)}){/if}</div>
         {#if !projection && hd.d}<div>Frente a la proyección: <b>{sgnInt(hd.d)}</b></div>{/if}
       </div>
     {/if}
   </div>
-  <div class="note">Barra superior: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra inferior: {projection ? 'la proyección' : 'tu escenario'}. En 2023, Frente Amplio es Sumar.</div>
+  <div class="note">Barra superior: escaños de 2023{!isES && n23 !== n ? ` (${n23})` : ''}; entre las barras, el cambio desde entonces · barra inferior: {projection ? 'la proyección' : esc}. En 2023, Frente Amplio es Sumar.</div>
 
   {#if !projection}
   <div class="deltas" class:stack style="min-height:{Math.max(64, layout.rows * 62) + (stack ? 26 : 0)}px">
-    <div class="dhead">Cambios en tu escenario</div>
+    <div class="dhead">Cambios en {esc}</div>
     {#if layout.items.length}
       {#each layout.items as it (it.P)}
         <div class="ditem" style="left:{it.x}px;top:{it.row * 62}px">

@@ -18,6 +18,8 @@
   import PollSection from './PollSection.svelte';
   import HistoryRail from './HistoryRail.svelte';
   import VitLogo from './VitLogo.svelte';
+  import Escenario from './Escenario.svelte';
+  import { ESCENARIOS } from '$lib/escenarios';
   // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
   import logo350 from '$lib/assets/logo-350.svg?raw';
   import cocina from '$lib/assets/cocina.webp?inline';
@@ -138,6 +140,7 @@
     else try { const s = JSON.parse(localStorage.getItem('sim29n') || 'null'); if (s && s.nat) st = Object.assign(blank(), s); } catch {}
     ready = true;
   });
+  afterNavigate(() => { if (ready && page.route.id === '/simula') { const linked = scenarioFromUrl(blank); if (linked) st = linked; } });
   $effect(() => {
     const snap = JSON.stringify(st);
     if (!ready) return;
@@ -200,6 +203,8 @@
         <p class="lede w">Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula tu escenario</a>.</p>
         <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /><figcaption class="note">Ilustración @oyematias</figcaption></figure>
       </section>
+      <!-- newest first: each new scenario pushes the rest down -->
+      {#each ESCENARIOS as e (e.slug)}<Escenario {e} />{/each}
     {:else}
     {#if sim}
     <section class="sec simintro">
