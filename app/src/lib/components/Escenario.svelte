@@ -32,6 +32,10 @@
   let scope = $state('ES');
   let focusParty = $state('PP');
   let open = $state(false);
+  // the adjustments: beyond three, only the first two until asked
+  const FOLD = 3, SHOW = 2;
+  let allSup = $state(false);
+  const shown = $derived(entries.length > FOLD && !allSup ? entries.slice(0, SHOW) : entries);
   // older scenarios, pushed down by newer ones, show only the headline, the date and a mini seat bar;
   // «Leer más» unfolds the whole scenario
   let full = $state(false);
@@ -59,7 +63,7 @@
         <div class="shead">Los supuestos</div>
         <a class="tosim" href={simHref} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
         <ol class="slist">
-          {#each entries as x (x.key)}
+          {#each shown as x (x.key)}
             <li>
               <div class="stext">{@html x.html}</div>
               <div class="simpact">
@@ -68,6 +72,12 @@
             </li>
           {/each}
         </ol>
+        {#if entries.length > FOLD}
+          <button type="button" class="more-sup" aria-expanded={allSup} onclick={() => (allSup = !allSup)}>
+            {allSup ? 'Ver menos' : `Ver los ${entries.length} supuestos`}
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class:flip={allSup}><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        {/if}
       </div>
       <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
     {/if}
@@ -105,6 +115,12 @@
   .slist li { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 5px; }
   .slist li:first-child { padding-top: 0; }
   .slist li:last-child { padding-bottom: 0; border-bottom: 0; }
+  /* see all the adjustments: the site's button */
+  .more-sup { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer;
+    border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 12px 7px 16px; }
+  .more-sup:hover { opacity: 0.85; }
+  .more-sup svg { transition: transform 0.3s ease; }
+  .more-sup svg.flip { transform: rotate(180deg); }
   .stext { font-family: var(--font-ui); font-size: 14px; line-height: 1.45; color: var(--muted); font-weight: 400; }
   .stext :global(strong) { font-weight: 700; color: var(--ink); }
   .simpact { display: flex; flex-wrap: wrap; gap: 4px; }
