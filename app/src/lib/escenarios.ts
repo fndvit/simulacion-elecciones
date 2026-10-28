@@ -104,29 +104,42 @@ export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date))
  *  tells them apart). There:
  *   · young voters turn out more: YOUTH_EXTRA more points of turnout in the province (18–34 year olds are
  *     about a fifth of the census: as if their turnout rose some 25 points);
- *   · half of those young newcomers vote for the lists that carry Frente Amplio and Podemos (in Catalonia, the
- *     comuns' list; in the Valencian Community, with Compromís; in the Canaries, Unidad del Pueblo Canario);
- *     the other half, and everyone else who turns out, vote as newcomers usually do there.
+ *   · those young newcomers split in quarters: a quarter to the PSOE, a quarter to Frente Amplio's space, a
+ *     quarter to the space of Podemos, ERC or Compromís (by region) and the last quarter to the rest of the
+ *     parties, as newcomers usually vote there. In the Canaries both spaces go together in Unidad del Pueblo
+ *     Canario (half); in Catalonia, where Podemos does not run, its quarter goes to ERC; in the Valencian
+ *     Community, to Compromís. Everyone else who turns out votes as newcomers usually do there.
  *  And overall turnout rises to 75 %, voting as newcomers usually do. */
 export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17', '03', '41', '01', '39'];
 const YOUTH_EXTRA = 5;
-const LEFT_LISTS = ['FA', 'PODEMOS', 'COMP', 'UPC'];
+const CAT = ['08', '17', '25', '43'], VAL = ['03', '12', '46'], CAN = ['35', '38'];
+/** the young vote's quarters in a province: each group of lists gets a quarter (the rest, the last quarter) */
+function youthGroups(id: string): string[][] {
+  if (CAN.includes(id)) return [['PSOE'], ['UPC'], ['UPC']];
+  return [['PSOE'], ['FA'], CAT.includes(id) ? ['ERC'] : VAL.includes(id) ? ['COMP'] : ['PODEMOS']];
+}
 function vivienda(turnoutTo = 75): Partial<Scenario> {
   const turnNat = Math.round((turnoutTo - 100 * BASE.turnout) * 10) / 10;
-  const extra = YOUTH_EXTRA;
+  const young = YOUTH_EXTRA;
   const turnProv: Scenario['turnProv'] = {}, distProv: Scenario['distProv'] = {};
   for (const id of VIVIENDA_HOT) {
     const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
-    const L = LEFT_LISTS.filter((k) => (row[k] || 0) > 0);
-    // how newcomers vote here by default: share of the left lists (tau) and of everyone else
-    let A = 0, B = p.bl * (prof.BL ?? 1);
-    for (const k in row) { const w = row[k] * (prof[k] ?? 1); if (L.includes(k)) A += w; else B += w; }
-    const tau = A / (A + B), young = extra, general = provTurnShift(p, turnNat);
-    // share of ALL newcomers in the province the left lists must get: half of the young ones, the usual share of the rest
-    const T = (0.5 * young + tau * general) / (young + general);
-    const f = Math.round(((T * B) / (A * (1 - T))) * 100) / 100;
-    turnProv[id] = Math.round(extra * 10) / 10;
-    distProv[id] = Object.fromEntries(L.map((k) => [k, f]));
+    // target share of the young newcomers per list (lists named in two quarters add them up)
+    const youth: Record<string, number> = {};
+    for (const g of youthGroups(id)) { const ok = g.filter((k) => (row[k] || 0) > 0); for (const k of ok) youth[k] = (youth[k] || 0) + 0.25 / ok.length; }
+    const yRest = 1 - Object.values(youth).reduce((a, b) => a + b, 0);
+    // how newcomers vote here by default (tau), for each targeted list and for everyone else (blank included)
+    const w: Record<string, number> = {};
+    let W = p.bl * (prof.BL ?? 1), rest = W;
+    for (const k in row) { w[k] = row[k] * (prof[k] ?? 1); W += w[k]; if (!(k in youth)) rest += w[k]; }
+    const general = provTurnShift(p, turnNat), all = young + general;
+    // share of ALL newcomers each list must get; the rest keep their usual proportions (multiplier 1)
+    const restT = (yRest * young + (rest / W) * general) / all;
+    distProv[id] = Object.fromEntries(Object.entries(youth).map(([k, q]) => {
+      const T = (q * young + (w[k] / W) * general) / all;
+      return [k, Math.round(((T / (w[k] / W)) / (restT / (rest / W))) * 100) / 100];
+    }));
+    turnProv[id] = young;
   }
   return { turnNat, turnProv, distProv };
 }
