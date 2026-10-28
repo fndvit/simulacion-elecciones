@@ -85,9 +85,9 @@
   .tosim { align-self: flex-start; display: inline-flex; align-items: center; font-family: var(--font-ui); font-size: 14px; line-height: 18px; text-decoration: none;
     border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 16px; }
   .tosim:hover { opacity: 0.85; }
-  .more button { display: inline-flex; align-items: center; gap: 4px; padding: 0 0 2px; border: 0; border-bottom: 2px solid currentColor; background: none; cursor: pointer;
-    font-family: var(--font-ui); font-weight: 700; font-size: 15px; color: var(--ink); }
-  .more button:hover { color: #d1366b; }
+  .more button { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer;
+    border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 12px 7px 16px; }
+  .more button:hover { opacity: 0.85; }
   .more svg { transition: transform 0.3s ease; }
   .more svg.up { transform: rotate(180deg); }
   .stack { display: flex; flex-direction: column; gap: 14px; }
