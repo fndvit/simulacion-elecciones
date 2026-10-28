@@ -19,7 +19,16 @@ import type { Scenario, RunResult, DhondtResult, ProvResult } from './types';
 
 export const THR = 0.03;
 
-export const blank = (): Scenario => ({ nat: {}, prov: {}, turnNat: 0, turnProv: {}, distNat: {}, distProv: {} });
+export const blank = (): Scenario => ({ nat: {}, prov: {}, turnNat: 0, turnProv: {}, distNat: {}, distProv: {}, shareNat: {}, shareProv: {} });
+
+/** the fixed newcomer shares that apply in a province (its own, or the national ones), only for parties that run
+ *  there; if they add up to more than all, they are scaled down */
+export function sharesIn(st: Scenario, id: string, row: Record<string, number>) {
+  const s = st.shareProv?.[id] || st.shareNat || {};
+  const fixed = Object.entries(s).filter(([k, q]) => q > 0 && (row[k] || 0) > 0);
+  const F = fixed.reduce((a, [, q]) => a + q, 0), sc = F > 1 ? 1 / F : 1;
+  return { fixed: Object.fromEntries(fixed.map(([k, q]) => [k, q * sc])) as Record<string, number>, F: Math.min(1, F) };
+}
 
 /** baseline valid votes per province (2023 turnout and null rate on the 2026 census) */
 export const V0: Record<string, number> = Object.fromEntries(PROV.map((p) => [p.id, p.census * p.t0 * (1 - p.nr)]));
@@ -103,10 +112,12 @@ export function run(st: Scenario): RunResult {
       const prof = DATA.tp?.[p.id]?.[dVal > 0 ? 'up' : 'down'] || {};
       const w: Record<string, number> = {};
       const wb = p.bl * (prof.BL ?? 1);
+      // fixed shares first; the rest of the newcomers vote like their neighbours (× multipliers)
+      const { fixed, F } = sharesIn(st, p.id, row);
       let W = wb;
-      for (const k in row) { w[k] = row[k] * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); W += w[k]; }
-      for (const k in row) votes[k] = Math.max(0, votes[k] + (dVal * w[k]) / W);
-      blankV = Math.max(0, blankV + (dVal * wb) / W);
+      for (const k in row) { w[k] = row[k] * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); if (!(k in fixed)) W += w[k]; }
+      for (const k in row) votes[k] = Math.max(0, votes[k] + (k in fixed ? dVal * fixed[k] : (dVal * (1 - F) * w[k]) / W));
+      blankV = Math.max(0, blankV + (dVal * (1 - F) * wb) / W);
     }
     let valid = blankV;
     for (const k in votes) valid += votes[k];
@@ -150,10 +161,12 @@ export function newcomerShares(st: Scenario, cur: RunResult, scope: string, down
     const r = cur.prov[p.id], prof = DATA.tp?.[p.id]?.[down ? 'down' : 'up'] || {}, mult = st.distProv[p.id] || st.distNat || {};
     const om = scope !== 'ES' ? 1 : p.census * (down ? p.t0 * (1 - p.t0) : 1 - p.t0);
     const w: Record<string, number> = {};
+    const row = PROV.find((x) => x.id === p.id)!.s as Record<string, number>;
+    const { fixed, F } = sharesIn(st, p.id, row);
     let W = (r.blank / r.valid) * (prof.BL ?? 1);
-    for (const k in r.votes) { w[k] = (r.votes[k] / r.valid) * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); W += w[k]; }
+    for (const k in r.votes) { w[k] = (r.votes[k] / r.valid) * (prof[k] ?? 1) * (mult[k] != null ? mult[k] : 1); if (!(k in fixed)) W += w[k]; }
     if (W <= 0) continue;
-    for (const k in w) acc[k] = (acc[k] || 0) + (om * w[k]) / W;
+    for (const k in w) acc[k] = (acc[k] || 0) + om * (k in fixed ? fixed[k] : ((1 - F) * w[k]) / W);
     tot += om;
   }
   for (const k in acc) acc[k] /= tot || 1;
@@ -164,8 +177,8 @@ export const s2m = (v: number) => (v >= 0 ? 1 + 3 * v : 1 + v);
 export const m2s = (m: number) => (m >= 1 ? (m - 1) / 3 : m - 1);
 
 export function hasScopeChanges(st: Scenario, scope: string) {
-  if (scope === 'ES') return Object.values(st.nat).some(Boolean) || !!st.turnNat || Object.values(st.distNat).some((v) => v !== 1);
-  return Object.values(st.prov[scope] || {}).some(Boolean) || !!st.turnProv[scope] || !!st.distProv[scope];
+  if (scope === 'ES') return Object.values(st.nat).some(Boolean) || !!st.turnNat || Object.values(st.distNat).some((v) => v !== 1) || Object.keys(st.shareNat || {}).length > 0;
+  return Object.values(st.prov[scope] || {}).some(Boolean) || !!st.turnProv[scope] || !!st.distProv[scope] || !!st.shareProv?.[scope];
 }
 
 /**
@@ -194,17 +207,25 @@ function impactOf(st: Scenario): [string, number][] {
 }
 export function historyEntries(st: Scenario): HistoryEntry[] {
   const out: HistoryEntry[] = [];
-  const distTxt = (d?: Record<string, number>) => {
-    const e = Object.entries(d || {}).filter(([, m]) => m !== 1);
-    return e.length ? '; los nuevos votantes ' + e.map(([P, m]) => `${m > 1 ? 'favorecen' : 'castigan'} a ${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ') : '';
+  const pc = (q: number) => Math.round(q * 100) + ' %';
+  const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]);
+  const distTxt = (d?: Record<string, number>, s?: Record<string, number>) => {
+    const e = Object.entries(d || {}).filter(([, m]) => m !== 1), f = Object.entries(s || {}).filter(([, q]) => q > 0);
+    let t = e.length ? '; los nuevos votantes ' + e.map(([P, m]) => `${m > 1 ? 'favorecen' : 'castigan'} a ${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ') : '';
+    const al = (P: string) => (['PP', 'PSOE', 'PNV', 'BNG'].includes(P) ? 'al ' : 'a ') + nm(P);
+    if (f.length) t += `; de los nuevos votantes, ${list(f.map(([P, q]) => `${pc(q)} ${al(P)}`))}`;
+    return t;
   };
   for (const [P, v] of Object.entries(st.nat)) if (v)
     out.push({ key: 'n' + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en toda España`, impact: impactOf({ ...blank(), nat: { [P]: v } }), undo: (s) => { delete s.nat[P]; } });
   for (const [id, o] of Object.entries(st.prov)) for (const [P, v] of Object.entries(o || {})) if (v)
     out.push({ key: 'p' + id + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en ${esc(BYID[id].n)}`, impact: impactOf({ ...blank(), prov: { [id]: { [P]: v } } }), undo: (s) => { delete s.prov[id][P]; } });
   if (st.turnNat)
-    out.push({ key: 'tn', html: `La participación ${st.turnNat > 0 ? 'sube' : 'baja'} ${d1(st.turnNat)} puntos en toda España${distTxt(st.distNat)}`, impact: impactOf({ ...blank(), turnNat: st.turnNat, distNat: { ...st.distNat } }), undo: (s) => { s.turnNat = 0; } });
+    out.push({ key: 'tn', html: `La participación ${st.turnNat > 0 ? 'sube' : 'baja'} ${d1(st.turnNat)} puntos en toda España${distTxt(st.distNat, st.shareNat)}`, impact: impactOf({ ...blank(), turnNat: st.turnNat, distNat: { ...st.distNat }, shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { s.turnNat = 0; } });
   for (const [id, v] of Object.entries(st.turnProv)) if (v)
-    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${esc(BYID[id].n)}${distTxt(st.distProv[id] || st.distNat)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)) }), undo: (s) => { delete s.turnProv[id]; } });
+    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${esc(BYID[id].n)}${distTxt(st.distProv[id] || st.distNat, st.shareProv?.[id] || st.shareNat)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)), shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { delete s.turnProv[id]; } });
+  // a province's own split of the newcomers, where its turnout was not moved on its own
+  for (const id of Object.keys(st.shareProv || {})) if (!st.turnProv[id] && st.turnNat)
+    out.push({ key: 's' + id, html: `En ${esc(BYID[id].n)}${distTxt(undefined, st.shareProv[id]).replace(/^; d/, ', d')}`, impact: [], undo: (s) => { delete s.shareProv[id]; } });
   return out;
 }

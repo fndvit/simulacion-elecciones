@@ -114,30 +114,22 @@ export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date))
 export const VIVIENDA_HOT = ['28', '07', '29', '08', '20', '48', '38', '35', '46', '17', '03', '41', '01', '39'];
 const YOUTH_EXTRA = 5;
 const CAT = ['08', '17', '25', '43'], VAL = ['03', '12', '46'], CAN = ['35', '38'];
-/** the young vote's quarters in a province: each group of lists gets a quarter (the rest, the last quarter) */
-function youthGroups(id: string): string[][] {
-  if (CAN.includes(id)) return [['PSOE'], ['UPC'], ['UPC']];
-  return [['PSOE'], ['FA'], CAT.includes(id) ? ['ERC'] : VAL.includes(id) ? ['COMP'] : ['PODEMOS']];
-}
-/** newcomer multipliers that give each targeted list its quarter of the newcomers; the rest keep their usual proportions */
-function quarters(id: string): Record<string, number> {
-  const p = BYID[id], row = p.s as Record<string, number>, prof = DATA.tp?.[id]?.up || {};
-  const youth: Record<string, number> = {};
-  for (const g of youthGroups(id)) { const ok = g.filter((k) => (row[k] || 0) > 0); for (const k of ok) youth[k] = (youth[k] || 0) + 0.25 / ok.length; }
-  const qRest = 1 - Object.values(youth).reduce((a, b) => a + b, 0);
-  let W = p.bl * (prof.BL ?? 1), rest = W;
-  const w: Record<string, number> = {};
-  for (const k in row) { w[k] = row[k] * (prof[k] ?? 1); W += w[k]; if (!(k in youth)) rest += w[k]; }
-  return Object.fromEntries(Object.entries(youth).map(([k, q]) => [k, Math.round(((q / (w[k] / W)) / (qRest / (rest / W))) * 100) / 100]));
+/** the young vote's quarters: a quarter each to the PSOE, Frente Amplio and Podemos everywhere; Catalonia and
+ *  the Valencian Community swap Podemos for ERC and Compromís; in the Canaries, half to Unidad del Pueblo Canario */
+const Q = 0.25;
+function quarters(): Pick<Scenario, 'shareNat' | 'shareProv'> {
+  const shareProv: Scenario['shareProv'] = {};
+  for (const id of CAT) shareProv[id] = { PSOE: Q, FA: Q, ERC: Q };
+  for (const id of VAL) shareProv[id] = { PSOE: Q, FA: Q, COMP: Q };
+  for (const id of CAN) shareProv[id] = { PSOE: Q, UPC: 2 * Q };
+  return { shareNat: { PSOE: Q, FA: Q, PODEMOS: Q }, shareProv };
 }
 function vivienda(turnoutTo = 75): Partial<Scenario> {
   const turnProv: Scenario['turnProv'] = Object.fromEntries(VIVIENDA_HOT.map((id) => [id, YOUTH_EXTRA]));
   // the national rise that, with the hot provinces' extra points, takes turnout to the target
   let lo = -20, hi = 30;
   for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (run({ ...blank(), turnNat: m, turnProv }).turnout * 100 < turnoutTo) lo = m; else hi = m; }
-  const turnNat = Math.round(hi * 10) / 10;
-  const distProv: Scenario['distProv'] = Object.fromEntries(PROV.map((p) => [p.id, quarters(p.id)]));
-  return { turnNat, turnProv, distProv };
+  return { turnNat: Math.round(hi * 10) / 10, turnProv, ...quarters() };
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
