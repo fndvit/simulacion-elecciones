@@ -100,7 +100,7 @@ const LIST: Escenario[] = [
     slug: 'periferia',
     date: '2026-10-28',
     // TEXT PENDING (Xaquín): headline and paragraphs
-    title: '¿Y si ERC, EH Bildu y el BNG <strong>tocan techo</strong>?',
+    title: '¿Y si <strong>el nacionalismo de izquierdas</strong> en Galicia, Cataluña, País Vasco y Navarra galvaniza la resistencia contra la ultraderecha?',
     body: '[Texto pendiente]',
     st: () => periferia()
   },
