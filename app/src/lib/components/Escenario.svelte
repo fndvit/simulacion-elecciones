@@ -11,13 +11,19 @@
   import { longDate, sgnInt } from '$lib/format';
   import { encodeScenario } from '$lib/share';
   import { href } from '$lib/nav';
-  import { scenarioOf, type Escenario } from '$lib/escenarios';
+  import { scenarioOf, type Escenario, type Ctx } from '$lib/escenarios';
+  import { BASE } from '$lib/model';
+  import { DATA } from '$lib/data';
   import type { PartyKey } from '$lib/types';
 
   let { e, latest = true }: { e: Escenario; latest?: boolean } = $props();
   const st = $derived(scenarioOf(e));
   const cur = $derived(run(st));
   const entries = $derived(historyEntries(st));
+  // the texts may be written from the data
+  const ctx = $derived<Ctx>({ st, cur, base: BASE, today: DATA.today });
+  const title = $derived(typeof e.title === 'function' ? e.title(ctx) : e.title);
+  const paras = $derived.by(() => { const b = typeof e.body === 'function' ? e.body(ctx) : e.body; return Array.isArray(b) ? b : [b]; });
   // the simulator with these adjustments as its starting point (?e=… travels before the #/… of the hash router)
   const simHref = $derived.by(() => {
     const h = href('/simula'), q = '?e=' + encodeScenario(st);
@@ -40,7 +46,7 @@
 
 <article class="sec esc" class:compact id={e.slug}>
   <section class="sec">
-    <h2 class="hd w">{@html e.title}</h2>
+    <h2 class="hd w">{@html title}</h2>
     <p class="updated w"><time datetime={e.date}>{longDate(e.date)}</time></p>
     {#if compact}
       <div class="w minibar" role="img" aria-label="Escaños en este escenario">
@@ -48,7 +54,7 @@
         <i class="maj" aria-hidden="true"></i>
       </div>
     {:else}
-      <p class="lede w">{@html e.body}</p>
+      {#each paras as p}<p class="lede w">{@html p}</p>{/each}
       <div class="w supuestos">
         <div class="shead">Los supuestos</div>
         <a class="tosim" href={simHref} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
