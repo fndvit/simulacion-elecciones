@@ -196,7 +196,7 @@
   <main class="center">
     {#if tab === 'esc'}
       <!-- newest first: each new scenario pushes the rest down -->
-      {#each ESCENARIOS as e (e.slug)}<Escenario {e} />{/each}
+      {#each ESCENARIOS as e, i (e.slug)}<Escenario {e} latest={i === 0} />{/each}
     {:else}
     {#if sim}
     <section class="sec simintro">
