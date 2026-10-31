@@ -1,5 +1,5 @@
 // Escenarios: concrete «what if» questions, each one a set of adjustments to the poll projection.
-// Newest first on the page: add a new one anywhere in the list, the date sorts it.
+// Newest first on the page: the date sorts them; on the same date, the order of this list.
 //  · title and body are HTML (title takes <strong> for the bold half, as the section headings)
 //  · st: only what the scenario moves; the rest stays as in the projection (same shape as the simulator)
 import type { Scenario, RunResult, PartyKey } from './types';
@@ -47,30 +47,6 @@ function sinUltimoEscano(P: string, max = 3): Partial<Scenario> {
 
 const LIST: Escenario[] = [
   {
-    slug: 'vox-sin-ultimo-escano',
-    date: '2026-10-28',
-    title: '¿Y si Vox no se llevase <strong>el último escaño</strong> allá donde está más en disputa?',
-    body: (c) => {
-      const P = 'VOX';
-      const ids = Object.keys(c.st.prov).filter((id) => c.st.prov[id][P]);
-      const lost = (c.base.seats[P] || 0) - (c.cur.seats[P] || 0);
-      const gain = gains(c, P);
-      const top = gain.filter(([, n]) => n === gain[0]?.[1]).map(([k]) => k);
-      // seats that change hands for fewer than a thousand votes
-      const close = ids.filter((id) => votesFor(c, id, P) < 1000).sort((a, b) => votesFor(c, a, P) - votesFor(c, b, P));
-      const out = [
-        `${top.length > 1 ? 'Se reparten el botín ' + listEs(top.map(art)) : 'Se lleva el botín ' + art(top[0])}. En este escenario, con los datos de las encuestas actualizados a ${longDate(c.today)}, Vox pierde ${lost} ${lost === 1 ? 'escaño' : 'escaños'} a favor ${listEs(gain.map(([k]) => de(k)))}.`
-      ];
-      if (close.length)
-        out.push(`${close.length > 1 ? 'Algunos de los escaños, en' : 'El escaño de'} ${listEs(close.map((id) => BYID[id].n))}, se decidirán por apenas unos centenares de votos, muy por debajo del típico margen de error de ±3 puntos porcentuales de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
-      // only while most of these seats are in small constituencies (5 seats or fewer)
-      if (ids.filter((id) => BYID[id].seats <= 5).length > ids.length / 2)
-        out.push(`La mayoría se mueve en circunscripciones pequeñas, lo que sumado al método D'Hondt, eleva el listón a la hora de repartir escaños.`);
-      return out;
-    },
-    st: () => sinUltimoEscano('VOX', 3)
-  },
-  {
     slug: 'vivienda',
     date: '2026-10-28',
     title: '¿Y si es <strong>la crisis de la vivienda</strong> —que desató la convocatoria electoral— lo que decide?',
@@ -97,28 +73,36 @@ const LIST: Escenario[] = [
     st: () => vivienda(75)
   },
   {
+    slug: 'vox-sin-ultimo-escano',
+    date: '2026-10-28',
+    title: '¿Y si Vox no se llevase <strong>el último escaño</strong> allá donde está más en disputa?',
+    body: (c) => {
+      const P = 'VOX';
+      const ids = Object.keys(c.st.prov).filter((id) => c.st.prov[id][P]);
+      const lost = (c.base.seats[P] || 0) - (c.cur.seats[P] || 0);
+      const gain = gains(c, P);
+      const top = gain.filter(([, n]) => n === gain[0]?.[1]).map(([k]) => k);
+      // seats that change hands for fewer than a thousand votes
+      const close = ids.filter((id) => votesFor(c, id, P) < 1000).sort((a, b) => votesFor(c, a, P) - votesFor(c, b, P));
+      const out = [
+        `${top.length > 1 ? 'Se reparten el botín ' + listEs(top.map(art)) : 'Se lleva el botín ' + art(top[0])}. En este escenario, con los datos de las encuestas actualizados a ${longDate(c.today)}, Vox pierde ${lost} ${lost === 1 ? 'escaño' : 'escaños'} a favor ${listEs(gain.map(([k]) => de(k)))}.`
+      ];
+      if (close.length)
+        out.push(`${close.length > 1 ? 'Algunos de los escaños, en' : 'El escaño de'} ${listEs(close.map((id) => BYID[id].n))}, se decidirán por apenas unos centenares de votos, muy por debajo del típico margen de error de ±3 puntos porcentuales de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
+      // only while most of these seats are in small constituencies (5 seats or fewer)
+      if (ids.filter((id) => BYID[id].seats <= 5).length > ids.length / 2)
+        out.push(`La mayoría se mueve en circunscripciones pequeñas, lo que sumado al método D'Hondt, eleva el listón a la hora de repartir escaños.`);
+      return out;
+    },
+    st: () => sinUltimoEscano('VOX', 3)
+  },
+  {
     slug: 'periferia',
     date: '2026-10-28',
     // TEXT PENDING (Xaquín): headline and paragraphs
     title: '¿Y si <strong>el nacionalismo de izquierdas</strong> en Galicia, Cataluña, País Vasco y Navarra galvaniza la resistencia contra la ultraderecha?',
     body: '[Texto pendiente]',
     st: () => periferia()
-  },
-  {
-    // PLACEHOLDER: older scenario, to test the compact layout
-    slug: 'borrador-2',
-    date: '2026-10-21',
-    title: 'Un escenario anterior, <strong>empujado hacia abajo</strong>',
-    body: 'Texto provisional para probar cómo se ven los escenarios antiguos.',
-    st: { nat: { VOX: 2, PP: -2 } }
-  },
-  {
-    // PLACEHOLDER: older scenario, to test the compact layout
-    slug: 'borrador-3',
-    date: '2026-10-14',
-    title: 'Otro escenario más antiguo, <strong>con la participación a la baja</strong>',
-    body: 'Texto provisional para probar cómo se ven los escenarios antiguos.',
-    st: { turnNat: -4, nat: { FA: 1 } }
   }
 ];
 
