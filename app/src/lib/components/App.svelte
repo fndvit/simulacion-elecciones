@@ -37,12 +37,13 @@
   // each view is its own URL (/, /simula, /escenarios); this shell lives in the layout, so it persists
   // between them and the rails can slide in and out instead of the page reloading
   // /metodologia and /quienes-somos are pages of their own: the bar stays, the projection shell does not
-  const tab = $derived<'proj' | 'sim' | 'esc' | 'page'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : page.route.id === '/' ? 'proj' : 'page');
+  const tab = $derived<'proj' | 'sim' | 'esc' | 'dec' | 'page'>(page.route.id === '/simula' ? 'sim' : page.route.id === '/escenarios' ? 'esc' : page.route.id === '/decide' ? 'dec' : page.route.id === '/' ? 'proj' : 'page');
   const sim = $derived(tab === 'sim');
-  // Material Symbols Outlined (weight 400): dashboard, modeling, fork_chart
+  // Material Symbols Outlined (weight 400): dashboard, modeling, fork_chart, list_alt_check
   const ICON = {
     proj: 'M510-570v-270h330v270H510ZM120-450v-390h330v390H120Zm390 330v-390h330v390H510Zm-390 0v-270h330v270H120Zm60-390h210v-270H180v270Zm390 330h210v-270H570v270Zm0-450h210v-150H570v150ZM180-180h210v-150H180v150Zm210-330Zm180-120Zm0 180ZM390-330Z',
     sim: 'M718-145 569-295l149-150 42 43-76 77 196 1v60l-196-1 76 77-42 43Zm-578-15q-24 0-42-18t-18-42v-147q0-24 18-42t42-18h269q24 0 42 18t18 42v147q0 24-18 42t-42 18H140Zm0-60h269v-147H140v147Zm102-297-42-42 76-78H80v-60h196l-76-77 42-42 149 149-149 150Zm309-16q-24 0-42-18t-18-42v-147q0-24 18-42t42-18h269q24 0 42 18t18 42v147q0 24-18 42t-42 18H551Zm0-60h269v-147H551v147ZM409-220v-147 147Zm142-373v-147 147Z',
+    dec: 'M200-200v-560 454-85 191Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v320h-80v-320H200v560h280v80H200Zm494 40L552-222l57-56 85 85 170-170 56 57L694-80ZM320-440q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 160h240v-80H440v80Zm0-160h240v-80H440v80Z',
     esc: 'M120-160v-310q-26-7-43-28t-17-50v-192q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v192q0 29-17 50t-43 28v310h-60Zm480 1q-134 0-227.5-93.5T279-480q0-133 93.5-226.5T600-800q133 0 226.5 93.5T920-480q0 134-93.5 227.5T600-159Zm203-482L642-480l161 162q26-34 41.5-75t15.5-87q0-46-15.5-87T803-641Zm-173-97v186l131-131q-28-22-61-36t-70-19Zm-30 519q46 0 87-15.5t74-41.5L570-467v-271q-98 11-164.5 84.5T339-480q0 109 76 185t185 76Z'
   };
 
@@ -153,6 +154,7 @@
   <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>{@render icon(ICON.proj)}Proyección</a>
   <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
   <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
+  <a href={resolve('/decide')} class:on={tab === 'dec'} aria-current={tab === 'dec' ? 'page' : undefined}>{@render icon(ICON.dec)}Decide</a>
 {/snippet}
 <header class="mast" class:instant class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
@@ -173,7 +175,7 @@
   </section>
 {/if}
 
-{#if tab !== 'page'}
+{#if tab !== 'page' && tab !== 'dec'}
 <div class="scn" class:sim>
   <aside class="rail left" class:big={sheetBig} aria-label="Controles del escenario" aria-hidden={!sim} inert={!sim}>
     <!-- phones only: the sheet's handle and tabs -->

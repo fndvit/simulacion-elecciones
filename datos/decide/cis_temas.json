@@ -1,0 +1,139 @@
+{
+ "estudio": "CIS 3582, barómetro de octubre de 2026",
+ "n": 5024,
+ "temas": {
+  "vivienda": {
+   "espana": 58.7,
+   "personal": 35.0,
+   "problemas": [
+    "La ocupación de viviendas",
+    "La vivienda",
+    "Los desahucios"
+   ]
+  },
+  "inmigracion": {
+   "espana": 28.8,
+   "personal": 15.1,
+   "problemas": [
+    "Crisis con Marruecos. Fronteras de Ceuta y Melilla",
+    "El racismo",
+    "La inmigración"
+   ]
+  },
+  "economia": {
+   "espana": 22.3,
+   "personal": 33.1,
+   "problemas": [
+    "La crisis económica, los problemas de índole económica",
+    "La subida de tarifas energéticas, crisis energética"
+   ]
+  },
+  "empleo": {
+   "espana": 27.8,
+   "personal": 26.0,
+   "problemas": [
+    "El paro",
+    "La Reforma Laboral",
+    "Los problemas relacionados con la calidad del empleo",
+    "Los problemas relacionados con los/as autónomos/as"
+   ]
+  },
+  "sanidad": {
+   "espana": 13.6,
+   "personal": 23.6,
+   "problemas": [
+    "La sanidad"
+   ]
+  },
+  "educacion": {
+   "espana": 8.9,
+   "personal": 11.3,
+   "problemas": [
+    "La educación"
+   ]
+  },
+  "juventud": {
+   "espana": 7.2,
+   "personal": 8.6,
+   "problemas": [
+    "Los problemas relacionados con la juventud. Falta de apoyo y oportunidades para los/as jóvenes"
+   ]
+  },
+  "pensiones": {
+   "espana": 1.3,
+   "personal": 3.8,
+   "problemas": [
+    "Las pensiones"
+   ]
+  },
+  "impuestos": {
+   "espana": 3.9,
+   "personal": 7.6,
+   "problemas": [
+    "El fraude fiscal",
+    "La subida de los impuestos"
+   ]
+  },
+  "corrupcion": {
+   "espana": 40.0,
+   "personal": 18.2,
+   "problemas": [
+    "El Gobierno y partidos o políticos/as concretos/as",
+    "El funcionamiento de la democracia",
+    "El mal comportamiento de los/as políticos/as",
+    "La Administración de Justicia",
+    "La corrupción y el fraude",
+    "Los problemas políticos en general"
+   ]
+  },
+  "seguridad": {
+   "espana": 4.9,
+   "personal": 8.0,
+   "problemas": [
+    "La inseguridad ciudadana",
+    "Las drogas"
+   ]
+  },
+  "clima": {
+   "espana": 5.4,
+   "personal": 7.8,
+   "problemas": [
+    "Catástrofes naturales: crisis de la DANA",
+    "El cambio climático",
+    "El medio ambiente",
+    "Los incendios",
+    "Los problemas relacionados con el agua, la sequía"
+   ]
+  },
+  "desigualdad": {
+   "espana": 8.9,
+   "personal": 8.9,
+   "problemas": [
+    "La violencia de género",
+    "Las desigualdades, incluida la de género, diferencias de clases, la pobreza",
+    "Los problemas de índole social",
+    "Los problemas relacionados con la mujer"
+   ]
+  },
+  "territorio": {
+   "espana": 1.9,
+   "personal": 1.6,
+   "problemas": [
+    "La España vaciada, la despoblación",
+    "La independencia de Cataluña",
+    "Los estatutos de autonomía",
+    "Los nacionalismos"
+   ]
+  },
+  "exterior": {
+   "espana": 9.2,
+   "personal": 6.1,
+   "problemas": [
+    "Crisis con Marruecos. Fronteras de Ceuta y Melilla",
+    "Guerra de Ucrania y Rusia",
+    "Las guerras en general",
+    "Política exterior y relaciones internacionales. Papel de España en el marco internacional"
+   ]
+  }
+ }
+}

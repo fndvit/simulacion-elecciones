@@ -1,0 +1,19 @@
+{
+  "_nota": "edicion: fecha del corpus que usa el cuestionario (AAAAMM). Para los programas del 29N: copiar los PDF a datos/programas/pdf/ con el nombre de «pdf», poner \"edicion\": \"202611\" y ejecutar pdf_a_corpus.py --todos. Si existe datos/programas/<PARTIDO>_<edicion>.csv se usa ese; si no, el del Manifesto Project <mp_id>_<edicion>.csv.",
+  "edicion": "202307",
+  "partidos": {
+    "PP":      {"mp_id": "33610", "fuente": "Programa electoral del PP", "pdf": "PP.pdf"},
+    "PSOE":    {"mp_id": "33320", "fuente": "Programa electoral del PSOE", "pdf": "PSOE.pdf"},
+    "VOX":     {"mp_id": "33710", "fuente": "Programa electoral de Vox", "pdf": "VOX.pdf"},
+    "FA":      {"mp_id": "33021", "fuente": "Programa electoral de Frente Amplio", "pdf": "FA.pdf"},
+    "PODEMOS": {"mp_id": "33210", "fuente": "Programa electoral de Podemos", "pdf": "PODEMOS.pdf"},
+    "ERC":     {"mp_id": "33905", "fuente": "Programa electoral de ERC", "pdf": "ERC.pdf"},
+    "JUNTS":   {"mp_id": "33912", "fuente": "Programa electoral de Junts", "pdf": "JUNTS.pdf"},
+    "BILDU":   {"mp_id": "33095", "fuente": "Programa electoral de EH Bildu", "pdf": "BILDU.pdf"},
+    "PNV":     {"mp_id": "33902", "fuente": "Programa electoral del PNV", "pdf": "PNV.pdf"},
+    "BNG":     {"mp_id": "33908", "fuente": "Programa electoral del BNG", "pdf": "BNG.pdf"},
+    "CC":      {"mp_id": "33907", "fuente": "Programa electoral de Coalición Canaria", "pdf": "CC.pdf"},
+    "UPN":     {"mp_id": "33910", "fuente": "Programa electoral de UPN", "pdf": "UPN.pdf"},
+    "COMP":    {"mp_id": "33914", "fuente": "Programa electoral de Compromís", "pdf": "COMP.pdf"}
+  }
+}

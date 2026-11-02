@@ -40,6 +40,7 @@
       <a href={href('/')}>Proyección</a>
       <a href={href('/simula')}>Simula</a>
       <a href={href('/escenarios')}>Escenarios</a>
+      <a href={href('/decide')}>Decide</a>
       <a href={href('/metodologia')}>Metodología</a>
     </nav>
 

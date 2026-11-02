@@ -8,3 +8,5 @@ datos/*.tmp
 revision.md
 *.nuevo
 datos/wiki_*.json
+datos/decide/codificador.joblib
+datos/programas/pdf/
