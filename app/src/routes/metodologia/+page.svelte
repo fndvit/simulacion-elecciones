@@ -114,7 +114,7 @@
   <div class="prose well">
     <h2>Las <strong>encuestas</strong></h2>
     <p>
-      La materia prima es la <a href="https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election" target="_blank" rel="noopener">tabla de sondeos publicados</a> que mantiene la comunidad de Wikipedia en inglés para estas elecciones: es la
+      La materia prima es la <a href="https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election" target="_blank" rel="noopener">tabla de sondeos publicados</a>  que mantiene la comunidad de <strong>Wikipedia en inglés</strong> para estas elecciones: es la
       recopilación pública más completa y la más al día, cada fila cita la publicación de la que sale y cada cambio queda registrado con su
       autor y su fecha. Hasta noviembre de 2026 usábamos la de la Wikipedia en español, que ha dejado de actualizarse al mismo ritmo. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
       y se normaliza fila a fila: empresa y medio, fechas de campo, tamaño de la muestra, estimación de voto de cada partido en porcentaje
@@ -123,7 +123,7 @@
     <h3>Comprobación cruzada y aprobación</h3>
     <p>
       Lo que se descarga no entra directamente en la media. Primero se compara con la lista de encuestas ya aprobadas, y cada encuesta
-      nueva o cambiada se busca en la <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">tabla de la <strong>Wikipedia en español</strong></a>, que mantienen en buena parte otras personas: si
+      nueva o cambiada se busca a su vez en la <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">tabla de la <strong>Wikipedia en español</strong></a>, que mantienen en buena parte otras personas: si
       PP, PSOE o Vox no coinciden (misma empresa, fin de campo con un día de margen), se marca. Después, <strong>una persona del equipo
       revisa</strong> las novedades —con el enlace a la fuente de cada una— y las aprueba o las corrige. Solo entonces se recalcula la
       media.{#if SRC?.timestamp} Las encuestas aprobadas ahora salen de la <a href={SRC.url} target="_blank" rel="noopener">revisión

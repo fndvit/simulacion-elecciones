@@ -1,18 +1,18 @@
 import type { PartyKey } from './types';
 
 export const PARTY: Record<PartyKey, { n: string; c: string; statewide?: boolean }> = {
-  PP: { n: 'PP', c: '#005aaa', statewide: true },
+  PP: { n: 'PP', c: '#1e4a90', statewide: true },
   PSOE: { n: 'PSOE', c: '#ee3135', statewide: true },
-  VOX: { n: 'Vox', c: '#63be21', statewide: true },
+  VOX: { n: 'Vox', c: '#7CBD2A', statewide: true },
   FA: { n: 'Frente Amplio', c: '#e51c6b', statewide: true },
   PODEMOS: { n: 'Podemos', c: '#7b55c7', statewide: true },
   SALF: { n: 'SALF', c: '#8c7a6b', statewide: true },
   COMP: { n: 'Compromís', c: '#f07d2a' },
   ERC: { n: 'ERC', c: '#f6c500' },
   JUNTS: { n: 'Junts', c: '#00c3b2' },
-  BILDU: { n: 'EH Bildu', c: '#9fca3a' },
-  PNV: { n: 'PNV', c: '#0aa04b' },
-  BNG: { n: 'BNG', c: '#6a9bca' },
+  BILDU: { n: 'EH Bildu', c: '#00AC8E' },
+  PNV: { n: 'PNV', c: '#40802d' },
+  BNG: { n: 'BNG', c: '#6AADE4' },
   CC: { n: 'CC', c: '#e0b000' },
   UPC: { n: 'Unidad P. Canario', c: '#a3528c' },
   UPN: { n: 'UPN', c: '#2a52be' },
