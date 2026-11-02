@@ -1,9 +1,9 @@
 # Actualización diaria del simulador, con una persona que aprueba las encuestas nuevas.
 #
 # Cada mañana, dos trabajos:
-#   1. «revisar»: lee la Wikipedia en español (anotando la revisión exacta), valida la tabla, la compara con
+#   1. «revisar»: lee la Wikipedia en inglés (anotando la revisión exacta), valida la tabla, la compara con
 #      la lista aprobada (datos/polls.csv en main) y comprueba cada encuesta nueva o cambiada con la Wikipedia
-#      en inglés. Si hay cambios, los sube a la rama «encuestas-pendientes» y abre o actualiza un pull request
+#      en español (desde noviembre de 2026; antes era al revés, pero la española se quedó atrás). Si hay cambios, los sube a la rama «encuestas-pendientes» y abre o actualiza un pull request
 #      con el detalle. Nada de esto llega a la web hasta que alguien aprueba el pull request (merge).
 #   2. «publicar»: recalcula la media y la proyección con la lista aprobada para la fecha del día (las
 #      encuestas pierden peso con los días), comprueba los datos, compila y hace commit. Vercel publica cada

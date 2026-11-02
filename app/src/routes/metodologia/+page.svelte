@@ -55,7 +55,7 @@
 
   // ── sources ───────────────────────────────────────────────────────────
   const sources = [
-    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en español (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en inglés y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026', d: 'Cada día' },
+    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en inglés (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en español y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election', d: 'Cada día' },
     { q: 'Transferencias de voto', s: 'Microdatos del barómetro mensual del CIS (recuerdo de voto e intención de voto)', u: 'https://www.cis.es', d: 'Cada mes' },
     { q: 'Resultados electorales', s: 'Ministerio del Interior, infoelectoral: generales de abril y noviembre de 2019 y julio de 2023, por circunscripción', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
     { q: 'Quién se suma al cambiar la participación', s: 'Ministerio del Interior, infoelectoral: generales de julio de 2023, por mesa electoral', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
@@ -76,6 +76,10 @@
   async function copyBib() {
     try { await navigator.clipboard.writeText(bibtex); copied = true; setTimeout(() => (copied = false), 1600); } catch { /* no clipboard */ }
   }
+  // the Wikipedia revision the approved polls come from (English since November 2026; older data: Spanish)
+  const SRC_EN = DATA.fuente?.principal === 'wikipedia_en';
+  const SRC = SRC_EN ? DATA.fuente?.wikipedia_en : DATA.fuente?.wikipedia_es;
+  const SRC_LANG = SRC_EN ? 'inglés' : 'español';
 </script>
 
 <svelte:head>
@@ -110,20 +114,20 @@
   <div class="prose well">
     <h2>Las <strong>encuestas</strong></h2>
     <p>
-      La materia prima es la <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">tabla de sondeos publicados</a> que mantiene la comunidad de Wikipedia en español para estas elecciones: es la
-      recopilación pública más completa, cada fila cita la publicación de la que sale y cada cambio queda registrado con su autor y su
-      fecha. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
+      La materia prima es la <a href="https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election" target="_blank" rel="noopener">tabla de sondeos publicados</a> que mantiene la comunidad de Wikipedia en inglés para estas elecciones: es la
+      recopilación pública más completa y la más al día, cada fila cita la publicación de la que sale y cada cambio queda registrado con su
+      autor y su fecha. Hasta noviembre de 2026 usábamos la de la Wikipedia en español, que ha dejado de actualizarse al mismo ritmo. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
       y se normaliza fila a fila: empresa y medio, fechas de campo, tamaño de la muestra, estimación de voto de cada partido en porcentaje
       del voto válido y enlace a la fuente. Cuenta el <strong>último día de campo</strong>, no la fecha de publicación.
     </p>
     <h3>Comprobación cruzada y aprobación</h3>
     <p>
       Lo que se descarga no entra directamente en la media. Primero se compara con la lista de encuestas ya aprobadas, y cada encuesta
-      nueva o cambiada se busca en la <a href="https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election" target="_blank" rel="noopener">tabla de la <strong>Wikipedia en inglés</strong></a>, que mantienen en buena parte otras personas: si
+      nueva o cambiada se busca en la <a href="https://es.wikipedia.org/wiki/Encuestas_de_opini%C3%B3n_para_las_elecciones_generales_de_Espa%C3%B1a_de_2026" target="_blank" rel="noopener">tabla de la <strong>Wikipedia en español</strong></a>, que mantienen en buena parte otras personas: si
       PP, PSOE o Vox no coinciden (misma empresa, fin de campo con un día de margen), se marca. Después, <strong>una persona del equipo
       revisa</strong> las novedades —con el enlace a la fuente de cada una— y las aprueba o las corrige. Solo entonces se recalcula la
-      media.{#if DATA.fuente?.wikipedia_es} Las encuestas aprobadas ahora salen de la <a href={DATA.fuente.wikipedia_es.url} target="_blank" rel="noopener">revisión
-      {DATA.fuente.wikipedia_es.revid}</a> de la Wikipedia en español, del {longDate(DATA.fuente.wikipedia_es.timestamp.slice(0, 10))}.{/if}
+      media.{#if SRC?.timestamp} Las encuestas aprobadas ahora salen de la <a href={SRC.url} target="_blank" rel="noopener">revisión
+      {SRC.revid}</a> de la Wikipedia en {SRC_LANG}, del {longDate(SRC.timestamp.slice(0, 10))}.{/if}
     </p>
     <p>
       El <strong>CIS</strong> cuenta una vez por barómetro, con su propia estimación, y su sesgo respecto a las demás empresas se corrige

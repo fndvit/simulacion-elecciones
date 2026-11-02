@@ -7,7 +7,7 @@
   - `src/lib/hex.ts` — cartograma de hexágonos (un escaño por hexágono; referencia: proyección o 2023).
 - `datos/` — resultados de Interior (2019A, 2019N, 2023), encuestas (`polls.csv`), cartograma y datos de la app.
 - `modelo/` — Python:
-  - `fetch_polls.py` lee las encuestas de Wikipedia (`tests/` comprueba el lector con un HTML de muestra); `fetch_en.py` lee la tabla de la Wikipedia en inglés para la comprobación cruzada; `actualizar.py` valida, compara con la lista aprobada y prepara el pull request de revisión, y `comprobar.py` revisa los datos de la app antes de publicar.
+  - `fetch_en.py` lee las encuestas de la Wikipedia en inglés, la fuente principal desde noviembre de 2026; `fetch_polls.py` lee la tabla de la Wikipedia en español, que ahora sirve para la comprobación cruzada, y guarda las piezas comunes a los dos lectores (`tests/` comprueba los dos con HTML de muestra); `actualizar.py` valida, compara con la lista aprobada y prepara el pull request de revisión, y `comprobar.py` revisa los datos de la app antes de publicar.
   - `polls.py` hace la media de encuestas al estilo 538.
   - `projection.py` y `export.py` generan `datos/app_data.json`.
   - `hexmap.py` genera `datos/hex.json` y `voronoi.py`, `datos/vor.json` (mapa geográfico); solo hay que volver a ejecutarlos si cambia el reparto de escaños.
@@ -18,9 +18,9 @@
 
 1. **Revisar** (trabajo `revisar`):
    - Tests de los dos lectores de Wikipedia.
-   - `modelo/actualizar.py` descarga la tabla de la Wikipedia en español (tres intentos) y anota la **revisión exacta** (`revid`, fecha y enlace `oldid`), y la **valida**: al menos 50 encuestas, no pierde más del 10 %, la más reciente no retrocede, sin fechas futuras, PP y PSOE con valores razonables, ninguna encuesta que sume más del 115 %. Cada encuesta lleva el enlace a su fuente original (la nota al pie de Wikipedia).
+   - `modelo/actualizar.py` descarga la tabla de la Wikipedia en inglés (tres intentos) y anota la **revisión exacta** (`revid`, fecha y enlace `oldid`), y la **valida**: al menos 50 encuestas, no pierde más del 10 %, la más reciente no retrocede, sin fechas futuras, PP y PSOE con valores razonables, ninguna encuesta que sume más del 115 %. Cada encuesta lleva el enlace a su fuente original (la nota al pie de Wikipedia).
    - La compara con la lista aprobada (`datos/polls.csv` en `main`) por empresa y fecha de fin de campo: nuevas, cambiadas y retiradas.
-   - Cada encuesta nueva o cambiada se busca en la Wikipedia en inglés (misma empresa, ±1 día) y se comparan PP, PSOE y Vox: *coincide*, *difiere* o *no figura*. Es solo una comprobación: no entra en la media.
+   - Cada encuesta nueva o cambiada se busca en la Wikipedia en español (misma empresa, ±1 día) y se comparan PP, PSOE y Vox: *coincide*, *difiere* o *no figura*. Es solo una comprobación: no entra en la media. La española va con retraso, así que *no figura* es frecuente en las más recientes.
    - Si hay cambios, los sube a la rama `encuestas-pendientes` (con `datos/fuente.json` y la copia de respaldo) y abre o actualiza un **pull request** con la etiqueta `revision-encuestas` y una tabla con cada cambio, su fuente y la comprobación en inglés.
 2. **Aprobar** (una persona): revisa el pull request —sobre todo las filas marcadas *difiere* o *no figura*— y, si está bien, lo **fusiona** (merge). Si algo no cuadra, puede corregir `datos/polls.csv` en la misma rama o cerrar el pull request. Mientras no se apruebe, cada mañana se actualiza el mismo pull request.
 3. **Publicar** (trabajo `publicar`): siempre con la lista aprobada de `main`. Recalcula la media y la proyección para la fecha del día (`export.py`; las encuestas pierden peso con los días, así que se publica cada día aunque no haya encuestas nuevas), comprueba los datos (`comprobar.py`: 52 circunscripciones, 350 escaños, media que suma ~100 %), compila y hace commit. Al fusionar un pull request de encuestas, el push a `main` lanza este trabajo al momento. **Vercel** publica cada commit de `main` según `vercel.json`.
@@ -30,7 +30,7 @@ La tabla de Wikipedia se publica con licencia **CC BY-SA 4.0**; `datos/polls.csv
 **Si algo falla, nunca se publica nada a medias:**
 
 - Wikipedia caída, cambio de formato o datos raros → no se propone nada; la web sigue con la lista aprobada.
-- Si no se puede leer la Wikipedia en inglés, el pull request lo dice y la revisión se hace sin esa comprobación.
+- Si no se puede leer la Wikipedia en español, el pull request lo dice y la revisión se hace sin esa comprobación.
 - Falla el cálculo, la comprobación o la compilación → no hay commit, así que Vercel no despliega nada nuevo; la página sigue siendo la del último día correcto.
 - En ambos casos se abre un issue con la etiqueta `fallo-datos` (o se comenta el que ya esté abierto), y GitHub te avisa. Cuando vuelve a funcionar, el issue se cierra solo.
 - Para volver atrás a mano: copia el fichero que quieras de `datos/respaldo/` sobre `datos/polls.csv` en `main` (eso relanza la publicación), o usa el historial de git.

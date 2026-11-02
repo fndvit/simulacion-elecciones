@@ -19,7 +19,8 @@ export interface AppData {
   ratings: Record<string, [number, number]>; he: Record<string, Record<string, number>>; heN: Record<string, number>;
   wElec: Record<string, number>; polls: Poll[];
   /** vote transfers 2023 → projection per province (CIS recall × intention fitted to each province's totals) */
-  fuente?: { wikipedia_es?: { title: string; revid: number; timestamp: string; url: string }; wikipedia_en?: { revid: number; url: string } | null; leido?: string };
+  /** principal: the Wikipedia the polls are read from (English since November 2026); the other one is the cross-check */
+  fuente?: { principal?: 'wikipedia_en' | 'wikipedia_es'; wikipedia_es?: { title: string; revid: number; timestamp: string; url: string } | null; wikipedia_en?: { title?: string; revid: number; timestamp?: string; url: string } | null; leido?: string };
   /** who joins / stays home when turnout changes: multiplier per party on its provincial vote (2023 polling-station abstention) */
   tp: Record<string, { up: Record<string, number>; down: Record<string, number> }>; tpMeta: { fuente: string; mesas: number };
   tr: Record<string, [string, string, number][]>; trMeta: { study: string; title: string; n: number }; series: ({ d: string } & Record<string, number>)[];
