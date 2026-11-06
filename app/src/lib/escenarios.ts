@@ -88,7 +88,7 @@ const LIST: Escenario[] = [
         `${top.length > 1 ? 'Se reparten el botín ' + listEs(top.map(art)) : 'Se lleva el botín ' + art(top[0])}. En este escenario, con los datos de las encuestas actualizados a ${longDate(c.today)}, Vox pierde ${lost} ${lost === 1 ? 'escaño' : 'escaños'} a favor ${listEs(gain.map(([k]) => de(k)))}.`
       ];
       if (close.length)
-        out.push(`${close.length > 1 ? 'Algunos de los escaños, en' : 'El escaño de'} ${listEs(close.map((id) => BYID[id].n))}, se decidirán por apenas unos centenares de votos, muy por debajo del típico margen de error de ±3 puntos porcentuales de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
+        out.push(`${close.length > 1 ? `Algunos de los escaños, en ${listEs(close.map((id) => BYID[id].n))}, se decidirán` : `El escaño de ${BYID[close[0]].n} se decidirá`} por apenas unos centenares de votos, muy por debajo del típico margen de error de ±3 puntos porcentuales de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
       // only while most of these seats are in small constituencies (5 seats or fewer)
       if (ids.filter((id) => BYID[id].seats <= 5).length > ids.length / 2)
         out.push(`La mayoría se mueve en circunscripciones pequeñas, lo que sumado al método D'Hondt, eleva el listón a la hora de repartir escaños.`);

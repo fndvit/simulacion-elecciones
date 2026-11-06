@@ -19,6 +19,7 @@
   import HistoryRail from './HistoryRail.svelte';
   import VitLogo from './VitLogo.svelte';
   import Escenario from './Escenario.svelte';
+  import EscenarioCard from './EscenarioCard.svelte';
   import { ESCENARIOS } from '$lib/escenarios';
   // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
   import logo350 from '$lib/assets/logo-350.svg?raw';
@@ -52,6 +53,20 @@
   // in-page jump without touching the hash (the router lives there)
   function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const entries = $derived(historyEntries(st));
+  // Escenarios: the list at the top; the chosen one, whole, below it (the newest to start with)
+  let escSel = $state(ESCENARIOS[0]?.slug);
+  const escOn = $derived(ESCENARIOS.find((x) => x.slug === escSel) || ESCENARIOS[0]);
+  let escList = $state<HTMLElement>(), escFull = $state<HTMLElement>();
+  let listOut = $state(false);   // the list has scrolled out of view: «Ver más escenarios» shows
+  const navOffset = () => (mastEl?.getBoundingClientRect().height || 60) + 16;
+  const scrollToEl = (el?: HTMLElement) => { if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - navOffset(), behavior: reduce() ? 'auto' : 'smooth' }); };
+  async function pickEsc(slug: string) { escSel = slug; await tick(); scrollToEl(escFull); }
+  $effect(() => {
+    if (!escList) return;
+    const io = new IntersectionObserver(([x]) => (listOut = !x.isIntersecting && x.boundingClientRect.top < 0), { rootMargin: `-${navOffset()}px 0px 0px 0px` });
+    io.observe(escList);
+    return () => io.disconnect();
+  });
   // phones: the controls live in a bottom sheet (a quarter of the screen, or expanded to almost all of it)
   // with two tabs, controls and history
   let sheetBig = $state(false);
@@ -152,7 +167,7 @@
 {#snippet tablinks()}
   <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>{@render icon(ICON.proj)}Proyección</a>
   <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
-  <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
+  <a href={resolve('/escenarios')} class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}Escenarios</a>
 {/snippet}
 <header class="mast" class:instant class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
@@ -195,8 +210,20 @@
 
   <main class="center">
     {#if tab === 'esc'}
-      <!-- newest first: each new scenario pushes the rest down -->
-      {#each ESCENARIOS as e, i (e.slug)}<Escenario {e} latest={i === 0} />{/each}
+      <!-- the list, newest first: each new scenario pushes the rest along -->
+      <section class="sec esc-list" bind:this={escList} aria-label="Escenarios">
+        <ul class="cards">
+          {#each ESCENARIOS as e (e.slug)}<li><EscenarioCard {e} selected={e.slug === escOn?.slug} onselect={() => pickEsc(e.slug)} /></li>{/each}
+        </ul>
+      </section>
+      {#if escOn}
+        <div class="esc-full" bind:this={escFull}>{#key escOn.slug}<div in:fade={{ duration: 250 }}><Escenario e={escOn} /></div>{/key}</div>
+      {/if}
+      <!-- back to the list, once it has scrolled away -->
+      <button type="button" class="tolist" class:show={listOut} tabindex={listOut ? 0 : -1} aria-hidden={!listOut} onclick={() => scrollToEl(escList)}>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        Ver más escenarios
+      </button>
     {:else}
     {#if sim}
     <section class="sec simintro">
@@ -260,15 +287,12 @@
   /* tabs: right-aligned, ending on the grid's last column (the title bar shares the grid's edges) */
   .tabs { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 26px; min-width: 0; }
   .tabs a { text-decoration: none; }
-  .tabs a, .soon { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap;
+  .tabs a { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap;
     background: none; border: 0; padding: 10px 0 8px; border-bottom: 2px solid transparent; color: var(--muted); }
   .tabs a { cursor: pointer; }
   .tabs a:hover { color: var(--ink); }
   .tabs a.on { color: var(--ink); border-bottom-color: var(--ink); }
   .ti { width: 18px; height: 18px; fill: currentColor; flex: none; }
-  .soon em { margin-right: -2px; }
-  .soon:not(.on) { opacity: 0.55; }
-  .soon em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
 
   /* page grid: rail · gap · centre · gutter · rail. In the projection the rail tracks are 0 and the
      rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
@@ -288,6 +312,17 @@
   .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
+  /* Escenarios: the list of scenarios, one card each (three to a row on wide screens) */
+  .cards { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+  .cards li { display: flex; }
+  .esc-full { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
+  .esc-full > div { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
+  /* «Ver más escenarios»: the site's button, top right under the title bar, while the list is out of view */
+  .tolist { position: fixed; z-index: 25; top: calc(var(--nav-h) + 10px); right: max(16px, calc((100vw - 1262px) / 2)); display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg);
+    padding: 7px 16px 7px 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+  .tolist.show { opacity: 1; transform: none; pointer-events: auto; }
+  .tolist:hover { opacity: 0.85; }
   /* the sheet's handle, tabs and history copy only exist on phones */
   .sheet-head, .sheet-hist { display: none; }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
@@ -363,9 +398,7 @@
     font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap; color: rgba(214, 209, 211, 0.6); }
   .h-tabs a:hover { color: #fff; }
   .h-tabs a.on { color: #fff; border-bottom-color: #fff; }
-  .h-tabs .soon:not(.on) { color: rgba(214, 209, 211, 0.4); opacity: 1; }
   .h-tabs .ti { width: 36px; height: 36px; }
-  .h-tabs em { font-style: normal; font-weight: 300; text-transform: none; letter-spacing: 0; font-size: 13px; }
   .intro .jump { color: inherit; }
 
   /* tabs drop to their own row under the name */
