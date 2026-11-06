@@ -212,9 +212,7 @@
     {#if tab === 'esc'}
       <!-- the list, newest first: each new scenario pushes the rest along -->
       <section class="sec esc-list" bind:this={escList} aria-label="Escenarios">
-        <ul class="cards">
-          {#each ESCENARIOS as e (e.slug)}<li><EscenarioCard {e} selected={e.slug === escOn?.slug} onselect={() => pickEsc(e.slug)} /></li>{/each}
-        </ul>
+        {#each ESCENARIOS as e (e.slug)}<div class="sec stackitem"><EscenarioCard {e} selected={e.slug === escOn?.slug} onselect={() => pickEsc(e.slug)} /></div>{/each}
       </section>
       {#if escOn}
         <div class="esc-full" bind:this={escFull}>{#key escOn.slug}<div in:fade={{ duration: 250 }}><Escenario e={escOn} /></div>{/key}</div>
@@ -312,9 +310,10 @@
   .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
-  /* Escenarios: the list of scenarios, one card each (three to a row on wide screens) */
-  .cards { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
-  .cards li { display: flex; }
+  /* Escenarios: the list of scenarios, one under the other, a rule between them */
+  .esc-list { row-gap: 0; }
+  .stackitem { padding: var(--s2) 0; border-top: 1px solid var(--line); }
+  .stackitem:first-child { padding-top: 0; border-top: 0; }
   .esc-full { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
   .esc-full > div { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
   /* «Ver más escenarios»: the site's button, top right under the title bar, while the list is out of view */

@@ -1,8 +1,7 @@
 <script lang="ts">
   // One scenario, as the projection page below the hero: headline, date, presentation, the adjustments it
   // makes (each with the seats it moves on its own; the whole set opens in the simulator), the seat bar
-  // against the projection and, behind «Leer más», the map and the closest seats.
-  import { slide } from 'svelte/transition';
+  // against the projection, the map and the closest seats.
   import SeatBar from './SeatBar.svelte';
   import HexMap from './HexMap.svelte';
   import LastSeat from './LastSeat.svelte';
@@ -31,12 +30,10 @@
   });
   let scope = $state('ES');
   let focusParty = $state('PP');
-  let open = $state(false);
   // the adjustments: beyond three, only the first two until asked
   const FOLD = 3, SHOW = 2;
   let allSup = $state(false);
   const shown = $derived(entries.length > FOLD && !allSup ? entries.slice(0, SHOW) : entries);
-  const toggle = () => (open = !open);
   // Material Symbols Outlined fork_chart, as the Escenarios tab
   const FORK = 'M120-160v-310q-26-7-43-28t-17-50v-192q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v192q0 29-17 50t-43 28v310h-60Zm480 1q-134 0-227.5-93.5T279-480q0-133 93.5-226.5T600-800q133 0 226.5 93.5T920-480q0 134-93.5 227.5T600-159Zm203-482L642-480l161 162q26-34 41.5-75t15.5-87q0-46-15.5-87T803-641Zm-173-97v186l131-131q-28-22-61-36t-70-19Zm-30 519q46 0 87-15.5t74-41.5L570-467v-271q-98 11-164.5 84.5T339-480q0 109 76 185t185 76Z';
   const nm = (k: string) => PARTY[k as PartyKey].n;
@@ -70,19 +67,11 @@
       <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
   </section>
 
-  {#if open}
-    <section class="sec" transition:slide={{ duration: 350 }}>
-      <h3 class="hd w">Así quedaría <strong>el reparto por provincias</strong> en este escenario.</h3>
-      <HexMap {cur} bind:scope bind:focusParty who="este" />
-    </section>
-    <section class="sec" transition:slide={{ duration: 350 }}><div class="w stack"><LastSeat {cur} bind:scope who="este" /></div></section>
-  {/if}
-  <div class="w more">
-    <button type="button" aria-expanded={open} aria-controls={e.slug} onclick={toggle}>
-      {open ? 'Leer menos' : 'Leer más'}
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class:flip={open}><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
-    </button>
-  </div>
+  <section class="sec">
+    <h3 class="hd w">Así quedaría <strong>el reparto por provincias</strong> en este escenario.</h3>
+    <HexMap {cur} bind:scope bind:focusParty who="este" />
+  </section>
+  <section class="sec"><div class="w stack"><LastSeat {cur} bind:scope who="este" /></div></section>
 </article>
 
 <style>
@@ -120,10 +109,5 @@
   .tosim:hover, .tosim:focus-visible { padding: 0 16px 0 12px; }
   .tosim:hover .lbl, .tosim:focus-visible .lbl { max-width: 200px; opacity: 1; margin-left: 7px; }
   .tosim { transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  .more button { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer;
-    border: 0; border-radius: 999px; background: var(--ink); color: var(--bg); padding: 7px 12px 7px 16px; }
-  .more button:hover { opacity: 0.85; }
-  .more svg { transition: transform 0.3s ease; }
-  .more svg.flip { transform: rotate(180deg); }
   .stack { display: flex; flex-direction: column; gap: 14px; }
 </style>
