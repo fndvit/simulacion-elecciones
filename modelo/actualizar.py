@@ -2,11 +2,12 @@
 Paso diario de datos: propone las encuestas nuevas para que una persona las apruebe.
 Lo ejecuta el workflow de GitHub Actions; también se puede lanzar a mano.
 
-1. Descarga la página de encuestas de la Wikipedia en español (fetch_polls.py) y anota la revisión exacta.
+1. Descarga la tabla de encuestas de la Wikipedia en inglés (fetch_en.py) y anota la revisión exacta. Es la
+   fuente principal desde noviembre de 2026: la de la Wikipedia en español quedó desactualizada.
 2. Valida lo descargado contra datos/polls.csv, la lista APROBADA. Si algo falla (red, cambio de formato,
    tabla a medias, valores absurdos), no se propone nada y se informa del motivo.
 3. Compara con la lista aprobada: encuestas nuevas, cambiadas y retiradas. Cada nueva o cambiada se busca en
-   la Wikipedia en inglés (fetch_en.py) para comprobar PP, PSOE y Vox.
+   la Wikipedia en español (fetch_polls.py) para comprobar PP, PSOE y Vox.
 4. Si hay cambios, escribe la lista propuesta en datos/polls.csv, la revisión usada en datos/fuente.json y el
    informe para la persona que revisa en revision.md. El workflow lo sube a la rama «encuestas-pendientes» y
    abre (o actualiza) un pull request; la web solo usa las encuestas cuando alguien lo aprueba (merge).
@@ -31,7 +32,7 @@ def fetch_with_retries(tries=3, wait=60):
     import time
     for i in range(tries):
         try:
-            return F.fetch_page()
+            return EN.fetch()
         except Exception as e:
             if i == tries - 1:
                 raise
@@ -88,13 +89,13 @@ def fmt(x):
     return x.replace('.', ',') if x else '–'
 
 
-def report(added, changed, removed, checks, es, en, en_err):
+def report(added, changed, removed, checks, en, es, es_err):
     """the pull request body, in Spanish, for the person who approves"""
     L = ['## Encuestas para revisar', '',
-         f'Leídas de la [Wikipedia en español, revisión {es["revid"]}]({es["url"]}) ({es["timestamp"][:16].replace("T", " ")} UTC).']
-    if en: L.append(f'Comprobadas con la [Wikipedia en inglés, revisión {en["revid"]}]({en["url"]}): PP, PSOE y Vox, misma empresa y fin de campo (±1 día).')
-    else: L.append(f'**No se ha podido comprobar con la Wikipedia en inglés** ({en_err}). Revisa las cifras con la fuente.')
-    L += ['', '| | Encuestadora | Fin de campo | Muestra | PP | PSOE | Vox | Sumar/FA | Fuente | Wikipedia en inglés |', '|---|---|---|---|---|---|---|---|---|---|']
+         f'Leídas de la [Wikipedia en inglés, revisión {en["revid"]}]({en["url"]}) ({en["timestamp"][:16].replace("T", " ")} UTC).']
+    if es: L.append(f'Comprobadas con la [Wikipedia en español, revisión {es["revid"]}]({es["url"]}): PP, PSOE y Vox, misma empresa y fin de campo (±1 día). La española va con retraso: «no figura» suele querer decir que aún no la ha recogido.')
+    else: L.append(f'**No se ha podido comprobar con la Wikipedia en español** ({es_err}). Revisa las cifras con la fuente.')
+    L += ['', '| | Encuestadora | Fin de campo | Muestra | PP | PSOE | Vox | Sumar/FA | Fuente | Wikipedia en español |', '|---|---|---|---|---|---|---|---|---|---|']
     col = {k: i for i, k in enumerate(F.HEAD)}
     def line(kind, r, chk='', old=None):
         cell = lambda k: (f'{fmt(old[col[k]])} → **{fmt(r[col[k]])}**' if old and old[col[k]] != r[col[k]] else fmt(r[col[k]]))
@@ -103,10 +104,10 @@ def report(added, changed, removed, checks, es, en, en_err):
         return f'| {kind} | {r[0]} | {r[1]} | {cell("n")} | {cell("PP")} | {cell("PSOE")} | {cell("VOX")} | {fmt(sumar)} | {src} | {chk} |'
     for r, chk in added: L.append(line('Nueva', r, chk))
     for r, old, chk in changed: L.append(line('Cambiada', r, chk, old))
-    for r in removed: L.append(line('Retirada', r, 'ya no está en la Wikipedia en español'))
+    for r in removed: L.append(line('Retirada', r, 'ya no está en la Wikipedia en inglés'))
     dif = sum(1 for c in checks if c == 'difiere')
     L += ['', f'**{nn(len(added), "nueva", "nuevas")}, {nn(len(changed), "cambiada", "cambiadas")}, {nn(len(removed), "retirada", "retiradas")}.**'
-          + (f' {nn(dif, "no coincide", "no coinciden")} con la Wikipedia en inglés: revísala{"s" if dif > 1 else ""} con la fuente antes de aprobar.' if dif else ''),
+          + (f' {nn(dif, "no coincide", "no coinciden")} con la Wikipedia en español: revísala{"s" if dif > 1 else ""} con la fuente antes de aprobar.' if dif else ''),
           '', 'Al aprobar (merge), la web recalcula la media y se publica en unos minutos. Si una cifra está mal, corrígela en `datos/polls.csv` en esta rama antes de aprobar, o cierra el pull request para no usar estos cambios.',
           '', 'La rama se rehace cada mañana con lo que haya en Wikipedia: los cambios que no se hayan aprobado siguen apareciendo.']
     return '\n'.join(L) + '\n'
@@ -115,8 +116,8 @@ def report(added, changed, removed, checks, es, en, en_err):
 def main():
     old = read_current()
     try:
-        es = fetch_with_retries()
-        new = [p for p in F.parse(es['text'], today=dt.date.today()) if p['end'] >= SINCE]
+        en = fetch_with_retries()
+        new = [p for p in EN.parse(en['text'], today=dt.date.today()) if p['end'] >= SINCE]
     except Exception as e:  # red, API, HTML irreconocible…
         out(estado='respaldo', cambios='no', motivo=f'no se pudo descargar o leer Wikipedia: {type(e).__name__}: {e}'.replace('\n', ' ')[:300])
         return
@@ -135,15 +136,15 @@ def main():
     changed_k = [k for k in nxt if k in cur and not same(nxt[k], cur[k])]
     removed_k = [k for k in cur if k not in nxt]
     if not (added_k or changed_k or removed_k):
-        out(estado='ok', cambios='no', motivo=f'{len(new)} encuestas en Wikipedia, ninguna nueva ni cambiada')
+        out(estado='ok', cambios='no', motivo=f'{len(new)} encuestas en la Wikipedia en inglés, ninguna nueva ni cambiada')
         return
     try:
-        en = EN.fetch(); en_polls = EN.parse(en['text']); en_err = ''
+        es = F.fetch_page(); es_polls = F.parse(es['text'], today=dt.date.today()); es_err = ''
     except Exception as e:
-        en, en_polls, en_err = None, [], f'{type(e).__name__}: {e}'.replace('\n', ' ')[:200]
+        es, es_polls, es_err = None, [], f'{type(e).__name__}: {e}'.replace('\n', ' ')[:200]
     checks = []
     def check(k):
-        c, txt = EN.compare(bysrc[k], en_polls) if en else ('sin comprobar', 'sin comprobar')
+        c, txt = EN.compare(bysrc[k], es_polls) if es else ('sin comprobar', 'sin comprobar')
         checks.append(c); return txt
     added = [(nxt[k], check(k)) for k in added_k]
     changed = [(nxt[k], cur[k], check(k)) for k in changed_k]
@@ -157,13 +158,13 @@ def main():
             os.remove(f)
     F.write(new, POLLS)
     meta = lambda r: r and {k: r[k] for k in ('title', 'revid', 'timestamp', 'url')}
-    json.dump(dict(wikipedia_es=meta(es), wikipedia_en=meta(en), leido=dt.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ'), licencia='CC BY-SA 4.0'),
+    json.dump(dict(principal='wikipedia_en', wikipedia_en=meta(en), wikipedia_es=meta(es), leido=dt.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ'), licencia='CC BY-SA 4.0'),
               open(SOURCE, 'w'), ensure_ascii=False, indent=1)
-    open(REPORT, 'w').write(report(added, changed, removed, checks, es, en, en_err))
+    open(REPORT, 'w').write(report(added, changed, removed, checks, en, es, es_err))
     dif = sum(1 for c in checks if c == 'difiere')
     out(estado='ok', cambios='si', nuevas=len(added), cambiadas=len(changed), retiradas=len(removed), difieren=dif,
         motivo=f'{nn(len(added), "nueva", "nuevas")}, {nn(len(changed), "cambiada", "cambiadas")}, {nn(len(removed), "retirada", "retiradas")}'
-               + (f'; {nn(dif, "no coincide", "no coinciden")} con la Wikipedia en inglés' if dif else ''))
+               + (f'; {nn(dif, "no coincide", "no coinciden")} con la Wikipedia en español' if dif else ''))
 
 
 if __name__ == '__main__':

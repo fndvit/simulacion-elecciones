@@ -202,7 +202,7 @@
     <p class="empty">No hay datos para este ámbito.</p>
   {/if}
 </div>
-<p class="method c7">Patrón de trasvases: recuerdo de voto en 2023 e intención de voto del {DATA.trMeta.title} del CIS ({fmtN(DATA.trMeta.n)} entrevistas), ajustado al resultado de 2023 y a la proyección en cada circunscripción. <a href={href('/metodologia')}>Cómo se calcula</a>.</p>
+<p class="method w">Patrón de trasvases: recuerdo de voto en 2023 e intención de voto del {DATA.trMeta.title} del CIS ({fmtN(DATA.trMeta.n)} entrevistas), ajustado al resultado de 2023 y a la proyección en cada circunscripción. <a href={href('/metodologia')}>Cómo se calcula</a>.</p>
 
 <style>
   .sankey { min-width: 0; position: relative; }

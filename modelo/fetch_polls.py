@@ -1,5 +1,8 @@
 """
-Descarga las encuestas de Wikipedia y regenera datos/polls.csv.
+Lector de la tabla de encuestas de la Wikipedia en español. Desde noviembre de 2026 es la fuente de la
+COMPROBACIÓN CRUZADA (la principal es la Wikipedia en inglés, fetch_en.py), y guarda las piezas comunes a los
+dos lectores: descarga con la API (fetch_page), tablas con rowspan/colspan (grid), cifras (num), notas al pie
+(references), limpieza final (clean) y el formato de datos/polls.csv (HEAD, row, write).
 
 Fuente: es.wikipedia.org — «Encuestas de opinión para las elecciones generales de España de 2026»
 (API action=parse). Se leen las tablas de intención de voto (las que tienen columna «Trabajo de campo»),
@@ -89,8 +92,9 @@ def cell_text(td):
     return lines[0] if lines else ''
 
 
-def grid(table):
-    """expand rowspan/colspan → list of rows of (text, own) where own=False means 'spanned from above'"""
+def grid(table, spans=False):
+    """expand rowspan/colspan → list of rows of (text, own) where own=False means 'spanned from above';
+    with spans=True, (text, own, first column, last column) of the cell each position comes from"""
     rows, carry = [], {}
     for tr in table.xpath('./tbody/tr|./tr'):
         cells, col = [], 0
@@ -98,9 +102,9 @@ def grid(table):
         out = {}
         while tds or any(c >= col for c in carry):
             if col in carry:
-                txt, left = carry[col]
-                out[col] = (txt, False)
-                if left > 1: carry[col] = (txt, left - 1)
+                txt, left, c0, c1 = carry[col]
+                out[col] = (txt, False, c0, c1)
+                if left > 1: carry[col] = (txt, left - 1, c0, c1)
                 else: del carry[col]
                 col += 1
                 continue
@@ -109,10 +113,10 @@ def grid(table):
             txt = cell_text(td) if td.tag == 'td' else td
             span_c, span_r = _span(td.get('colspan')), _span(td.get('rowspan'))
             for k in range(span_c):
-                out[col + k] = (txt, True)
-                if span_r > 1: carry[col + k] = (txt, span_r - 1)
+                out[col + k] = (txt, True, col, col + span_c - 1)
+                if span_r > 1: carry[col + k] = (txt, span_r - 1, col, col + span_c - 1)
             col += span_c
-        rows.append([out[i] for i in sorted(out)])
+        rows.append([out[i] if spans else out[i][:2] for i in sorted(out)])
     return rows
 
 
@@ -218,6 +222,11 @@ def parse(html_text, today=None):
             if vals['FA'] is not None or vals['COMP'] is not None:
                 vals['SUMAR'] = None  # FA/Compromís split already given
             polls.append(dict(pollster=name, end=end, fw=fw, n=int(re.sub(r'\D', '', n)) if re.sub(r'\D', '', n) else None, v=vals, src=src))
+    return clean(polls)
+
+
+def clean(polls):
+    """shared by both readers: drop exact repeats, blank implausible single values, newest first"""
     # dedupe exact repeats
     seen, out = set(), []
     for p in polls:
