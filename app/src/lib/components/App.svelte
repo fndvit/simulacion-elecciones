@@ -60,8 +60,8 @@
   let listOut = $state(false);   // the list has scrolled out of view: «Ver más escenarios» shows
   const navOffset = () => (mastEl?.getBoundingClientRect().height || 60) + 16;
   const scrollToEl = (el?: HTMLElement, extra = 0) => { if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - navOffset() - extra, behavior: reduce() ? 'auto' : 'smooth' }); };
-  // the story scrolls 20 px further than the list, closer to the title bar
-  async function pickEsc(slug: string) { escSel = slug; await tick(); scrollToEl(escFull, -20); }
+  // the story scrolls 40 px further than the list, closer to the title bar
+  async function pickEsc(slug: string) { escSel = slug; await tick(); scrollToEl(escFull, -40); }
   $effect(() => {
     if (!escList) return;
     const io = new IntersectionObserver(([x]) => (listOut = !x.isIntersecting && x.boundingClientRect.top < 0), { rootMargin: `-${navOffset()}px 0px 0px 0px` });
