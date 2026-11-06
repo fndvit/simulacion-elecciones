@@ -53,9 +53,9 @@
   // in-page jump without touching the hash (the router lives there)
   function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const entries = $derived(historyEntries(st));
-  // Escenarios: the list at the top; the chosen one, whole, below it (the newest to start with)
-  let escSel = $state(ESCENARIOS[0]?.slug);
-  const escOn = $derived(ESCENARIOS.find((x) => x.slug === escSel) || ESCENARIOS[0]);
+  // Escenarios: the list at the top; the chosen one, whole, below it (none until the reader picks one)
+  let escSel = $state<string | undefined>(undefined);
+  const escOn = $derived(ESCENARIOS.find((x) => x.slug === escSel));
   let escList = $state<HTMLElement>(), escFull = $state<HTMLElement>();
   let listOut = $state(false);   // the list has scrolled out of view: «Ver más escenarios» shows
   const navOffset = () => (mastEl?.getBoundingClientRect().height || 60) + 16;
