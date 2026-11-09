@@ -70,10 +70,10 @@ const LIST: Escenario[] = [
       const ine = '<a href="https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736152838&menu=ultiDatos&idp=1254735976607" target="_blank" rel="noopener">Índice de precios de vivienda del INE</a>';
       const ide = '<a href="https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/alquiler/report/" target="_blank" rel="noopener">alquiler</a> y <a href="https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/report/" target="_blank" rel="noopener">venta</a>';
       return [
-        '<a href="https://elpais.com/espana/madrid/2026-09-23/maricarmen-se-queda-un-centenar-de-activistas-espera-junto-a-la-anciana-a-la-comision-judicial.html" target="_blank" rel="noopener">El desahucio de Maricarmen</a> fue la chispa. Enseguida llegaron las protestas; la reacción legislativa del gobierno, que tumbó el Congreso; y la convocatoria electoral.',
+        '<a href="https://elpais.com/espana/madrid/2026-09-23/maricarmen-se-queda-un-centenar-de-activistas-espera-junto-a-la-anciana-a-la-comision-judicial.html" target="_blank" rel="noopener">El desahucio de Maricarmen</a> fue la chispa. Enseguida llegaron las protestas; la reacción legislativa del gobierno —que tumbó el Congreso—, y la convocatoria electoral.',
         'La vivienda, poder comprar o alquilar, es una de las <a href="https://www.cis.es/documents/d/guest/es3582mar_a-pdf" target="_blank" rel="noopener">mayores preocupaciones</a> de la sociedad española. Es una carga que <a href="https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/Fich/IIPP-2026-06-18-lopez-salido-es-or.pdf" target="_blank" rel="noopener">no se veía desde la burbuja de 2007</a> y es <a href="https://www.cje.org/download/313/ano-2025/23618/2025-balance-general.pdf" target="_blank" rel="noopener">la juventud</a> la clase más afectada —los y las y les menores de 35 años—.',
         `En ${provs} la vivienda está disparada, según datos del ${ine} y los informes de precios en ${ide} de Idealista. Aquí es donde objetivamente podría ser un factor decisivo.`,
-        'Si la izquierda —el espacio que lleva en sus <a href="https://movimientosumar.es/wp-content/uploads/2023/07/Un-Programa-para-ti.pdf" target="_blank" rel="noopener">manifiestos</a> <a href="https://www.psoe.es/media-content/2023/07/PROGRAMA_ELECTORAL-GENERALES-2023.pdf" target="_blank" rel="noopener">políticos</a> <a href="https://static.esquerra.cat/uploads/20230705/e2023-programa.pdf" target="_blank" rel="noopener">más</a> <a href="https://www.bng.gal/media/bnggaliza/files/2023/07/05/23_bng_xerais_programa.pdf" target="_blank" rel="noopener">propuestas</a> <a href="https://ehbildu.eus/dokumentuak/23J-COMPROMISO-DE-EUSKAL-HERRIA-BILDU.pdf" target="_blank" rel="noopener">concretas</a> para atajar la problemática— fuese capaz de movilizar a ese electorado, que tiende a quedarse más en casa que sus progenitores cuando se llama a las urnas, el panorama sería muy distinto al que han venido pintando las encuestas. ' +
+        'Si la izquierda —el espacio que llevó en sus <a href="https://movimientosumar.es/wp-content/uploads/2023/07/Un-Programa-para-ti.pdf" target="_blank" rel="noopener">manifiestos</a> <a href="https://www.psoe.es/media-content/2023/07/PROGRAMA_ELECTORAL-GENERALES-2023.pdf" target="_blank" rel="noopener">políticos</a> <a href="https://static.esquerra.cat/uploads/20230705/e2023-programa.pdf" target="_blank" rel="noopener">más</a> <a href="https://www.bng.gal/media/bnggaliza/files/2023/07/05/23_bng_xerais_programa.pdf" target="_blank" rel="noopener">propuestas</a> <a href="https://ehbildu.eus/dokumentuak/23J-COMPROMISO-DE-EUSKAL-HERRIA-BILDU.pdf" target="_blank" rel="noopener">concretas</a> para atajar la problemática— fuese capaz de movilizar a ese electorado, que tiende a quedarse más en casa que sus progenitores cuando se llama a las urnas, el panorama sería muy distinto al que han venido pintando las encuestas. ' +
           (gap > 0
             ? `Aunque no sería suficiente para darle la vuelta al marcador, estarían aún a ${gap} ${gap === 1 ? 'escaño' : 'escaños'} de un pacto PP + Vox.`
             : gap === 0
@@ -96,13 +96,18 @@ const LIST: Escenario[] = [
       // seats that change hands for fewer than a thousand votes
       const close = ids.filter((id) => votesFor(c, id, P) < 1000).sort((a, b) => votesFor(c, a, P) - votesFor(c, b, P));
       const out = [
-        `${top.length > 1 ? 'Se reparten el botín ' + listEs(top.map(art)) : 'Se lleva el botín ' + art(top[0])}. En este escenario, con los datos de las encuestas actualizados a ${longDate(c.today)}, Vox pierde ${lost} ${lost === 1 ? 'escaño' : 'escaños'} a favor ${listEs(gain.map(([k]) => de(k)))}.`
+        `${top.length > 1 ? 'Se reparten el botín ' + listEs(top.map(art)) : 'Se lleva el botín ' + art(top[0])}. En este escenario, con los datos de las encuestas a ${longDate(c.today)}, Vox pierde ${lost} ${lost === 1 ? 'escaño' : 'escaños'} a favor ${listEs(gain.map(([k]) => de(k)))}.`
       ];
       if (close.length)
-        out.push(`${close.length > 1 ? `Algunos de los escaños, en ${listEs(close.map((id) => BYID[id].n))}, se decidirán` : `El escaño de ${BYID[close[0]].n} se decidirá`} por apenas unos centenares de votos, muy por debajo del típico margen de error de ±3 puntos porcentuales de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
+        out.push(`${close.length > 1 ? `Algunos de los escaños, en ${listEs(close.map((id) => BYID[id].n))}, se decidirán` : `El escaño de ${BYID[close[0]].n} se decidirá`} por apenas unos centenares de votos, muy por debajo del típico <a href="https://www.aimc.es/a1mc-c0nt3nt/uploads/2016/10/2016_09rev_aedemo_los_margenes_de_error_en_las_encuestas_electorales.pdf" target="_blank" rel="noopener">margen de error</a> de <a href="https://www.cuadernosdeperiodistas.com/encuestas-y-margen-de-error-una-guia-practica/" target="_blank" rel="noopener">±3 puntos porcentuales</a> de cualquier encuesta. Ese margen de error explica, en jerga estadística, que si una encuesta dice que el 25% apoya una opción, el apoyo real estaría entre el 22% y el 28%.`);
       // only while most of these seats are in small constituencies (5 seats or fewer)
-      if (ids.filter((id) => BYID[id].seats <= 5).length > ids.length / 2)
-        out.push(`La mayoría se mueve en circunscripciones pequeñas, lo que sumado al método D'Hondt, eleva el listón a la hora de repartir escaños.`);
+      const small = ids.filter((id) => BYID[id].seats <= 5);
+      if (small.length > ids.length / 2) {
+        const ts = small.map((id) => Math.round(100 * effThreshold(c.base, id)));
+        const lo = Math.min(...ts), hi = Math.max(...ts);
+        const range = lo === hi ? `en torno al ${lo} %` : `entre el ${lo} % y el ${hi} %, según la provincia`;
+        out.push(`La mayoría de esos escaños están en provincias pequeñas —con cinco escaños o menos—. Con tan pocos en juego, el método D'Hondt exige mucho voto para conseguir uno —<a href="https://preprints.apsanet.org/engage/api-gateway/apsa/assets/orp/resource/item/6a958e3fd1922e37d5d26525/original/estimating-effective-electoral-thresholds-a-logical-model.pdf" target="_blank" rel="noopener">${range}</a>— y Vox los gana por poco. Un pequeño cambio y ... zas, cambia de manos.`);
+      }
       return out;
     },
     st: () => sinUltimoEscano('VOX', 3)
@@ -110,10 +115,34 @@ const LIST: Escenario[] = [
   {
     slug: 'periferia',
     date: '2026-10-28',
-    hidden: true,   // maybe next week
-    // TEXT PENDING (Xaquín): headline and paragraphs
     title: '¿Y si <strong>el nacionalismo de izquierdas</strong> en Galicia, Cataluña, País Vasco y Navarra galvaniza la resistencia contra la ultraderecha?',
-    body: '[Texto pendiente]',
+    body: (c) => {
+      const P = PERIFERIA;
+      const inBase = (k: string, ids: string[]) => ids.reduce((a, id) => a + (c.base.prov[id].votes[k] || 0), 0);
+      const inCur = (k: string, ids: string[]) => ids.reduce((a, id) => a + (c.cur.prov[id].votes[k] || 0), 0);
+      const ercPct = ((100 * (c.base.votes.ERC || 0)) / c.base.valid).toFixed(1).replace('.', ',');
+      const bng = seatMoves(c, 'BNG', P.GAL), erc = seatMoves(c, 'ERC', P.CAT), bildu = seatMoves(c, 'BILDU', P.EUS_NAV);
+      const right = (k: 'base' | 'cur') => (c[k].seats.PP || 0) + (c[k].seats.VOX || 0);
+      const r0 = right('base'), r1 = right('cur'), over = r1 - MAJORITY;
+      const n = (x: number) => (x === 1 ? 'escaño' : 'escaños');
+      // «El BNG ganaría 2 escaños, en A Coruña y Lugo, arrebatados a Vox y al PP.»
+      const gainTxt = (k: string, m: SeatMoves, first: boolean) =>
+        m.won
+          ? `${cap(art(k))} ${first ? `ganaría ${m.won} ${n(m.won)}` : `sumaría otros ${m.won}`}, en ${listEs(m.provs.map((id) => BYID[id].n))}, ${first ? 'arrebatados ' + listEs(m.from.map(al)) : 'a costa ' + listEs(m.from.map(de))}.`
+          : `${cap(art(k))} no ganaría ningún escaño.`;
+      return [
+        'En las últimas elecciones, una parte del voto que frenó a PP y Vox no vino de Madrid, sino de la periferia. ' +
+          `¿Y si la izquierda “periférica” se movilizase todavía más: si ERC pescase al electorado de Comuns y CUP, si EH Bildu superase los ${thousands(P.BILDU_TARGET)} votos entre Euskadi y Navarra, y si el BNG llegase a los ${thousands(P.BNG_TARGET)} en Galicia?`,
+        `Sería un salto notable para el BNG, que pasaría de ${thousands(inBase('BNG', P.GAL))} votos en nuestra proyección a ${thousands(P.BNG_TARGET)}, pero los gallegos rompieron su techo en las autonómicas de 2024 con 470 mil votos. Nuestro escenario plantea que mantengan menos de dos tercios de esos votantes.`,
+        `Las demás organizaciones subirían más modestamente: EH Bildu sumaría ${thousands(inCur('BILDU', P.EUS_NAV) - inBase('BILDU', P.EUS_NAV))} más, y ERC ya ronda el ${ercPct}% en nuestra proyección.`,
+        'A pesar de todo, el resultado es más modesto de lo que sugieren las cifras. ' + gainTxt('BNG', bng, true) + ' ' + (erc.won ? gainTxt('ERC', erc, false) : 'ERC no ganaría ningún escaño.') + ' ' +
+          (bildu.won
+            ? gainTxt('BILDU', bildu, false)
+            : `EH Bildu, pese a crecer, se quedaría con los mismos ${c.cur.seats.BILDU || 0} ${n(c.cur.seats.BILDU || 0)}: el voto de más no le basta para el siguiente escaño en ninguna de sus provincias.`),
+        `PP y Vox ${r1 < r0 ? 'bajarían' : r1 > r0 ? 'subirían' : 'se quedarían'} ${r1 === r0 ? 'en ' + r1 : 'de ' + r0 + ' a ' + r1} escaños y ` +
+          (over > 0 ? `seguirían ${over} por encima de la mayoría absoluta.` : over === 0 ? 'se quedarían justo en la mayoría absoluta.' : `se quedarían ${-over} por debajo de la mayoría absoluta.`)
+      ];
+    },
     st: () => periferia()
   }
 ];
@@ -217,6 +246,35 @@ function mayores(drop = 0.2): Partial<Scenario> {
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
+const MAJORITY = 176;
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+/** 240000 → «240.000», to the thousand */
+const thousands = (x: number) => String(Math.round(x / 1000) * 1000).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+/** «al» + party, with «a» where it takes no article */
+const al = (k: string) => (ART[k as PartyKey] ? 'al ' + ART[k as PartyKey]!.slice(3) : 'a ' + PARTY[k as PartyKey].n);
+interface SeatMoves { won: number; provs: string[]; from: string[] }
+/** seats party P wins against the projection in provinces ids, where, and from whom (parties that lose seats there) */
+function seatMoves(c: Ctx, P: string, ids: string[]): SeatMoves {
+  const provs: string[] = [], from: string[] = [];
+  let won = 0;
+  for (const id of ids) {
+    const d = (k: string) => (c.cur.prov[id].seats[k] || 0) - (c.base.prov[id].seats[k] || 0);
+    if (d(P) <= 0) continue;
+    won += d(P); provs.push(id);
+    for (const k of Object.keys({ ...c.cur.prov[id].seats, ...c.base.prov[id].seats })) if (k !== P && d(k) < 0 && !from.includes(k)) from.push(k);
+  }
+  return { won, provs, from };
+}
+/** Effective threshold of a province: the vote share at which a party has an even chance of its first seat.
+ *  Bailey (2026), «Estimating Effective Electoral Thresholds: A Logical Model», eq. 8:
+ *  t = (1 − θ)·min(tR, tX) + θ·tX, with tR = 1/(m·n), tX = 1/(m+1), θ = 1 − (1 − 1/n)^m,
+ *  m = seats, n = effective number of parties by votes (Laakso–Taagepera, 1/Σv², on the projection; «otros» as one). */
+function effThreshold(R: RunResult, id: string): number {
+  const v = Object.values(R.prov[id].votes), T = v.reduce((a, x) => a + x, 0);
+  const n = 1 / v.reduce((a, x) => a + (x / T) ** 2, 0), m = BYID[id].seats;
+  const tR = 1 / (m * n), tX = 1 / (m + 1), th = 1 - (1 - 1 / n) ** m;
+  return (1 - th) * Math.min(tR, tX) + th * tX;
+}
 /** parties that take an article in running text */
 const ART: Partial<Record<PartyKey, string>> = { PP: 'el PP', PSOE: 'el PSOE', PNV: 'el PNV', BNG: 'el BNG' };
 export const art = (k: string) => ART[k as PartyKey] || PARTY[k as PartyKey].n;
