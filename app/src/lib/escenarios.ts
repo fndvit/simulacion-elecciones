@@ -51,6 +51,7 @@ const LIST: Escenario[] = [
   {
     slug: 'mayores',
     date: '2026-11-09',
+    hidden: true,   // the story depends on the poll (CIS vs 40dB): keep for later
     // TEXT PENDING (Xaquín)
     title: '¿Qué pasa si <strong>los mayores de 65 años</strong> no acuden a las urnas?',
     body: '[Texto pendiente]',
