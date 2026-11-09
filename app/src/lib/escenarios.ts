@@ -49,12 +49,12 @@ function sinUltimoEscano(P: string, max = 3): Partial<Scenario> {
 
 const LIST: Escenario[] = [
   {
-    slug: 'jovenes',
+    slug: 'mayores',
     date: '2026-11-09',
     // TEXT PENDING (Xaquín)
-    title: '¿Qué pasa si <strong>los jóvenes</strong> no acuden a las urnas?',
+    title: '¿Qué pasa si <strong>los mayores de 65 años</strong> no acuden a las urnas?',
     body: '[Texto pendiente]',
-    st: () => jovenes(0.2)
+    st: () => mayores(0.2)
   },
   {
     slug: 'vivienda',
@@ -186,33 +186,33 @@ function periferia(): Partial<Scenario> {
   return { prov: { ...ercFrom(hi), ...growTo(PERI.EUS_NAV, 'BILDU', BILDU_TARGET), ...growTo(PERI.GAL, 'BNG', BNG_TARGET) } };
 }
 
-/** Young voters stay home.
- *  · Where the young are: INE, Estadística Continua de Población, 1 July 2026 (table 59591), Spanish nationals,
- *    share of adults aged 18–34 per province (YOUNG_ADULTS; 18–19 taken as 2/5 of the 15–19 group;
- *    datos/ine/jovenes_18_34_prov_2026-07.csv). Nationally 20.8 %.
- *  · How much less they vote: CIS 3493, P0A2 (2023 vote recall by age, «No votó» column): 72.7 % of those aged 18–34
- *    say they voted against 83.0 % of those older (YOUNG_TURNOUT = 0.876). Surveys overstate turnout, but both
- *    groups are measured the same way, so we only use the ratio. With 20.8 % of adults, that makes the young 18.7 %
- *    of voters (3493 itself: 18.1 %).
- *  · How they vote: CIS 3582 (October 2026 barometer, microdata, weighted with PESO), vote + sympathy among those
- *    who name a party or blank: their weight per party relative to all voters (YOUTH_RATIO; e.g. Vox 20.6 % of the
- *    young vs 14.5 % of all = ×1.41). 3582 rather than 3493 because the projection is 2026 intention and 3582 has
- *    852 young respondents; in 3493 the regional parties have 2–12 each.
- *  A fraction `drop` of the young voters in each province do not vote: that province's turnout falls
- *  drop × (young share of its voters) × its turnout, and those who stay home are, party by party, as much more or
- *  less likely as the young are to vote for it.
- *  The polls already carry their own turnout: this is «that many fewer young voters than the polls expect». */
-const YOUNG_ADULTS: Record<string, number> = { '01': 0.183, '02': 0.207, '03': 0.213, '04': 0.234, '05': 0.166, '06': 0.208, '07': 0.237, '08': 0.216, '09': 0.173, '10': 0.184, '11': 0.218, '12': 0.206, '13': 0.205, '14': 0.213, '15': 0.169, '16': 0.188, '17': 0.220, '18': 0.222, '19': 0.215, '20': 0.195, '21': 0.217, '22': 0.186, '23': 0.217, '24': 0.155, '25': 0.206, '26': 0.191, '27': 0.143, '28': 0.221, '29': 0.221, '30': 0.238, '31': 0.212, '32': 0.147, '33': 0.152, '34': 0.159, '35': 0.228, '36': 0.179, '37': 0.171, '38': 0.221, '39': 0.176, '40': 0.185, '41': 0.227, '42': 0.173, '43': 0.211, '44': 0.185, '45': 0.214, '46': 0.209, '47': 0.178, '48': 0.181, '49': 0.145, '50': 0.197, '51': 0.302, '52': 0.326 };
-const YOUNG_TURNOUT = 72.7 / 83.0;
-const YOUTH_RATIO: Record<string, number> = { PSOE: 0.66, PP: 0.82, VOX: 1.41, FA: 1.48, COMP: 1.48, PODEMOS: 0.88, ERC: 1.48,
-  SALF: 1.7, JUNTS: 0.89, BILDU: 1.09, BNG: 2.08, AA: 1.64, PNV: 0.75, UPC: 1.29, OTROS: 1.19 };   // CC: as everyone (×1.03)
-function jovenes(drop = 0.2): Partial<Scenario> {
+/** Voters over 65 stay home.
+ *  · Where they are: INE, Estadística Continua de Población, 1 July 2026 (table 59591), Spanish nationals, share of
+ *    adults aged 65 and over per province (OLD_ADULTS; datos/ine/edades_prov_2026-07.csv). Nationally 27.9 %.
+ *  · How much more they vote: CIS 3582 (October 2026 barometer, microdata, weighted with PESO), 2023 vote recall:
+ *    93.2 % of those 65 and over say they voted against 86.5 % of those younger (OLD_TURNOUT = 1.077). Surveys
+ *    overstate turnout, but both groups are measured the same way, so we only use the ratio. (The same barometer
+ *    gives 18–34 vs older 79.0 / 90.5 = 0.87, as CIS 3493 P0A2 does: 72.7 / 83.0 = 0.88.) With 27.9 % of adults,
+ *    that makes them 29.4 % of voters (3582 itself: 29.6 %).
+ *  · How they vote: CIS 3582, vote + sympathy among those who name a party or blank: their weight per party
+ *    relative to all voters (OLD_RATIO; e.g. PSOE 51.2 % of those over 65 vs 34.0 % of all = ×1.50); 980
+ *    respondents over 65. Sumar for FA and Compromís, «Coalición de izquierdas» for UPC, «Otro partido» for OTROS;
+ *    CC as everyone (no respondents over 65).
+ *  A fraction `drop` of the voters over 65 in each province do not vote: that province's turnout falls
+ *  drop × (their share of its voters) × its turnout, and those who stay home are, party by party, as much more or
+ *  less likely as those over 65 are to vote for it.
+ *  The polls already carry their own turnout: this is «that many fewer voters over 65 than the polls expect». */
+const OLD_ADULTS: Record<string, number> = { '01': 0.309, '02': 0.279, '03': 0.267, '04': 0.236, '05': 0.351, '06': 0.275, '07': 0.235, '08': 0.280, '09': 0.336, '10': 0.317, '11': 0.248, '12': 0.285, '13': 0.289, '14': 0.276, '15': 0.325, '16': 0.325, '17': 0.276, '18': 0.262, '19': 0.240, '20': 0.317, '21': 0.253, '22': 0.323, '23': 0.275, '24': 0.362, '25': 0.302, '26': 0.311, '27': 0.375, '28': 0.265, '29': 0.243, '30': 0.237, '31': 0.289, '32': 0.392, '33': 0.350, '34': 0.356, '35': 0.221, '36': 0.306, '37': 0.355, '38': 0.238, '39': 0.314, '40': 0.323, '41': 0.240, '42': 0.350, '43': 0.284, '44': 0.335, '45': 0.261, '46': 0.276, '47': 0.322, '48': 0.322, '49': 0.394, '50': 0.305, '51': 0.188, '52': 0.185 };
+const OLD_TURNOUT = 93.2 / 86.5;
+const OLD_RATIO: Record<string, number> = { PSOE: 1.5, PP: 1.06, VOX: 0.45, FA: 0.44, COMP: 0.44, PODEMOS: 0.74, ERC: 0.79,
+  SALF: 0.05, JUNTS: 1.59, BILDU: 1.0, BNG: 0.63, AA: 0.37, PNV: 1.68, UPC: 0.89, OTROS: 0.86 };
+function mayores(drop = 0.2): Partial<Scenario> {
   const turnProv: Record<string, number> = {};
-  for (const [id, c] of Object.entries(YOUNG_ADULTS)) {
-    const v = (c * YOUNG_TURNOUT) / (c * YOUNG_TURNOUT + 1 - c);           // young share of that province's voters
+  for (const [id, c] of Object.entries(OLD_ADULTS)) {
+    const v = (c * OLD_TURNOUT) / (c * OLD_TURNOUT + 1 - c);              // over-65 share of that province's voters
     turnProv[id] = -Math.round(drop * v * BASE.prov[id].turnout * 1000) / 10;
   }
-  return { turnProv, distNat: { ...YOUTH_RATIO } };
+  return { turnProv, distNat: { ...OLD_RATIO } };
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
