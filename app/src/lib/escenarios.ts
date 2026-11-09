@@ -22,6 +22,8 @@ export interface Escenario {
   /** the adjustments, or a function that works them out from the day's projection (so the scenario
    *  keeps its meaning when the polls move) */
   st: Partial<Scenario> | (() => Partial<Scenario>);
+  /** kept ready but not on the page yet */
+  hidden?: boolean;
 }
 
 /** Party P gives up, in each province where D'Hondt hands it the last seat, the fewest votes (to the tenth of a
@@ -46,6 +48,14 @@ function sinUltimoEscano(P: string, max = 3): Partial<Scenario> {
 }
 
 const LIST: Escenario[] = [
+  {
+    slug: 'jovenes',
+    date: '2026-11-09',
+    // TEXT PENDING (Xaquín)
+    title: '¿Qué pasa si <strong>los jóvenes</strong> no acuden a las urnas?',
+    body: '[Texto pendiente]',
+    st: () => jovenes(0.2)
+  },
   {
     slug: 'vivienda',
     date: '2026-10-28',
@@ -99,6 +109,7 @@ const LIST: Escenario[] = [
   {
     slug: 'periferia',
     date: '2026-10-28',
+    hidden: true,   // maybe next week
     // TEXT PENDING (Xaquín): headline and paragraphs
     title: '¿Y si <strong>el nacionalismo de izquierdas</strong> en Galicia, Cataluña, País Vasco y Navarra galvaniza la resistencia contra la ultraderecha?',
     body: '[Texto pendiente]',
@@ -106,7 +117,7 @@ const LIST: Escenario[] = [
   }
 ];
 
-export const ESCENARIOS = [...LIST].sort((a, b) => b.date.localeCompare(a.date));
+export const ESCENARIOS = LIST.filter((e) => !e.hidden).sort((a, b) => b.date.localeCompare(a.date));
 /** Housing. Provinces where housing is a hot issue: rent of 13.5 €/m² a month or more, or a sale price of
  *  2,900 €/m² or more; and, a step below, rent of 11.8 €/m² or more with a sale price of 2,000 €/m² or more
  *  (Alicante, Sevilla, Álava, Cantabria; not Segovia, cheap to buy), in Idealista's September 2026 reports (datos/vivienda_idealista_2026-09.csv; the INE
@@ -173,6 +184,20 @@ function periferia(): Partial<Scenario> {
   let lo = 0, hi = 1;
   for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; const R = run({ ...blank(), prov: ercFrom(m) }); if ((100 * R.votes.ERC) / R.valid >= ERC_TARGET) hi = m; else lo = m; }
   return { prov: { ...ercFrom(hi), ...growTo(PERI.EUS_NAV, 'BILDU', BILDU_TARGET), ...growTo(PERI.GAL, 'BNG', BNG_TARGET) } };
+}
+
+/** Young voters stay home. CIS, October 2026 barometer (study 3582, microdata, weighted with PESO):
+ *   · voters under 35 were 15.5 % of those who say they voted in 2023 (YOUNG_SHARE);
+ *   · how they vote, against everyone (vote + sympathy, among those who name a party or blank): their weight per
+ *     party relative to all voters (YOUTH_RATIO; e.g. Vox 20.6 % of the young vs 14.5 % of all = ×1.41).
+ *  A fraction `drop` of those young voters do not vote: turnout falls drop × YOUNG_SHARE of the voters, and those
+ *  who stay home are, party by party, as much more or less likely as the young are to vote for it.
+ *  The polls already carry their own turnout: this is «that many fewer young voters than the polls expect». */
+const YOUNG_SHARE = 0.155;
+const YOUTH_RATIO: Record<string, number> = { PSOE: 0.66, PP: 0.82, VOX: 1.41, FA: 1.48, COMP: 1.48, PODEMOS: 0.88, ERC: 1.48,
+  SALF: 1.7, JUNTS: 0.89, BILDU: 1.09, BNG: 2.08, AA: 1.64, PNV: 0.75, UPC: 1.29, OTROS: 1.19 };   // CC: as everyone (×1.03)
+function jovenes(drop = 0.2): Partial<Scenario> {
+  return { turnNat: -Math.round(drop * YOUNG_SHARE * BASE.turnout * 1000) / 10, distNat: { ...YOUTH_RATIO } };
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────

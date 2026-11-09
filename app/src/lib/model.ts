@@ -209,9 +209,13 @@ export function historyEntries(st: Scenario): HistoryEntry[] {
   const out: HistoryEntry[] = [];
   const pc = (q: number) => Math.round(q * 100) + ' %';
   const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]);
-  const distTxt = (d?: Record<string, number>, s?: Record<string, number>) => {
+  const distTxt = (d?: Record<string, number>, s?: Record<string, number>, down = false) => {
     const e = Object.entries(d || {}).filter(([, m]) => m !== 1), f = Object.entries(s || {}).filter(([, q]) => q > 0);
-    let t = e.length ? '; los nuevos votantes ' + e.map(([P, m]) => `${m > 1 ? 'favorecen' : 'castigan'} a ${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ') : '';
+    // when turnout falls, the multipliers say who stays home: more (×>1) or fewer (×<1) of each party's voters
+    let t = !e.length ? '' : down
+      ? '; se quedan en casa más votantes de ' + e.filter(([, m]) => m > 1).map(([P, m]) => `${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ') +
+        (e.some(([, m]) => m < 1) ? ' y menos de ' + e.filter(([, m]) => m < 1).map(([P, m]) => `${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ') : '')
+      : '; los nuevos votantes ' + e.map(([P, m]) => `${m > 1 ? 'favorecen' : 'castigan'} a ${nm(P)} (×${m.toFixed(1).replace('.', ',')})`).join(', ');
     const al = (P: string) => (['PP', 'PSOE', 'PNV', 'BNG'].includes(P) ? 'al ' : 'a ') + nm(P);
     if (f.length) t += `; de los nuevos votantes, ${list(f.map(([P, q]) => `${pc(q)} ${al(P)}`))}`;
     return t;
@@ -221,9 +225,9 @@ export function historyEntries(st: Scenario): HistoryEntry[] {
   for (const [id, o] of Object.entries(st.prov)) for (const [P, v] of Object.entries(o || {})) if (v)
     out.push({ key: 'p' + id + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en ${esc(BYID[id].n)}`, impact: impactOf({ ...blank(), prov: { [id]: { [P]: v } } }), undo: (s) => { delete s.prov[id][P]; } });
   if (st.turnNat)
-    out.push({ key: 'tn', html: `La participación ${st.turnNat > 0 ? 'sube' : 'baja'} ${d1(st.turnNat)} puntos en toda España${distTxt(st.distNat, st.shareNat)}`, impact: impactOf({ ...blank(), turnNat: st.turnNat, distNat: { ...st.distNat }, shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { s.turnNat = 0; } });
+    out.push({ key: 'tn', html: `La participación ${st.turnNat > 0 ? 'sube' : 'baja'} ${d1(st.turnNat)} puntos en toda España${distTxt(st.distNat, st.shareNat, st.turnNat < 0)}`, impact: impactOf({ ...blank(), turnNat: st.turnNat, distNat: { ...st.distNat }, shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { s.turnNat = 0; } });
   for (const [id, v] of Object.entries(st.turnProv)) if (v)
-    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${esc(BYID[id].n)}${distTxt(st.distProv[id] || st.distNat, st.shareProv?.[id] || st.shareNat)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)), shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { delete s.turnProv[id]; } });
+    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${esc(BYID[id].n)}${distTxt(st.distProv[id] || st.distNat, st.shareProv?.[id] || st.shareNat, v + st.turnNat < 0)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)), shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { delete s.turnProv[id]; } });
   // a province's own split of the newcomers, where its turnout was not moved on its own
   for (const id of Object.keys(st.shareProv || {})) if (!st.turnProv[id] && st.turnNat)
     out.push({ key: 's' + id, html: `En ${esc(BYID[id].n)}${distTxt(undefined, st.shareProv[id]).replace(/^; d/, ', d')}`, impact: [], undo: (s) => { delete s.shareProv[id]; } });
