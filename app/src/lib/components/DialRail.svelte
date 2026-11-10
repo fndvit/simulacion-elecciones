@@ -5,7 +5,7 @@
   import ToSpain from './ToSpain.svelte';
   import { PROV, BYID } from '$lib/data';
   import { PARTY } from '$lib/parties';
-  import { BASE, V0, VNAT, CENSUS, partiesIn, scopeVotes, scopeValid, hasScopeChanges, newcomerShares, provTurnShift, s2m, m2s } from '$lib/model';
+  import { BASE, V0, VNAT, CENSUS, partiesIn, scopeVotes, scopeValid, hasScopeChanges, newcomerShares, provTurnShift } from '$lib/model';
   import { pct, pp, fmtSigned, sortEs } from '$lib/format';
   import type { Scenario, RunResult, PartyKey } from '$lib/types';
 
@@ -44,17 +44,21 @@
   // newcomer distribution
   const effTurn = $derived(isES ? st.turnNat || (Object.values(st.turnProv).some(Boolean) ? 1 : 0) : st.turnNat + (st.turnProv[scope] || 0));
   const dist = $derived(isES ? st.distNat : st.distProv[scope] || st.distNat);
-  const custom = $derived(Object.values(dist || {}).some((v) => v !== 1));
+  // the shares fixed by hand in this scope (a province starts from the national ones)
+  const fixedShares = $derived<Record<string, number>>(isES ? st.shareNat || {} : st.shareProv?.[scope] || st.shareNat || {});
+  const custom = $derived(Object.values(dist || {}).some((v) => v !== 1) || Object.keys(fixedShares).length > 0);
   const distShare = $derived(newcomerShares(st, cur, scope, effTurn < 0));
-  function setDist(P: string, slider: number) {
-    const m = s2m(slider);
-    if (isES) st.distNat[P] = m;
-    else (st.distProv[scope] ||= { ...st.distNat })[P] = m;
+  // each party's slider sets its share of the newcomers (what the others already have fixed caps it)
+  function setShare(P: string, pct100: number) {
+    const others = Object.entries(fixedShares).filter(([k]) => k !== P).reduce((a, [, q]) => a + q, 0);
+    const q = Math.max(0, Math.min(1 - others, pct100 / 100));
+    if (isES) st.shareNat = { ...(st.shareNat || {}), [P]: q };
+    else st.shareProv = { ...(st.shareProv || {}), [scope]: { ...(st.shareProv?.[scope] || st.shareNat || {}), [P]: q } };
   }
 
   function resetScope() {
-    if (isES) { st.nat = {}; st.turnNat = 0; st.distNat = {}; }
-    else { delete st.prov[scope]; delete st.turnProv[scope]; delete st.distProv[scope]; }
+    if (isES) { st.nat = {}; st.turnNat = 0; st.distNat = {}; st.shareNat = {}; }
+    else { delete st.prov[scope]; delete st.turnProv[scope]; delete st.distProv[scope]; if (st.shareProv) delete st.shareProv[scope]; }
   }
 
   // readout under the handle, centred on it (atlas DialRail)
@@ -97,16 +101,16 @@
 
   <div class="gl"><span>… y los que {effTurn < 0 ? 'se quedan en casa votaban' : 'se suman votan'} {custom ? 'así' : 'como sus vecinos'}</span><small>% del total</small></div>
   <div class="dist">
-    <p class="note">{#if effTurn < 0}En el centro, se quedan en casa sobre todo donde ya se vota menos, y votaban como el resto de su mesa electoral en 2023.{:else}En el centro, salen de donde hay más abstención y votan como el resto de su mesa electoral en 2023.{/if} Hacia +, un partido capta más de ellos; hacia −, menos.</p>
+    <p class="note">{#if effTurn < 0}Por defecto, se quedan en casa sobre todo donde ya se vota menos, y votaban como el resto de su mesa electoral en 2023.{:else}Por defecto, salen de donde hay más abstención y votan como el resto de su mesa electoral en 2023.{/if} Mueve un partido para fijar qué parte de ellos se lleva; los demás se reparten el resto como sus vecinos.</p>
     {#each sorted as P (P)}
-      <div class="drow">
+      <div class="drow" class:fixed={P in fixedShares}>
         <label class="nm" for="d-{P}"><i style="background:{PARTY[P].c}"></i>{PARTY[P].n}</label>
-        <input id="d-{P}" type="range" min="-1" max="1" step="0.05" value={m2s(dist[P] != null ? dist[P] : 1)} oninput={(e) => setDist(P, +e.currentTarget.value)} />
+        <input id="d-{P}" type="range" min="0" max="100" step="1" value={Math.round(100 * (fixedShares[P] ?? distShare[P] ?? 0))} oninput={(e) => setShare(P, +e.currentTarget.value)} />
         <span class="pc">{pct(distShare[P] || 0, 0)}</span>
       </div>
     {/each}
     {#if !effTurn}<p class="note">No tiene efecto hasta que muevas la participación.</p>
-    {:else if !isES && !st.distProv[scope]}<p class="note">Ahora usa el reparto fijado para toda España; si lo cambias, solo se aplica aquí.</p>{/if}
+    {:else if !isES && !st.distProv[scope] && !st.shareProv?.[scope]}<p class="note">Ahora usa el reparto fijado para toda España; si lo cambias, solo se aplica aquí.</p>{/if}
   </div>
 
   <button class="reset" onclick={resetScope} disabled={!hasScopeChanges(st, scope)}>
@@ -139,10 +143,13 @@
   .val b { color: var(--ink); font-weight: 700; }
 
   .dist { display: flex; flex-direction: column; gap: 10px; margin-top: -8px; }
-  .drow { display: grid; grid-template-columns: 96px 1fr 40px; gap: 8px; align-items: center; font-family: var(--font-ui); font-size: 13px; color: var(--ink); }
+  .drow { display: grid; grid-template-columns: 96px 1fr 40px; gap: 8px; align-items: center; font-family: var(--font-ui); font-size: 13px; font-weight: 400; color: var(--ink); }
   .drow .nm { display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
   .drow .nm i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
   .drow .pc { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  /* a share fixed by hand */
+  .drow.fixed .nm { font-weight: 700; }
+  .drow.fixed .pc { color: var(--ink); font-weight: 700; }
   .drow input { margin: 0; }
 
   /* the same pill as «Compartir mi escenario» and «Ver toda España»; greyed out while there is nothing to undo */
@@ -157,7 +164,7 @@
     .title, .sel :global(.word) { font-size: 20px; line-height: 28px; }
     .gl { font-size: 16px; line-height: 22px; }
     .dials { gap: 2px; }
-    .dlabel { font-size: 14px; line-height: 18px; }
+    .dlabel { font-size: 14px; line-height: 18px; font-weight: 400; }
     .dial input[type='range'] { margin: 2px 0 0; height: 22px; }
     .ends { height: 14px; font-size: 11px; line-height: 14px; }
     .dist { gap: 2px; margin-top: -4px; }

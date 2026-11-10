@@ -1,0 +1,55 @@
+# Idealista, informes de precios de vivienda, septiembre de 2026 (provincia; Alicante y Castellón, filas provinciales de la Comunitat Valenciana)
+# tensionada = alquiler >= 13.5 €/m² al mes o venta >= 2900 €/m²; o bien alquiler >= 11.8 y venta >= 2000 €/m²
+provincia,alquiler_eur_m2,alquiler_var_anual,venta_eur_m2,venta_var_anual,tensionada
+Madrid,21.6,5.7,5065.0,6.9,1
+Illes Balears,20.2,3.6,5593.0,4.1,1
+Málaga,18.8,5.7,4317.0,6.6,1
+Barcelona,17.2,1.6,3506.0,11.5,1
+Gipuzkoa,16.1,-3.0,4743.0,12.7,1
+Bizkaia,15.3,3.2,3588.0,9.6,1
+Santa Cruz de Tenerife,15.3,4.5,3514.0,3.7,1
+Las Palmas,15.1,4.0,3113.0,10.4,1
+Valencia,14.2,5.0,2208.0,15.1,1
+Girona,13.9,7.3,2934.0,9.9,1
+Alicante,12.7,7.1,2767.0,7.8,1
+Sevilla,12.2,4.1,2080.0,14.7,1
+Álava,12.0,-4.0,2652.0,6.0,1
+Segovia,11.9,6.2,1601.0,12.7,0
+Cantabria,11.8,5.4,2408.0,14.6,1
+Zaragoza,11.7,9.7,1777.0,14.4,0
+Cádiz,11.6,5.2,2539.0,9.9,0
+Melilla,11.3,8.6,2086.0,4.0,0
+Pontevedra,11.0,7.8,2056.0,11.3,0
+Asturias,10.9,9.3,1892.0,12.6,0
+Navarra,10.6,0.9,1980.0,10.1,0
+Guadalajara,10.4,3.5,1631.0,13.5,0
+Granada,10.3,3.6,1890.0,13.0,0
+Salamanca,10.3,8.9,1706.0,14.0,0
+Burgos,10.1,8.5,1405.0,18.0,0
+Huelva,10.1,7.8,1817.0,11.6,0
+A Coruña,9.9,2.5,1773.0,13.3,0
+Tarragona,9.9,2.9,1922.0,10.2,0
+Valladolid,9.7,6.3,1693.0,13.0,0
+Huesca,9.5,10.2,1779.0,12.2,0
+La Rioja,9.5,5.3,1515.0,6.5,0
+Murcia,9.5,4.8,1689.0,13.9,0
+Toledo,9.5,12.7,1218.0,19.0,0
+Castellón,9.4,9.5,1663.0,11.9,0
+Almería,9.0,4.7,1673.0,14.3,0
+Córdoba,9.0,4.0,1420.0,9.3,0
+Lleida,8.9,2.6,1595.0,14.1,0
+Soria,8.9,8.6,1203.0,7.0,0
+Palencia,8.8,9.0,1156.0,1.9,0
+Albacete,8.4,4.8,1256.0,8.6,0
+León,8.4,6.7,1124.0,8.9,0
+Cuenca,8.2,10.9,896.0,9.2,0
+Ourense,8.2,6.6,960.0,-3.6,0
+Lugo,8.1,7.7,1212.0,7.6,0
+Ávila,8.1,2.0,1148.0,14.2,0
+Teruel,8.0,3.6,889.0,11.2,0
+Zamora,8.0,2.7,974.0,5.0,0
+Badajoz,7.8,7.0,1069.0,10.4,0
+Ciudad Real,7.7,8.4,858.0,15.8,0
+Cáceres,7.7,4.5,1026.0,4.6,0
+Jaén,7.0,1.6,879.0,3.1,0
+Ceuta,,,2698.0,13.1,0

@@ -18,9 +18,11 @@
   import PollSection from './PollSection.svelte';
   import HistoryRail from './HistoryRail.svelte';
   import VitLogo from './VitLogo.svelte';
+  import Escenario from './Escenario.svelte';
+  import EscenarioCard from './EscenarioCard.svelte';
+  import { ESCENARIOS } from '$lib/escenarios';
   // the TresCincuenta.es mark, inlined (works in the single-file build too); also the favicon, on a square canvas
   import logo350 from '$lib/assets/logo-350.svg?raw';
-  import cocina from '$lib/assets/cocina.webp?inline';
   const favicon = 'data:image/svg+xml,' + encodeURIComponent(logo350.replace(/viewBox="[^"]*"/, 'viewBox="0 -170.475 799.31 799.31"'));
   import ShareButton from './ShareButton.svelte';
   import { blank, run, historyEntries, BASE } from '$lib/model';
@@ -51,6 +53,21 @@
   // in-page jump without touching the hash (the router lives there)
   function toBase(e: MouseEvent) { e.preventDefault(); document.getElementById('la-base')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   const entries = $derived(historyEntries(st));
+  // Escenarios: the list at the top; the chosen one, whole, below it (none until the reader picks one)
+  let escSel = $state<string | undefined>(undefined);
+  const escOn = $derived(ESCENARIOS.find((x) => x.slug === escSel));
+  let escList = $state<HTMLElement>(), escFull = $state<HTMLElement>();
+  let listOut = $state(false);   // the list has scrolled out of view: «Ver más escenarios» shows
+  const navOffset = () => (mastEl?.getBoundingClientRect().height || 60) + 16;
+  const scrollToEl = (el?: HTMLElement, extra = 0) => { if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - navOffset() - extra, behavior: reduce() ? 'auto' : 'smooth' }); };
+  // the story scrolls 40 px further than the list, closer to the title bar
+  async function pickEsc(slug: string) { escSel = slug; await tick(); scrollToEl(escFull, -40); }
+  $effect(() => {
+    if (!escList) return;
+    const io = new IntersectionObserver(([x]) => (listOut = !x.isIntersecting && x.boundingClientRect.top < 0), { rootMargin: `-${navOffset()}px 0px 0px 0px` });
+    io.observe(escList);
+    return () => io.disconnect();
+  });
   // phones: the controls live in a bottom sheet (a quarter of the screen, or expanded to almost all of it)
   // with two tabs, controls and history
   let sheetBig = $state(false);
@@ -138,6 +155,7 @@
     else try { const s = JSON.parse(localStorage.getItem('sim29n') || 'null'); if (s && s.nat) st = Object.assign(blank(), s); } catch {}
     ready = true;
   });
+  afterNavigate(() => { if (ready && page.route.id === '/simula') { const linked = scenarioFromUrl(blank); if (linked) st = linked; } });
   $effect(() => {
     const snap = JSON.stringify(st);
     if (!ready) return;
@@ -150,7 +168,7 @@
 {#snippet tablinks()}
   <a href={resolve('/')} class:on={tab === 'proj'} aria-current={tab === 'proj' ? 'page' : undefined}>{@render icon(ICON.proj)}Proyección</a>
   <a href={resolve('/simula')} class:on={tab === 'sim'} aria-current={tab === 'sim' ? 'page' : undefined}>{@render icon(ICON.sim)}Simula</a>
-  <a href={resolve('/escenarios')} class="soon" class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}<em>Cocinando</em> Escenarios</a>
+  <a href={resolve('/escenarios')} class:on={tab === 'esc'} aria-current={tab === 'esc' ? 'page' : undefined}>{@render icon(ICON.esc)}Escenarios</a>
 {/snippet}
 <header class="mast" class:instant class:sim class:hero={heroOn && !compact} class:notabs={!tabsUp} class:dark={heroOn && overDark} bind:this={mastEl}>
   <div class="brand"><VitLogo height={26} /><a class="l350" href={resolve('/')} aria-label="TresCincuenta.es · inicio" bind:this={head350}>{@html logo350}</a><h1 class="brand-title">TresCincuenta.es</h1></div>
@@ -193,13 +211,18 @@
 
   <main class="center">
     {#if tab === 'esc'}
-      <section class="sec" in:fade={{ duration: 300 }}>
-        <h2 class="hd w">Cocinando <strong>escenarios</strong></h2>
-        <p class="lede w">Estamos cocinando escenarios para el 29N. Preguntas concretas convertidas en cambios de voto y de participación, con los supuestos a la vista. ¿Qué pasaría si votan los barrios más jóvenes, esos donde hoy más gente se queda en casa? ¿Y si la vivienda mueve el voto donde el alquiler más aprieta? ¿Y si las encuestas se equivocan con Vox, como cuando en 2016 anunciaron un <em>sorpasso</em> que nunca cuajó, o al revés?</p>
-        <p class="lede w">Ninguno de estos escenarios es una predicción. Son preguntas del tipo «¿qué pasaría si…?», y cada una muestra cuánto se reordenaría el hemiciclo y en qué provincias se decidiría. Y, de paso, sirven de trampolín para tus propios escenarios.</p>
-        <p class="lede w">Mientras tanto, mira la <a href={resolve('/')}>proyección</a> o <a href={resolve('/simula')}>simula tu escenario</a>.</p>
-        <figure class="cocina"><img src={cocina} width="1400" height="1278" alt="Ilustración del equipo de TresCincuenta.es en una cocina, preparando gráficos como si fueran platos" /><figcaption class="note">Ilustración @oyematias</figcaption></figure>
+      <!-- the list, newest first: each new scenario pushes the rest along -->
+      <section class="sec esc-list" bind:this={escList} aria-label="Escenarios">
+        {#each ESCENARIOS as e (e.slug)}<div class="sec stackitem"><EscenarioCard {e} selected={e.slug === escOn?.slug} onselect={() => pickEsc(e.slug)} /></div>{/each}
       </section>
+      {#if escOn}
+        <div class="esc-full" bind:this={escFull}>{#key escOn.slug}<div in:fade={{ duration: 250 }}><Escenario e={escOn} /></div>{/key}</div>
+      {/if}
+      <!-- back to the list, once it has scrolled away -->
+      <button type="button" class="tolist" class:show={listOut} tabindex={listOut ? 0 : -1} aria-hidden={!listOut} onclick={() => scrollToEl(escList)}>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        Ver más escenarios
+      </button>
     {:else}
     {#if sim}
     <section class="sec simintro">
@@ -263,15 +286,12 @@
   /* tabs: right-aligned, ending on the grid's last column (the title bar shares the grid's edges) */
   .tabs { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 26px; min-width: 0; }
   .tabs a { text-decoration: none; }
-  .tabs a, .soon { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap;
+  .tabs a { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap;
     background: none; border: 0; padding: 10px 0 8px; border-bottom: 2px solid transparent; color: var(--muted); }
   .tabs a { cursor: pointer; }
   .tabs a:hover { color: var(--ink); }
   .tabs a.on { color: var(--ink); border-bottom-color: var(--ink); }
   .ti { width: 18px; height: 18px; fill: currentColor; flex: none; }
-  .soon em { margin-right: -2px; }
-  .soon:not(.on) { opacity: 0.55; }
-  .soon em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
 
   /* page grid: rail · gap · centre · gutter · rail. In the projection the rail tracks are 0 and the
      rails are invisible; entering the simulation animates the tracks open and slides the rails in. */
@@ -291,6 +311,18 @@
   .right .rin { width: calc(2 * var(--c) + var(--g)); }
   .sim .rail { opacity: 1; transform: none; pointer-events: auto; overflow-y: auto; transition-delay: 0.15s, 0s; }
   .share-rail { margin-bottom: var(--s2); }
+  /* Escenarios: the list of scenarios, one under the other, a rule between them */
+  .esc-list { row-gap: 0; }
+  .stackitem { padding: var(--s2) 0; border-top: 1px solid var(--line); }
+  .stackitem:first-child { padding-top: 0; border-top: 0; }
+  .esc-full { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
+  .esc-full > div { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
+  /* «Ver más escenarios»: the site's button, top right under the title bar, while the list is out of view */
+  .tolist { position: fixed; z-index: 25; top: calc(var(--nav-h) + 10px); right: max(16px, calc((100vw - 1262px) / 2)); display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; cursor: pointer; border: 0; border-radius: 999px; background: var(--ink); color: var(--bg);
+    padding: 7px 16px 7px 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+  .tolist.show { opacity: 1; transform: none; pointer-events: auto; }
+  .tolist:hover { opacity: 0.85; }
   /* the sheet's handle, tabs and history copy only exist on phones */
   .sheet-head, .sheet-hist { display: none; }
   .share-rail :global(.share) { width: 100%; justify-content: center; padding-inline: 10px; white-space: normal; text-align: center; line-height: 1.25; }
@@ -366,9 +398,7 @@
     font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; line-height: 1; white-space: nowrap; color: rgba(214, 209, 211, 0.6); }
   .h-tabs a:hover { color: #fff; }
   .h-tabs a.on { color: #fff; border-bottom-color: #fff; }
-  .h-tabs .soon:not(.on) { color: rgba(214, 209, 211, 0.4); opacity: 1; }
   .h-tabs .ti { width: 36px; height: 36px; }
-  .h-tabs em { font-style: normal; font-weight: 300; text-transform: none; letter-spacing: 0; font-size: 13px; }
   .intro .jump { color: inherit; }
 
   /* tabs drop to their own row under the name */
@@ -427,7 +457,4 @@
   @media (max-width: 480px) { .brand { --logo-h: 20px; } .tabs a { font-size: 12px; } .ti { width: 16px; height: 16px; }
     .mast.hero .brand :global(.vitlogo) { transform: translateY(10px) scale(1.3); }
     .h350 :global(svg) { height: 72px; } .h-title { font-size: 28px; line-height: 26px; } .h-tabs a { font-size: 12px; } .h-tabs .ti { width: 24px; height: 24px; } }
-  .cocina { margin: 24px auto 0; max-width: 1200px; }
-  .cocina img { display: block; width: 100%; height: auto; border-radius: 12px; }
-  .cocina figcaption { margin-top: 8px; text-align: right; }
 </style>

@@ -34,8 +34,10 @@ export interface Scenario {
   prov: Record<string, Record<string, number>>;    // province → party → Δ pp
   turnNat: number;                                 // national Δ pp of census
   turnProv: Record<string, number>;                // province → extra Δ pp (adds to national)
-  distNat: Record<string, number>;                 // newcomer multipliers (×1 = like everyone else)
+  distNat: Record<string, number>;                 // newcomer multipliers (×1 = like everyone else; old links)
   distProv: Record<string, Record<string, number>>;
+  shareNat: Record<string, number>;                // newcomers: fixed share (0…1) for some parties; the rest as usual
+  shareProv: Record<string, Record<string, number>>; // province → party → share (replaces the national one there)
 }
 
 export interface DhondtResult {

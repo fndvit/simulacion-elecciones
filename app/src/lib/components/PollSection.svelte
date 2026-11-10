@@ -126,7 +126,7 @@
   .chart .rule { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
   .tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
   .tip .tm { color: var(--muted); margin-top: 3px; }
-  .chart text { font-family: var(--font-ui); font-size: 13px; fill: var(--muted); }
+  .chart text { font-family: var(--font-ui); font-size: 13px; font-weight: 400; fill: var(--muted); }
   .chart .grid { stroke: var(--line); stroke-width: 1; }
   .chart .lbl { font-weight: 700; font-size: 12px; paint-order: stroke; stroke: var(--halo); stroke-width: 3px; }
   .ptable { width: 100%; border-collapse: collapse; font-family: var(--font-ui); font-size: 13px; color: var(--ink); font-weight: 400; }

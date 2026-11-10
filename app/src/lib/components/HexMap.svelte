@@ -16,7 +16,8 @@
   import { pct, fmtN } from '$lib/format';
   import type { RunResult } from '$lib/types';
 
-  let { cur, scope = $bindable(), focusParty = $bindable(), projection = false }: { cur: RunResult; scope: string; focusParty: string; projection?: boolean } = $props();
+  let { cur, scope = $bindable(), focusParty = $bindable(), projection = false, who = 'tu' }: { cur: RunResult; scope: string; focusParty: string; projection?: boolean; who?: 'tu' | 'este' } = $props();
+  const esc = $derived(who === 'este' ? 'este escenario' : 'tu escenario');
 
   let mode = $state<'seats' | 'party'>('seats');
   let compareSel = $state<'scenario' | '2023'>('scenario');
@@ -175,7 +176,7 @@
   {/if}
   {#if projection}<span class="since">desde 2023</span>{:else}
   <div class="toggle small" role="group" aria-label="Escaños que cambian de manos: respecto a">
-    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en tu escenario</button>
+    <button class:on={compare === 'scenario'} aria-pressed={compare === 'scenario'} onclick={() => (compareSel = 'scenario')}>en {esc}</button>
     <button class:on={compare === '2023'} aria-pressed={compare === '2023'} onclick={() => (compareSel = '2023')}>desde 2023</button>
   </div>{/if}
 </div>
@@ -268,7 +269,7 @@
 </div>
 
 <p class="sub w">
-  {#if compare === 'scenario'}El trazo negro marca los escaños que tu escenario cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid, también se cuenta el escaño nuevo).{/if}
+  {#if compare === 'scenario'}El trazo negro marca los escaños que {esc} cambia de manos respecto a la proyección de las encuestas.{:else}El trazo negro marca los escaños que cambian de manos respecto a las generales de 2023 (en Madrid, también se cuenta el escaño nuevo).{/if}
   <span class="on-mouse">Clica en una provincia</span><span class="on-touch">Toca una provincia</span> para seleccionarla en toda la página.
 </p>
 
@@ -282,7 +283,7 @@
   .since { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; margin-left: -4px; }
   .chg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: -4px; }
   .toggle.small { border-radius: 999px; }
-  .toggle.small button { font-size: 14px; line-height: 20px; padding: 2px 12px; border-radius: 999px; }
+  .toggle.small button { font-size: 14px; line-height: 20px; font-weight: 400; padding: 2px 12px; border-radius: 999px; }
   .pdrop :global(.word) { font-size: 17px; line-height: 26px; padding: 2px 10px; }
   .pdrop :global(.opt) { font-size: 16px; }
   .short { display: none; }
@@ -290,7 +291,7 @@
   @media (max-width: 560px) {
     .long { display: none; } .short { display: inline; }
     .map-top { gap: 8px 8px; }
-    .map-top .toggle button { font-size: 14px; padding: 2px 8px; }
+    .map-top .toggle button { font-size: 14px; font-weight: 400; padding: 2px 8px; }
     .map-top .pdrop { order: 3; flex-basis: 100%; }
   }
   .map-heading { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--fg); }

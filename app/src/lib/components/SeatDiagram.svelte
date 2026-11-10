@@ -41,7 +41,7 @@
   .diagram { display: flex; flex-direction: column; gap: 12px; }
   .dgrid { display: grid; gap: 4px; }
   .chead { font-family: var(--font-ui); font-weight: 700; font-size: 12px; text-align: center; padding-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rowlab { font-family: var(--font-ui); font-size: 12px; color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; }
+  .rowlab { font-family: var(--font-ui); font-size: 12px; font-weight: 400; color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; }
   .cell { font-family: var(--font-ui); font-size: 12px; font-variant-numeric: tabular-nums; text-align: center; padding: 6px 2px; border-radius: 4px; color: var(--muted); background: var(--panel); font-weight: 400; }
   .cell.won { font-weight: 700; color: #fff; }
   .cell.last { outline: 2px solid var(--stroke); outline-offset: -2px; }

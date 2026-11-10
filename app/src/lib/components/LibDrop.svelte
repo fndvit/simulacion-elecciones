@@ -127,7 +127,7 @@
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   }
   .word:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
-  .chev { font-size: 12px; opacity: 0.75; }
+  .chev { font-size: 12px; font-weight: 400; opacity: 0.75; }
   .menu {
     position: absolute; top: calc(100% + 4px); left: 0; z-index: 20;
     display: flex; flex-direction: column; min-width: 100%;

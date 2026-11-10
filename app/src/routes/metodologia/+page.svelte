@@ -434,8 +434,7 @@
   .prose p { margin: 0 0 1em; }
   .prose ul { margin: 0 0 1em; padding-left: 1.1em; }
   .prose li { margin-bottom: 0.45em; }
-  .prose a { color: inherit; text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
-  .prose a:hover { text-decoration-color: var(--fg); }
+  /* links in the text: app.css (.prose a), the same everywhere */
   .prose code, .mono { font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace; font-size: 0.86em; }
   .prose code { background: var(--panel); padding: 1px 5px; border-radius: 4px; }
   .nowrap { white-space: nowrap; }
@@ -456,7 +455,7 @@
   .tbl a { color: var(--fg); }
   .bar { display: inline-block; height: 8px; margin-right: 8px; border-radius: 2px; background: var(--fg); opacity: 0.55; vertical-align: middle; }
 
-  .avg { display: flex; flex-direction: column; gap: 6px; margin: var(--s1) 0 var(--s2); font-family: var(--font-ui); font-size: 14px; }
+  .avg { display: flex; flex-direction: column; gap: 6px; margin: var(--s1) 0 var(--s2); font-family: var(--font-ui); font-size: 14px; font-weight: 400; }
   .avg .row { display: grid; grid-template-columns: 130px minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
   .avg .nm { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 700; white-space: nowrap; }
   .avg .nm i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
