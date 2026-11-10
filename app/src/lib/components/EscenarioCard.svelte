@@ -22,7 +22,7 @@
 
 <button type="button" class="item w" class:on={selected} aria-pressed={selected} onclick={onselect}>
   <span class="hd t">{@html title}</span>
-  <span class="date"><time datetime={e.date}>{longDate(e.date)}</time></span>
+  <span class="date">Publicado el <time datetime={e.date}>{longDate(e.date)}</time></span>
   <span class="minibar" role="img" aria-label="Escaños en este escenario">
     {#each segs as s (s.P)}<span style="width:{s.f * 100}%;background:{PARTY[s.P].c}"></span>{/each}
     <i class="maj" aria-hidden="true"></i>

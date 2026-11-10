@@ -42,7 +42,7 @@
 <article class="sec esc" id={e.slug}>
   <section class="sec">
     <h2 class="etitle w6">{@html title}</h2>
-    <p class="updated w"><time datetime={e.date}>{longDate(e.date)}</time></p>
+    <p class="updated w">Publicado el <time datetime={e.date}>{longDate(e.date)}</time></p>
       {#each paras as p}<p class="lede w">{@html p}</p>{/each}
       <div class="w supuestos">
         <div class="shead">Los supuestos</div>

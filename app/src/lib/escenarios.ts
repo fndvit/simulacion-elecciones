@@ -59,7 +59,7 @@ const LIST: Escenario[] = [
   },
   {
     slug: 'vivienda',
-    date: '2026-10-28',
+    date: '2026-11-10',
     title: '¿Y si es <strong>la crisis de la vivienda</strong> —que desató la convocatoria electoral— lo que decide?',
     body: (c) => {
       const provs = listEs(VIVIENDA_HOT.map((id) => BYID[id].n));
@@ -85,7 +85,7 @@ const LIST: Escenario[] = [
   },
   {
     slug: 'vox-sin-ultimo-escano',
-    date: '2026-10-28',
+    date: '2026-11-10',
     title: '¿Y si Vox no se llevase <strong>el último escaño</strong> allá donde está más en disputa?',
     body: (c) => {
       const P = 'VOX';
@@ -114,7 +114,7 @@ const LIST: Escenario[] = [
   },
   {
     slug: 'periferia',
-    date: '2026-10-28',
+    date: '2026-11-10',
     title: '¿Y si <strong>el nacionalismo de izquierdas</strong> en Galicia, Cataluña, País Vasco y Navarra galvaniza la resistencia contra la ultraderecha?',
     body: (c) => {
       const P = PERIFERIA;
