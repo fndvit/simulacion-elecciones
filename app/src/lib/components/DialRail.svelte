@@ -133,7 +133,7 @@
   .gl small { display: block; font-weight: 400; font-size: 12px; line-height: 16px; color: var(--muted); }
   .dials { display: flex; flex-direction: column; gap: 16px; }
   .dial { display: flex; flex-direction: column; }
-  .dlabel { font-family: var(--font-ui); font-size: 15px; line-height: 20px; color: var(--ink); display: flex; align-items: center; gap: 7px; font-weight: 300; }
+  .dlabel { font-family: var(--font-ui); font-size: 15px; line-height: 20px; color: var(--ink); display: flex; align-items: center; gap: 7px; font-weight: 400; }
   .dlabel .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
   .dlabel strong { font-weight: 700; }
   .dlabel .pct { margin-left: auto; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 400; white-space: nowrap; }
@@ -143,7 +143,7 @@
   .val b { color: var(--ink); font-weight: 700; }
 
   .dist { display: flex; flex-direction: column; gap: 10px; margin-top: -8px; }
-  .drow { display: grid; grid-template-columns: 96px 1fr 40px; gap: 8px; align-items: center; font-family: var(--font-ui); font-size: 13px; color: var(--ink); }
+  .drow { display: grid; grid-template-columns: 96px 1fr 40px; gap: 8px; align-items: center; font-family: var(--font-ui); font-size: 13px; font-weight: 400; color: var(--ink); }
   .drow .nm { display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
   .drow .nm i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
   .drow .pc { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }

@@ -215,7 +215,7 @@
   .sel :global(.word) { font-size: 24px; line-height: 30px; padding: 0 10px; font-weight: 200; }
   .sel :global(.opts) { max-height: 320px; overflow-y: auto; }
   .sel :global(.opt) { font-size: 16px; line-height: 24px; }
-  .fig :global(text) { stroke: var(--halo); paint-order: stroke; stroke-linejoin: round; font-family: var(--font-ui); }
+  .fig :global(text) { stroke: var(--halo); paint-order: stroke; stroke-linejoin: round; font-family: var(--font-ui); font-weight: 400; }
   .tip .sub { color: var(--muted); margin-bottom: 6px; }
   .tip .rows { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
   .tip .rows td { padding: 1px 0; white-space: nowrap; }

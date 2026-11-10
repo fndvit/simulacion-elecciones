@@ -127,7 +127,7 @@
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   }
   .word:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
-  .chev { font-size: 12px; opacity: 0.75; }
+  .chev { font-size: 12px; font-weight: 400; opacity: 0.75; }
   .menu {
     position: absolute; top: calc(100% + 4px); left: 0; z-index: 20;
     display: flex; flex-direction: column; min-width: 100%;
@@ -142,7 +142,7 @@
   }
   .search:focus { outline: none; }
   .opt {
-    font: inherit; font-family: var(--font-ui); font-weight: 300; text-align: left; white-space: nowrap; cursor: pointer;
+    font: inherit; font-family: var(--font-ui); font-weight: 400; text-align: left; white-space: nowrap; cursor: pointer;
     padding: 4px 12px;
     background: var(--menu); color: var(--muted);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
