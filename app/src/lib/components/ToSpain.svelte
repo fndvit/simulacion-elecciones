@@ -6,7 +6,7 @@
 
 {#if scope !== 'ES'}
   <button type="button" class="tospain" onclick={(e) => { e.stopPropagation(); scope = 'ES'; }}>
-    <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor" aria-hidden="true"><path d="M440-122q-121-15-200.5-105.5T160-440q0-66 26-126.5T260-672l57 57q-38 34-57.5 79T240-440q0 88 56 155.5T440-202v80Zm80 0v-80q87-16 143.5-83T720-440q0-100-70-170t-170-70h-3l44 44-56 56-140-140 140-140 56 56-44 44h3q134 0 227 93t93 227q0 121-79.5 211.5T520-122Z"/></svg>
+    <svg class="flipx" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
     Ver toda España
   </button>
 {/if}
@@ -20,5 +20,7 @@
     font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 18px; letter-spacing: 0; white-space: nowrap;
   }
   .tospain:hover { opacity: 0.85; }
+  /* «Restablecer»'s icon, mirrored */
+  .flipx { transform: scaleX(-1); }
   .tospain:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 </style>
