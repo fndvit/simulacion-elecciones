@@ -142,7 +142,7 @@
   }
   .search:focus { outline: none; }
   .opt {
-    font: inherit; font-family: var(--font-ui); font-weight: 400; text-align: left; white-space: nowrap; cursor: pointer;
+    font: inherit; font-family: var(--font-ui); font-weight: 300; text-align: left; white-space: nowrap; cursor: pointer;
     padding: 4px 12px;
     background: var(--menu); color: var(--muted);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);

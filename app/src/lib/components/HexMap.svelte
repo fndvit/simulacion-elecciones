@@ -277,21 +277,21 @@
   .viewt { margin-left: auto; }
   .map-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
   .toggle { display: inline-flex; padding: 2px; border-radius: var(--radius); background: var(--panel); }
-  .toggle button { font-family: var(--font-ui); font-weight: 400; font-size: 17px; line-height: 26px; cursor: pointer; border: 0; border-radius: 5px; padding: 2px 12px; background: transparent; color: var(--muted); }
+  .toggle button { font-family: var(--font-ui); font-weight: 300; font-size: 17px; line-height: 26px; cursor: pointer; border: 0; border-radius: 5px; padding: 2px 12px; background: transparent; color: var(--muted); }
   .toggle button.on { background: var(--highlight); color: var(--hl-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
   .mapui { display: flex; flex-direction: column; gap: 10px; }
   .since { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; margin-left: -4px; }
   .chg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: -4px; }
   .toggle.small { border-radius: 999px; }
-  .toggle.small button { font-size: 14px; line-height: 20px; padding: 2px 12px; border-radius: 999px; }
-  .pdrop :global(.word) { font-size: 17px; line-height: 26px; padding: 2px 10px; font-weight: 400; }
+  .toggle.small button { font-size: 14px; line-height: 20px; font-weight: 400; padding: 2px 12px; border-radius: 999px; }
+  .pdrop :global(.word) { font-size: 17px; line-height: 26px; padding: 2px 10px; }
   .pdrop :global(.opt) { font-size: 16px; }
   .short { display: none; }
   /* phones: shorter label and tighter buttons so both toggles share one line; the party picker goes below */
   @media (max-width: 560px) {
     .long { display: none; } .short { display: inline; }
     .map-top { gap: 8px 8px; }
-    .map-top .toggle button { font-size: 14px; padding: 2px 8px; }
+    .map-top .toggle button { font-size: 14px; font-weight: 400; padding: 2px 8px; }
     .map-top .pdrop { order: 3; flex-basis: 100%; }
   }
   .map-heading { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--fg); }

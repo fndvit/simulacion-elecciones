@@ -133,7 +133,7 @@
   .gl small { display: block; font-weight: 400; font-size: 12px; line-height: 16px; color: var(--muted); }
   .dials { display: flex; flex-direction: column; gap: 16px; }
   .dial { display: flex; flex-direction: column; }
-  .dlabel { font-family: var(--font-ui); font-size: 15px; line-height: 20px; color: var(--ink); display: flex; align-items: center; gap: 7px; font-weight: 400; }
+  .dlabel { font-family: var(--font-ui); font-size: 15px; line-height: 20px; color: var(--ink); display: flex; align-items: center; gap: 7px; font-weight: 300; }
   .dlabel .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
   .dlabel strong { font-weight: 700; }
   .dlabel .pct { margin-left: auto; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 400; white-space: nowrap; }
@@ -164,7 +164,7 @@
     .title, .sel :global(.word) { font-size: 20px; line-height: 28px; }
     .gl { font-size: 16px; line-height: 22px; }
     .dials { gap: 2px; }
-    .dlabel { font-size: 14px; line-height: 18px; }
+    .dlabel { font-size: 14px; line-height: 18px; font-weight: 400; }
     .dial input[type='range'] { margin: 2px 0 0; height: 22px; }
     .ends { height: 14px; font-size: 11px; line-height: 14px; }
     .dist { gap: 2px; margin-top: -4px; }
