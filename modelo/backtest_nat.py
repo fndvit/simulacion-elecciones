@@ -15,7 +15,7 @@ def load(e):
     rows = []
     for r in csv.DictReader(open(os.path.join(D, 'hist_polls.csv')), delimiter='|'):
         if r['election'] != e: continue
-        rows.append(dict(pollster=r['pollster'], firm=PL.firm(r['pollster']), end=dt.date.fromisoformat(r['end']), fw='',
+        rows.append(dict(pollster=r['pollster'], firm=PL.firm(r['pollster']), end=dt.date.fromisoformat(r['end']), fw='', start=dt.date.fromisoformat(r['end']),
                          n=int(r['n']) if r['n'] else None, v={k: float(r[k]) if r[k] else None for k in COLS}))
     return rows
 

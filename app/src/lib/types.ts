@@ -11,13 +11,13 @@ export interface Province {
   r23: { v: Record<string, number>; s: Partial<Record<PartyKey, number>>; valid: number; blank: number; null: number; census: number };
 }
 export interface Poll {
-  p: string; f: string; end: string; fw: string; n: number | null; w: number;
+  p: string; f: string; end: string; /** central day of fieldwork: the date the poll counts from */ mid: string; fw: string; n: number | null; w: number;
   c: Record<string, number>; v: Record<string, number>; he: Record<string, number>;
 }
 export interface AppData {
   today: string; election: string; S: Record<string, number>; compSplit: number; halfLife: number;
   ratings: Record<string, [number, number]>; he: Record<string, Record<string, number>>; heN: Record<string, number>;
-  wElec: Record<string, number>; polls: Poll[];
+  wElec: Record<string, number>; polls: Poll[]; /** earlier releases of cumulative trackers, left out */ superseded: number;
   /** vote transfers 2023 → projection per province (CIS recall × intention fitted to each province's totals) */
   /** principal: the Wikipedia the polls are read from (English since November 2026); the other one is the cross-check */
   fuente?: { principal?: 'wikipedia_en' | 'wikipedia_es'; wikipedia_es?: { title: string; revid: number; timestamp: string; url: string } | null; wikipedia_en?: { title?: string; revid: number; timestamp?: string; url: string } | null; leido?: string };

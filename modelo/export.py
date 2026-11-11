@@ -34,7 +34,8 @@ for pr in PROV:
 # poll table (most recent 60) + series
 plist = []
 for r, w, c in sorted(detail, key=lambda d: d[0]['end'], reverse=True):
-    plist.append(dict(p=r['pollster'], f=r['firm'], end=r['end'].isoformat(), fw=r['fw'], n=r['n'], w=round(w, 4),
+    mid = r['end'] - dt.timedelta(days=round(r['back']))   # the poll's date: centre of fieldwork weighted by interviews
+    plist.append(dict(p=r['pollster'], f=r['firm'], end=r['end'].isoformat(), mid=mid.isoformat(), fw=r['fw'], n=r['n'], w=round(w, 4),
         c={k: round(v, 3) for k, v in c.items()}, v={k: v for k, v in r['v'].items() if v is not None},
         he={k: round(v, 2) for k, v in he.get(r['firm'], {}).items() if k in ('PP','PSOE','VOX','SUMAR','PODEMOS','SALF') }))
 series = []
@@ -48,7 +49,7 @@ if series[-1]['d'] != PL.TODAY.isoformat():
 out = dict(today=PL.TODAY.isoformat(), election='2026-11-29', S={k: round(v, 3) for k, v in S2.items()}, avgRaw={k: round(v, 3) for k, v in avg.items() if v},
     compSplit=round(cs, 3), halfLife=PL.HALF_LIFE, ratings={k: [round(mae[k], 2), round(rw[k], 2)] for k in mae},
     he={f: {k: round(v, 2) for k, v in d_.items()} for f, d_ in he.items()}, heN=counts,
-    polls=plist, series=series, prov=prov, geo=dict(W=geo['W'], H=geo['H'], canBox=geo['canBox']),
+    polls=plist, superseded=len(PL.superseded(rows)[1]), series=series, prov=prov, geo=dict(W=geo['W'], H=geo['H'], canBox=geo['canBox']),
     wElec=W_ELEC, census=CENSUS_2026)
 # where the approved polls come from: the Wikipedia revision read, with the date it was approved
 src_path = os.path.join(D, 'fuente.json')

@@ -30,7 +30,7 @@
       out.push({ x: X(d.toISOString().slice(0, 10)), t: MONTHS[d.getMonth()] + (d.getMonth() === 0 ? ' 26' : '') });
     return out;
   });
-  const dots = $derived(DATA.polls.filter((p) => new Date(p.end).getTime() >= t0).flatMap((p) => KEYS.filter((k) => p.v[k] != null).map((k) => ({ x: X(p.end), y: Y(p.v[k]), c: col(k), k, p }))));
+  const dots = $derived(DATA.polls.filter((p) => new Date(p.mid).getTime() >= t0).flatMap((p) => KEYS.filter((k) => p.v[k] != null).map((k) => ({ x: X(p.mid), y: Y(p.v[k]), c: col(k), k, p }))));
   const lines = $derived(KEYS.map((k) => ({ k, d: SER.map((s, i) => (i ? 'L' : 'M') + X(s.d).toFixed(1) + ',' + Y(s[k]).toFixed(1)).join('') })));
   const last = SER[SER.length - 1];
   const labels = KEYS.map((k) => ({ k, y: Y(last[k]), v: last[k] })).sort((a, b) => a.y - b.y);

@@ -13,10 +13,10 @@
 
   // ── weights of one poll ───────────────────────────────────────────────
   const weights = [
-    { k: 'Recencia', f: `0,5 ^ (días / ${dec(DATA.halfLife, 0)})`, d: `El peso se reduce a la mitad cada ${dec(DATA.halfLife, 0)} días desde el último día de campo.` },
+    { k: 'Recencia', f: `0,5 ^ (días / ${dec(DATA.halfLife, 0)})`, d: `El peso se reduce a la mitad cada ${dec(DATA.halfLife, 0)} días, contados desde la fecha de la encuesta: el centro de su trabajo de campo.` },
     { k: 'Muestra', f: '√(min(n, 3.000) ÷ 1.000)', d: 'Más entrevistas, más peso, con tope en 3.000. Si la muestra no se publica se supone n = 800.' },
     { k: 'Valoración', f: '0,6 – 1,4', d: 'Multiplicador según el acierto de la empresa en las generales de 2023 (tabla abajo). Sin historial: 0,85.' },
-    { k: 'Frecuencia', f: '1 ÷ √k', d: 'k = encuestas de la misma empresa en los últimos 30 días: quien publica mucho reparte su peso.' }
+    { k: 'Frecuencia', f: '1 ÷ √k', d: 'k = encuestas de la misma empresa con fecha en los últimos 30 días: quien publica mucho reparte su peso.' }
   ];
 
   // ── pollster ratings (2023) ───────────────────────────────────────────
@@ -118,7 +118,40 @@
       recopilación pública más completa y la más al día, cada fila cita la publicación de la que sale y cada cambio queda registrado con su
       autor y su fecha. Hasta noviembre de 2026 usábamos la de la Wikipedia en español, que ha dejado de actualizarse al mismo ritmo. Cada mañana se descarga con la API de Wikipedia (con tres intentos), anotando la <strong>revisión exacta</strong> que se lee,
       y se normaliza fila a fila: empresa y medio, fechas de campo, tamaño de la muestra, estimación de voto de cada partido en porcentaje
-      del voto válido y enlace a la fuente. Cuenta el <strong>último día de campo</strong>, no la fecha de publicación.
+      del voto válido y enlace a la fuente.
+    </p>
+    <h3>La fecha de cada encuesta</h3>
+    <p>
+      El <strong>11 de noviembre de 2026</strong> cambiamos cómo se fecha y se cuenta cada encuesta. Hasta entonces, las encuestas
+      acumuladas, como las de SW Demoscopia o el panel de SocioMétrica, entraban en la media una vez por entrega y con la fecha de su
+      último día de campo: las mismas entrevistas pesaban varias veces y como si fueran todas recientes.
+    </p>
+    <p>
+      Desde ese día, una encuesta no tiene la fecha de su publicación ni la de su último día de campo, sino la del <strong>centro de su trabajo de
+      campo</strong>, ponderado por entrevistas. Con esa fecha se calcula cuánto ha envejecido y en ella aparece en el gráfico. Así,
+      una encuesta cuyo campo se alarga durante semanas pesa como lo que es: una mezcla de entrevistas recientes y antiguas, y no como
+      si todas fueran de su último día. Solo se usan las encuestas cuyo campo ya ha terminado en la fecha de cálculo.
+    </p>
+    <p>
+      Si solo conocemos las fechas de campo, suponemos que las entrevistas se repartieron por igual y la fecha es el día central: para
+      una encuesta hecha entre el 1 y el 5 de noviembre, el 3. En las encuestas acumuladas sabemos algo más: cada entrega anterior dice
+      cuántas entrevistas se habían hecho hasta su último día. Cada tanda de entrevistas nuevas se sitúa en el centro de su tramo de campo,
+      y la fecha de la encuesta es la media de esos centros, ponderada por el número de entrevistas de cada tanda. Si una encuesta del 1
+      al 11 de noviembre tenía 1.000 entrevistas el día 7 y 4.000 el día 11, su fecha es el día 8: ni el 11, su último día, ni el 6,
+      el día central, porque tres cuartas partes de las entrevistas se hicieron en los últimos cuatro días.
+    </p>
+    <h3>Encuestas acumuladas</h3>
+    <p>
+      Algunas empresas publican <strong>encuestas acumuladas</strong>: cada día o cada semana añaden entrevistas nuevas a las de la entrega
+      anterior y publican el total. Cada entrega de SW Demoscopia, con el campo abierto desde el 26 de octubre, contiene todas las
+      entrevistas de la anterior, y lo mismo pasa con el panel acumulado de SocioMétrica. Contarlas como
+      encuestas distintas daría a las mismas entrevistas el peso de varias.
+    </p>
+    <p>
+      Por eso, de cada empresa solo entra la <strong>entrega más reciente</strong>. Una entrega anterior queda fuera, de la media y de la web,
+      cuando más de la mitad de sus días de campo están dentro de los de otra posterior de la misma empresa. Compartir un solo día no basta:
+      dos encuestas de Sigma Dos hechas del 29 al 30 de octubre y del 30 de octubre al 6 de noviembre cuentan las dos. Hoy quedan fuera
+      por este motivo <strong>{DATA.superseded} entregas</strong>.
     </p>
     <h3>Comprobación cruzada y aprobación</h3>
     <p>
@@ -153,8 +186,8 @@
   <div class="prose well">
     <h2>La <strong>media ponderada</strong></h2>
     <p>
-      El peso de cada encuesta se calcula combinando cuatro factores. Ninguno descarta encuestas: las viejas, pequeñas o de empresas que fallaron
-      cuentan menos, pero cuentan.
+      El peso de cada encuesta se calcula combinando cuatro factores. Ninguno de ellos descarta encuestas: las viejas, pequeñas o de empresas que fallaron
+      cuentan menos, pero cuentan. Las únicas que no entran son las entregas anteriores de las encuestas acumuladas y las reestimaciones de los microdatos del CIS.
     </p>
     <ScrollX><table class="tbl">
       <caption>Peso de una encuesta = recencia × muestra × valoración × frecuencia</caption>
@@ -190,7 +223,7 @@
     <h2>El <strong>sesgo</strong> de cada empresa</h2>
     <p>
       Algunas empresas dan sistemáticamente más (o menos) votos a un partido que el resto. Para medirlo, cada encuesta se compara con la
-      media de las <strong>demás empresas</strong> en una ventana de ±21 días (ponderada por cercanía en el tiempo y tamaño de muestra).
+      media de las <strong>demás empresas</strong> en una ventana de ±21 días entre sus fechas (ponderada por cercanía en el tiempo y tamaño de muestra).
       La desviación media de cada empresa con cada partido es su <strong>efecto de la casa</strong>.
     </p>
     <p>
