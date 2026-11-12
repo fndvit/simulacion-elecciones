@@ -12,7 +12,7 @@
   import { longDate, sgnInt } from '$lib/format';
   import { encodeScenario } from '$lib/share';
   import { href } from '$lib/nav';
-  import { scenarioOf, SUPUESTOS, CAMBIOS, DATOS, type Escenario, type Ctx } from '$lib/escenarios';
+  import { scenarioOf, SUPUESTOS, CAMBIOS, DATOS, BARRAS, type Escenario, type Ctx } from '$lib/escenarios';
   import { BASE } from '$lib/model';
   import { DATA } from '$lib/data';
   import type { PartyKey } from '$lib/types';
@@ -93,6 +93,7 @@
       {#each paras as p}
         {#if p === SUPUESTOS}{@render sups()}
         {:else if p === CAMBIOS}{#if vs.length}<div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>{/if}
+        {:else if p === BARRAS}{#if vs.length}<div class="f mirror"><CompareBars a={vs[0]} b={vs[1]} /></div>{/if}
         {:else if p === DATOS}{#if vs.length}<div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>{/if}
         {:else}<p class="lede w">{@html p}</p>{/if}
       {/each}
@@ -104,7 +105,7 @@
              (or here, if it does not); the mirrored seat bars close the scenario -->
         {#if !paras.includes(CAMBIOS)}<div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>{/if}
         {#if !paras.includes(DATOS)}<div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>{/if}
-        <div class="f mirror"><CompareBars a={vs[0]} b={vs[1]} /></div>
+        {#if !paras.includes(BARRAS)}<div class="f mirror"><CompareBars a={vs[0]} b={vs[1]} /></div>{/if}
       {/if}
   </section>
 

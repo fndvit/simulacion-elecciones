@@ -12,6 +12,8 @@ import { longDate } from './format';
 export const SUPUESTOS = '{{supuestos}}';
 /** in a scenario with versions: the seats each one moves (CAMBIOS) and the data behind each (DATOS) */
 export const CAMBIOS = '{{cambios}}', DATOS = '{{datos}}';
+/** in a scenario with versions: the mirrored seat bars (at the end, if the text does not place them) */
+export const BARRAS = '{{barras}}';
 /** what a scenario's texts can draw on: the adjustments, the result, the projection and the data date */
 export interface Ctx { st: Scenario; cur: RunResult; base: RunResult; today: string;
   /** a scenario with versions: each one's result, by key */
@@ -112,6 +114,7 @@ const LIST: Escenario[] = [
         '¿Y a quién le sale mejor?',
         'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
         same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
+        BARRAS,
         '¿Y quién pierde?',
         'Em ... pues depende de a quién se pregunte.',
         CAMBIOS,
