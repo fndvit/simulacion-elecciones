@@ -10,6 +10,8 @@ import { longDate } from './format';
 
 /** in a body, a paragraph that is only this marker places the adjustments («los supuestos») there */
 export const SUPUESTOS = '{{supuestos}}';
+/** in a scenario with versions: the seats each one moves (CAMBIOS) and the data behind each (DATOS) */
+export const CAMBIOS = '{{cambios}}', DATOS = '{{datos}}';
 /** what a scenario's texts can draw on: the adjustments, the result, the projection and the data date */
 export interface Ctx { st: Scenario; cur: RunResult; base: RunResult; today: string;
   /** a scenario with versions: each one's result, by key */
@@ -111,9 +113,11 @@ const LIST: Escenario[] = [
         'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
         '¿Cuánto mejor?',
         'Em ... pues depende de a quién se pregunte.',
+        CAMBIOS,
         same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
         `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—: los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}. ` +
           `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno, ${bTxt}.`,
+        DATOS,
         `Con una encuesta o con la otra, PP y Vox pasarían de ${r0} a ${lo === hi ? lo : `entre ${lo} y ${hi}`} escaños` +
           (lo >= MAJORITY ? (r0 >= MAJORITY ? ', y ampliarían su mayoría absoluta.' : ', y lograrían la mayoría absoluta.') : '.')
       ];

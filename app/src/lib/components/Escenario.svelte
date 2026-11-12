@@ -12,7 +12,7 @@
   import { longDate, sgnInt } from '$lib/format';
   import { encodeScenario } from '$lib/share';
   import { href } from '$lib/nav';
-  import { scenarioOf, SUPUESTOS, type Escenario, type Ctx } from '$lib/escenarios';
+  import { scenarioOf, SUPUESTOS, CAMBIOS, DATOS, type Escenario, type Ctx } from '$lib/escenarios';
   import { BASE } from '$lib/model';
   import { DATA } from '$lib/data';
   import type { PartyKey } from '$lib/types';
@@ -86,16 +86,20 @@
     <h2 class="etitle w6">{@html title}</h2>
     <p class="updated w">Publicado el <time datetime={e.date}>{longDate(e.date)}</time></p>
       {#each paras as p}
-        {#if p === SUPUESTOS}{@render sups()}{:else}<p class="lede w">{@html p}</p>{/if}
+        {#if p === SUPUESTOS}{@render sups()}
+        {:else if p === CAMBIOS}{#if vs.length}<div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>{/if}
+        {:else if p === DATOS}{#if vs.length}<div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>{/if}
+        {:else}<p class="lede w">{@html p}</p>{/if}
       {/each}
       {#if !paras.includes(SUPUESTOS)}{@render sups()}{/if}
       {#if !vs.length}
         <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
       {:else}
-        <!-- two sources: mirrored seat bars, the seats each one moves, the data behind each -->
+        <!-- two sources: the seats each one moves and the data behind each go where the text places them
+             (or here, if it does not); the mirrored seat bars close the scenario -->
+        {#if !paras.includes(CAMBIOS)}<div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>{/if}
+        {#if !paras.includes(DATOS)}<div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>{/if}
         <div class="f mirror"><CompareBars a={vs[0]} b={vs[1]} /></div>
-        <div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>
-        <div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>
       {/if}
   </section>
 
