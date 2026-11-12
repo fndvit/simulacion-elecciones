@@ -5,7 +5,9 @@
   import SeatBar from './SeatBar.svelte';
   import HexMap from './HexMap.svelte';
   import LastSeat from './LastSeat.svelte';
-  import { run, historyEntries } from '$lib/model';
+  import CompareBars from './CompareBars.svelte';
+  import AgeBars from './AgeBars.svelte';
+  import { run, historyEntries, blank } from '$lib/model';
   import { PARTY } from '$lib/parties';
   import { longDate, sgnInt } from '$lib/format';
   import { encodeScenario } from '$lib/share';
@@ -24,54 +26,75 @@
   const title = $derived(typeof e.title === 'function' ? e.title(ctx) : e.title);
   const paras = $derived.by(() => { const b = typeof e.body === 'function' ? e.body(ctx) : e.body; return Array.isArray(b) ? b : [b]; });
   // the simulator with these adjustments as its starting point (?e=… travels before the #/… of the hash router)
-  const simHref = $derived.by(() => {
-    const h = href('/simula'), q = '?e=' + encodeScenario(st);
+  const simOf = (x: typeof st) => {
+    const h = href('/simula'), q = '?e=' + encodeScenario(x);
     return h.startsWith('#') ? q + h : h + q;
-  });
+  };
+  const simHref = $derived(simOf(st));
+  // a scenario answered with two sources: each with its adjustments, result and step-by-step
+  const vs = $derived((e.versions || []).map((v) => {
+    const s = { ...blank(), ...JSON.parse(JSON.stringify(v.st())) };
+    return { ...v, st: s, cur: run(s), entries: historyEntries(s) };
+  }));
+  let allV = $state<Record<string, boolean>>({});
   let scope = $state('ES');
   let focusParty = $state('PP');
   // the adjustments: beyond three, only the first two until asked
   const FOLD = 3, SHOW = 2;
   let allSup = $state(false);
-  const shown = $derived(entries.length > FOLD && !allSup ? entries.slice(0, SHOW) : entries);
   // Material Symbols Outlined fork_chart, as the Escenarios tab
   const FORK = 'M120-160v-310q-26-7-43-28t-17-50v-192q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v140h30v-140q0-8 6-14t14-6q8 0 14 6t6 14v192q0 29-17 50t-43 28v310h-60Zm480 1q-134 0-227.5-93.5T279-480q0-133 93.5-226.5T600-800q133 0 226.5 93.5T920-480q0 134-93.5 227.5T600-159Zm203-482L642-480l161 162q26-34 41.5-75t15.5-87q0-46-15.5-87T803-641Zm-173-97v186l131-131q-28-22-61-36t-70-19Zm-30 519q46 0 87-15.5t74-41.5L570-467v-271q-98 11-164.5 84.5T339-480q0 109 76 185t185 76Z';
   const nm = (k: string) => PARTY[k as PartyKey].n;
 </script>
+
+{#snippet supBox(head: string, href: string, list: typeof entries, open: boolean, toggle: () => void)}
+  <div class="supuestos">
+    <div class="shead">{head}</div>
+    <a class="tosim" {href} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
+    <ol class="slist">
+      {#each list.length > FOLD && !open ? list.slice(0, SHOW) : list as x (x.key)}
+        <li>
+          <div class="stext">{@html x.html}</div>
+          <div class="simpact">
+            {#each x.impact as [k, d]}<span class:up={d > 0} class:down={d < 0}>{sgnInt(d)} {nm(k)}</span>{:else}<span class="zero">sin cambio de escaños por sí solo</span>{/each}
+          </div>
+        </li>
+      {/each}
+    </ol>
+    {#if list.length > FOLD}
+      <button type="button" class="more-sup" aria-expanded={open} onclick={toggle}>
+        {open ? 'Ver menos' : `Ver los ${list.length} supuestos`}
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class:flip={open}><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    {/if}
+  </div>
+{/snippet}
 
 <article class="sec esc" id={e.slug}>
   <section class="sec">
     <h2 class="etitle w6">{@html title}</h2>
     <p class="updated w">Publicado el <time datetime={e.date}>{longDate(e.date)}</time></p>
       {#each paras as p}<p class="lede w">{@html p}</p>{/each}
-      <div class="w supuestos">
-        <div class="shead">Los supuestos</div>
-        <a class="tosim" href={simHref} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
-        <ol class="slist">
-          {#each shown as x (x.key)}
-            <li>
-              <div class="stext">{@html x.html}</div>
-              <div class="simpact">
-                {#each x.impact as [k, d]}<span class:up={d > 0} class:down={d < 0}>{sgnInt(d)} {nm(k)}</span>{:else}<span class="zero">sin cambio de escaños por sí solo</span>{/each}
-              </div>
-            </li>
-          {/each}
-        </ol>
-        {#if entries.length > FOLD}
-          <button type="button" class="more-sup" aria-expanded={allSup} onclick={() => (allSup = !allSup)}>
-            {allSup ? 'Ver menos' : `Ver los ${entries.length} supuestos`}
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class:flip={allSup}><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
-          </button>
-        {/if}
-      </div>
-      <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
+      {#if !vs.length}
+        <div class="w">{@render supBox('Los supuestos', simHref, entries, allSup, () => (allSup = !allSup))}</div>
+        <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
+      {:else}
+        <!-- two sources: mirrored seat bars and the changes of each, the data behind each, the adjustments of each -->
+        <div class="f"><CompareBars a={vs[0]} b={vs[1]} /></div>
+        <div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>
+        <div class="w vgrid">
+          {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]))}{/each}
+        </div>
+      {/if}
   </section>
 
+  {#if !vs.length}
   <section class="sec">
     <h3 class="hd w">Así quedaría <strong>el reparto por provincias</strong> en este escenario.</h3>
     <HexMap {cur} bind:scope bind:focusParty who="este" />
   </section>
   <section class="sec"><div class="w stack"><LastSeat {cur} bind:scope who="este" /></div></section>
+  {/if}
 </article>
 
 <style>
@@ -110,4 +133,7 @@
   .tosim:hover .lbl, .tosim:focus-visible .lbl { max-width: 200px; opacity: 1; margin-left: 7px; }
   .tosim { transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .stack { display: flex; flex-direction: column; gap: 14px; }
+  /* the adjustments of each source, side by side */
+  .vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 760px) { .vgrid { grid-template-columns: 1fr; } }
 </style>

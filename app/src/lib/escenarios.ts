@@ -24,6 +24,20 @@ export interface Escenario {
   st: Partial<Scenario> | (() => Partial<Scenario>);
   /** kept ready but not on the page yet */
   hidden?: boolean;
+  /** the same question answered with two sources that disagree: the page shows both side by side (seat bars
+   *  mirrored, the changes, the data behind each, the adjustments of each) instead of the map; st is the first */
+  versions?: Version[];
+}
+/** one answer to a scenario's question, from one source */
+export interface Version {
+  key: string;
+  /** the source as it reads after «según» / «con»: «el CIS», «40dB» */
+  name: string;
+  /** HTML link to the source */
+  source: string;
+  st: () => Partial<Scenario>;
+  /** a small bar chart of the data behind it: label, colour key, share among everyone, share in the group (null: not given) */
+  chart?: { title: string; group: string; rows: [string, PartyKey, number, number | null][]; note: string };
 }
 
 /** Party P gives up, in each province where D'Hondt hands it the last seat, the fewest votes (to the tenth of a
@@ -55,7 +69,17 @@ const LIST: Escenario[] = [
     // TEXT PENDING (Xaquín)
     title: '¿Qué pasa si <strong>los mayores de 65 años</strong> no acuden a las urnas?',
     body: '[Texto pendiente]',
-    st: () => mayores(0.2)
+    st: () => mayores(0.2, OLD_RATIO),
+    versions: [
+      { key: 'cis', name: 'el CIS', source: '<a href="https://www.cis.es/documents/d/guest/es3582mar_a-pdf" target="_blank" rel="noopener">CIS, barómetro de octubre de 2026</a>',
+        st: () => mayores(0.2, OLD_RATIO),
+        chart: { title: 'Según el CIS', group: 'Mayores de 65', note: 'Voto más simpatía, sobre quienes dicen un partido o votarían en blanco. Microdatos del estudio 3582, ponderados.',
+          rows: [['PSOE', 'PSOE', 34.0, 51.2], ['PP', 'PP', 20.2, 21.5], ['Vox', 'VOX', 14.5, 6.5], ['Sumar', 'FA', 7.1, 3.1], ['Podemos', 'PODEMOS', 2.8, 2.1], ['SALF', 'SALF', 1.5, 0.1]] } },
+      { key: '40db', name: '40dB', source: '<a href="https://ep00.epimg.net/infografias/encuestas40db/2026/10-barometro/2026_10_informe_voto.pdf" target="_blank" rel="noopener">40dB para El País, barómetro de octubre de 2026</a>',
+        st: () => mayores(0.2, OLD_RATIO_40DB),
+        chart: { title: 'Según 40dB', group: 'Mayores de 65', note: 'Intención directa de voto, sobre toda la población (indecisos incluidos). Solo publica las cifras de más del 2 %.',
+          rows: [['PSOE', 'PSOE', 22.4, 28.2], ['PP', 'PP', 19.6, 28.2], ['Vox', 'VOX', 19.1, 12.1], ['Sumar', 'FA', 4.4, 3.8], ['Podemos', 'PODEMOS', 2.6, 2.5], ['SALF', 'SALF', 2.2, null]] } }
+    ]
   },
   {
     slug: 'vivienda',
@@ -236,13 +260,17 @@ const OLD_ADULTS: Record<string, number> = { '01': 0.309, '02': 0.279, '03': 0.2
 const OLD_TURNOUT = 93.2 / 86.5;
 const OLD_RATIO: Record<string, number> = { PSOE: 1.5, PP: 1.06, VOX: 0.45, FA: 0.44, COMP: 0.44, PODEMOS: 0.74, ERC: 0.79,
   SALF: 0.05, JUNTS: 1.59, BILDU: 1.0, BNG: 0.63, AA: 0.37, PNV: 1.68, UPC: 0.89, OTROS: 0.86 };
-function mayores(drop = 0.2): Partial<Scenario> {
+/** The same, as 40dB has it (barometer for El País, October 2026, direct vote intention among the whole
+ *  population: share among those 65 and over ÷ share among all). Parties it does not break down (or gives
+ *  under 2 % for those over 65) vote as everyone (×1). */
+const OLD_RATIO_40DB: Record<string, number> = { PSOE: 28.2 / 22.4, PP: 28.2 / 19.6, VOX: 12.1 / 19.1, FA: 3.8 / 4.4, COMP: 3.8 / 4.4, PODEMOS: 2.5 / 2.6 };
+function mayores(drop = 0.2, ratio: Record<string, number> = OLD_RATIO): Partial<Scenario> {
   const turnProv: Record<string, number> = {};
   for (const [id, c] of Object.entries(OLD_ADULTS)) {
     const v = (c * OLD_TURNOUT) / (c * OLD_TURNOUT + 1 - c);              // over-65 share of that province's voters
     turnProv[id] = -Math.round(drop * v * BASE.prov[id].turnout * 1000) / 10;
   }
-  return { turnProv, distNat: { ...OLD_RATIO } };
+  return { turnProv, distNat: { ...ratio } };
 }
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
