@@ -12,7 +12,7 @@
   import { longDate, sgnInt } from '$lib/format';
   import { encodeScenario } from '$lib/share';
   import { href } from '$lib/nav';
-  import { scenarioOf, type Escenario, type Ctx } from '$lib/escenarios';
+  import { scenarioOf, SUPUESTOS, type Escenario, type Ctx } from '$lib/escenarios';
   import { BASE } from '$lib/model';
   import { DATA } from '$lib/data';
   import type { PartyKey } from '$lib/types';
@@ -47,6 +47,17 @@
   const nm = (k: string) => PARTY[k as PartyKey].n;
 </script>
 
+{#snippet sups()}
+  {#if !vs.length}
+    <div class="w">{@render supBox('Los supuestos', simHref, entries, allSup, () => (allSup = !allSup))}</div>
+  {:else}
+    <!-- the adjustments of each source, one under the other -->
+    <div class="w vstack">
+      {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]))}{/each}
+    </div>
+  {/if}
+{/snippet}
+
 {#snippet supBox(head: string, href: string, list: typeof entries, open: boolean, toggle: () => void)}
   <div class="supuestos">
     <div class="shead">{head}</div>
@@ -74,18 +85,17 @@
   <section class="sec">
     <h2 class="etitle w6">{@html title}</h2>
     <p class="updated w">Publicado el <time datetime={e.date}>{longDate(e.date)}</time></p>
-      {#each paras as p}<p class="lede w">{@html p}</p>{/each}
+      {#each paras as p}
+        {#if p === SUPUESTOS}{@render sups()}{:else}<p class="lede w">{@html p}</p>{/if}
+      {/each}
+      {#if !paras.includes(SUPUESTOS)}{@render sups()}{/if}
       {#if !vs.length}
-        <div class="w">{@render supBox('Los supuestos', simHref, entries, allSup, () => (allSup = !allSup))}</div>
         <div class="f"><SeatBar {cur} bind:scope who="este" /></div>
       {:else}
-        <!-- two sources: mirrored seat bars and the changes of each, the data behind each, the adjustments of each -->
-        <div class="f"><CompareBars a={vs[0]} b={vs[1]} /></div>
+        <!-- two sources: mirrored seat bars, the seats each one moves, the data behind each -->
+        <div class="f mirror"><CompareBars a={vs[0]} b={vs[1]} /></div>
         <div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>
         <div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>
-        <div class="w vgrid">
-          {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]))}{/each}
-        </div>
       {/if}
   </section>
 
@@ -135,6 +145,6 @@
   .tosim { transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .stack { display: flex; flex-direction: column; gap: 14px; }
   /* the adjustments of each source, side by side */
-  .vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  @media (max-width: 760px) { .vgrid { grid-template-columns: 1fr; } }
+  .vstack { display: flex; flex-direction: column; gap: 12px; }
+  .mirror { margin-top: var(--s2); }
 </style>

@@ -8,6 +8,8 @@ import { PROV, BYID, DATA } from './data';
 import { PARTY, BLOC } from './parties';
 import { longDate } from './format';
 
+/** in a body, a paragraph that is only this marker places the adjustments («los supuestos») there */
+export const SUPUESTOS = '{{supuestos}}';
 /** what a scenario's texts can draw on: the adjustments, the result, the projection and the data date */
 export interface Ctx { st: Scenario; cur: RunResult; base: RunResult; today: string;
   /** a scenario with versions: each one's result, by key */
@@ -104,6 +106,7 @@ const LIST: Escenario[] = [
       return [
         `Son mayoría —3 de cada 10 votantes— y son quienes más votan —el 93% vs. el 87% de los jóvenes en el 23J—, según el ${cis}.`,
         `En este escenario suponemos que uno de cada cinco se queda en casa el 29N. La participación bajaría ${aprox(drop)}, más en las provincias más envejecidas como ${listEs(most)}.`,
+        SUPUESTOS,
         '¿Y a quién le sale mejor?',
         'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
         '¿Cuánto mejor?',

@@ -6,6 +6,7 @@
   import { isTouch, dismiss, tipStyle } from '$lib/touch';
   import { PARTY, BLOC } from '$lib/parties';
   import { BASE, seats2023, sumSeats } from '$lib/model';
+  import { PROV } from '$lib/data';
   import { sgnInt } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
@@ -43,7 +44,22 @@
 
   /** what each one changes against the projection, in bloc order */
   const changes = (cur: RunResult) => BLOC.map((P) => [P, (cur.seats[P] || 0) - (BASE.seats[P] || 0)] as [PartyKey, number]).filter(([, d]) => d);
-  const cols = $derived([a, b].map((v) => ({ v, ch: changes(v.cur), right: sumSeats(v.cur.seats, ['PP', 'VOX']) })));
+  /** the seats that change hands, province by province, grouped by who gives and who takes */
+  function flows(cur: RunResult) {
+    const out: { from: PartyKey; to: PartyKey; provs: string[] }[] = [];
+    for (const p of PROV) {
+      const d = (k: string) => (cur.prov[p.id].seats[k] || 0) - (BASE.prov[p.id].seats[k] || 0);
+      const keys = Object.keys({ ...cur.prov[p.id].seats, ...BASE.prov[p.id].seats }) as PartyKey[];
+      const give = keys.flatMap((k) => Array(Math.max(0, -d(k))).fill(k)), take = keys.flatMap((k) => Array(Math.max(0, d(k))).fill(k));
+      give.forEach((f, i) => {
+        const t = take[i]; if (!t) return;
+        const g = out.find((x) => x.from === f && x.to === t);
+        if (g) g.provs.push(p.n); else out.push({ from: f, to: t, provs: [p.n] });
+      });
+    }
+    return out.sort((x, y) => y.provs.length - x.provs.length || BLOC.indexOf(y.from) - BLOC.indexOf(x.from));
+  }
+  const cols = $derived([a, b].map((v) => ({ v, ch: changes(v.cur), fl: flows(v.cur), right: sumSeats(v.cur.seats, ['PP', 'VOX']) })));
   const right0 = sumSeats(BASE.seats, ['PP', 'VOX']);
 
   // hover: the party stands out in all four bars, with its seats in each
@@ -100,7 +116,17 @@
   <div class="cols">
     {#each cols as c (c.v.name)}
       <div class="col">
-        <div class="dhead">Cambios según {c.v.name}</div>
+        <div class="dhead">Según {c.v.name}</div>
+        <!-- seat by seat: who gives it and who takes it -->
+        <ul class="flows">
+          {#each c.fl as f (f.from + f.to)}
+            <li>
+              <span class="who"><i style="background:{PARTY[f.from].c}"></i>{PARTY[f.from].n}<span class="arr">→</span><i style="background:{PARTY[f.to].c}"></i>{PARTY[f.to].n}</span>
+              <span class="where">{f.provs.join(', ')}</span>
+            </li>
+          {/each}
+        </ul>
+        <div class="sub">Saldo</div>
         <div class="items">
           {#each c.ch as [P, d] (P)}
             <div class="ditem">
@@ -130,7 +156,7 @@
   .hovering .bar span:not(.on) { opacity: 0.35; }
   .bar.slim { height: 12px; opacity: 0.72; }
   .bar.fat { height: 56px; position: relative; }
-  .gap { height: 6px; }
+  .gap { height: 22px; }
   .blab { font-family: var(--font-ui); font-size: 11px; line-height: 1; pointer-events: none; }
   .blab.top { position: absolute; left: 0; top: -16px; color: var(--muted); font-weight: 400; }
   .blab.bottom { position: absolute; left: 0; bottom: -16px; color: var(--muted); font-weight: 400; }
@@ -142,13 +168,20 @@
 
   /* the changes, one column per source */
   .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+  .flows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .flows li { display: flex; flex-direction: column; gap: 1px; font-family: var(--font-ui); font-size: 13px; line-height: 18px; font-weight: 400; }
+  .who { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); font-weight: 700; }
+  .who i { width: 8px; height: 8px; border-radius: 2px; }
+  .arr { color: var(--muted); font-weight: 400; margin: 0 2px; }
+  .where { color: var(--muted); }
+  .sub { font-family: var(--font-ui); font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
   .col { display: flex; flex-direction: column; gap: 10px; }
   .dhead { font-family: var(--font-ui); font-weight: 700; font-size: 14px; line-height: 20px; color: var(--fg); }
-  .items { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  .items { display: flex; flex-wrap: wrap; gap: 8px 12px; }
   .ditem { display: flex; flex-direction: column; align-items: flex-start; }
   .dparty { font-family: var(--font-ui); font-size: 13px; line-height: 20px; white-space: nowrap; color: var(--muted); font-weight: 400; display: flex; align-items: center; gap: 5px; }
   .dparty i { width: 8px; height: 8px; border-radius: 2px; }
-  .dnum { font-family: var(--font-ui); font-weight: 700; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .dnum { font-family: var(--font-ui); font-weight: 700; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
   .dnum.up { color: var(--up); } .dnum.down { color: var(--down); }
   .none { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; }
   .sums { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; }
@@ -156,5 +189,5 @@
   .sums .was { font-weight: 700; color: var(--muted); }
   .sums .ok { color: var(--up); font-weight: 700; }
   @media (max-width: 820px) { .dnum { font-size: 26px; } }
-  @media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
 </style>
