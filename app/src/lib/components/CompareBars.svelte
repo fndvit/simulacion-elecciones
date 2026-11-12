@@ -9,7 +9,8 @@
   import { sgnInt } from '$lib/format';
   import type { RunResult, PartyKey } from '$lib/types';
 
-  let { a, b }: { a: { name: string; cur: RunResult }; b: { name: string; cur: RunResult } } = $props();
+  // part: the mirrored bars (full width) or the changes of each (in the text well)
+  let { a, b, part = 'bars' }: { a: { name: string; cur: RunResult }; b: { name: string; cur: RunResult }; part?: 'bars' | 'changes' } = $props();
   let W = $state(800);
   const N = 350, BAND = 34;
   const s23 = seats2023('ES');
@@ -48,10 +49,11 @@
   // hover: the party stands out in all four bars, with its seats in each
   let hov = $state<PartyKey | null>(null);
   let tip = $state({ x: 0, y: 0, h: 0 });
-  let barsEl: HTMLDivElement;
-  function over(e: PointerEvent, P: PartyKey) { const r = barsEl.getBoundingClientRect(); hov = P; tip = { x: e.clientX - r.left, y: e.clientY - r.top, h: r.height }; }
+  let barsEl = $state<HTMLDivElement>();
+  function over(e: PointerEvent, P: PartyKey) { const r = barsEl!.getBoundingClientRect(); hov = P; tip = { x: e.clientX - r.left, y: e.clientY - r.top, h: r.height }; }
 </script>
 
+{#if part === 'bars'}
 <div class="cmp" bind:clientWidth={W}>
   <div class="cap"><b>Congreso</b> · 350 escaños · mayoría absoluta, 176</div>
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -93,6 +95,8 @@
   </div>
   <div class="note">Barras finas: escaños de 2023; entre las barras, el cambio desde entonces · barras gruesas: este escenario según {a.name} (arriba) y según {b.name} (abajo). En 2023, Frente Amplio es Sumar.</div>
 
+</div>
+{:else}
   <div class="cols">
     {#each cols as c (c.v.name)}
       <div class="col">
@@ -109,7 +113,7 @@
       </div>
     {/each}
   </div>
-</div>
+{/if}
 
 <style>
   .cmp { display: flex; flex-direction: column; gap: 7px; }
@@ -137,14 +141,14 @@
   .tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
 
   /* the changes, one column per source */
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; margin-top: 10px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
   .col { display: flex; flex-direction: column; gap: 10px; }
   .dhead { font-family: var(--font-ui); font-weight: 700; font-size: 14px; line-height: 20px; color: var(--fg); }
-  .items { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .items { display: flex; flex-wrap: wrap; gap: 8px 16px; }
   .ditem { display: flex; flex-direction: column; align-items: flex-start; }
   .dparty { font-family: var(--font-ui); font-size: 13px; line-height: 20px; white-space: nowrap; color: var(--muted); font-weight: 400; display: flex; align-items: center; gap: 5px; }
   .dparty i { width: 8px; height: 8px; border-radius: 2px; }
-  .dnum { font-family: var(--font-ui); font-weight: 700; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .dnum { font-family: var(--font-ui); font-weight: 700; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
   .dnum.up { color: var(--up); } .dnum.down { color: var(--down); }
   .none { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; }
   .sums { font-family: var(--font-ui); font-size: 14px; color: var(--muted); font-weight: 400; }

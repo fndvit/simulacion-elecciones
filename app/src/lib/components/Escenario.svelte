@@ -81,6 +81,7 @@
       {:else}
         <!-- two sources: mirrored seat bars and the changes of each, the data behind each, the adjustments of each -->
         <div class="f"><CompareBars a={vs[0]} b={vs[1]} /></div>
+        <div class="w"><CompareBars a={vs[0]} b={vs[1]} part="changes" /></div>
         <div class="w"><AgeBars charts={vs.map((v) => v.chart!).filter(Boolean)} sources={vs.map((v) => v.source)} /></div>
         <div class="w vgrid">
           {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]))}{/each}
