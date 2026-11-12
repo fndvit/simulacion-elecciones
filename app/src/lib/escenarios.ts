@@ -106,16 +106,16 @@ const LIST: Escenario[] = [
       const r0 = (c.base.seats.PP || 0) + (c.base.seats.VOX || 0), rs = [A, B].map((R) => (R.seats.PP || 0) + (R.seats.VOX || 0));
       const lo = Math.min(...rs), hi = Math.max(...rs);
       return [
-        `Son mayoría —3 de cada 10 votantes— y son quienes más votan —el 93% vs. el 87% de los jóvenes en el 23J—, según el ${cis}.`,
+        `Son muchos —3 de cada 10 votantes— y son quienes más votan —el 93% vs. el 87% de los menores de 65 en el 23J—, según el ${cis}.`,
         `En este escenario suponemos que uno de cada cinco se queda en casa el 29N. La participación bajaría ${aprox(drop)}, más en las provincias más envejecidas como ${listEs(most)}.`,
         SUPUESTOS,
         '¿Y a quién le sale mejor?',
         'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
-        '¿Cuánto mejor?',
+        same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
+        '¿Y quién pierde?',
         'Em ... pues depende de a quién se pregunte.',
         CAMBIOS,
-        same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
-        `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—: los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}. ` +
+        `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—: los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}.`,
           `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno, ${bTxt}.`,
         DATOS,
         `Con una encuesta o con la otra, PP y Vox pasarían de ${r0} a ${lo === hi ? lo : `entre ${lo} y ${hi}`} escaños` +
