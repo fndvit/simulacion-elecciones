@@ -22,7 +22,12 @@
   const cur = $derived(run(st));
   const entries = $derived(historyEntries(st));
   // the texts may be written from the data
-  const ctx = $derived<Ctx>({ st, cur, base: BASE, today: DATA.today });
+  // a scenario answered with two sources: each with its adjustments, result and step-by-step
+  const vs = $derived((e.versions || []).map((v) => {
+    const s = { ...blank(), ...JSON.parse(JSON.stringify(v.st())) };
+    return { ...v, st: s, cur: run(s), entries: historyEntries(s) };
+  }));
+  const ctx = $derived<Ctx>({ st, cur, base: BASE, today: DATA.today, vs: Object.fromEntries(vs.map((v) => [v.key, v.cur])) });
   const title = $derived(typeof e.title === 'function' ? e.title(ctx) : e.title);
   const paras = $derived.by(() => { const b = typeof e.body === 'function' ? e.body(ctx) : e.body; return Array.isArray(b) ? b : [b]; });
   // the simulator with these adjustments as its starting point (?e=… travels before the #/… of the hash router)
@@ -31,11 +36,6 @@
     return h.startsWith('#') ? q + h : h + q;
   };
   const simHref = $derived(simOf(st));
-  // a scenario answered with two sources: each with its adjustments, result and step-by-step
-  const vs = $derived((e.versions || []).map((v) => {
-    const s = { ...blank(), ...JSON.parse(JSON.stringify(v.st())) };
-    return { ...v, st: s, cur: run(s), entries: historyEntries(s) };
-  }));
   let allV = $state<Record<string, boolean>>({});
   let scope = $state('ES');
   let focusParty = $state('PP');

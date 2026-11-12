@@ -5,11 +5,13 @@
 import type { Scenario, RunResult, PartyKey } from './types';
 import { blank, run, BASE, provTurnShift, INVEST } from './model';
 import { PROV, BYID, DATA } from './data';
-import { PARTY } from './parties';
+import { PARTY, BLOC } from './parties';
 import { longDate } from './format';
 
 /** what a scenario's texts can draw on: the adjustments, the result, the projection and the data date */
-export interface Ctx { st: Scenario; cur: RunResult; base: RunResult; today: string }
+export interface Ctx { st: Scenario; cur: RunResult; base: RunResult; today: string;
+  /** a scenario with versions: each one's result, by key */
+  vs?: Record<string, RunResult> }
 type Text = string | string[];
 
 export interface Escenario {
@@ -67,8 +69,53 @@ const LIST: Escenario[] = [
     date: '2026-11-09',
     hidden: true,   // the story depends on the poll (CIS vs 40dB): keep for later
     // TEXT PENDING (Xaquín)
-    title: '¿Qué pasa si <strong>los mayores de 65 años</strong> no acuden a las urnas?',
-    body: '[Texto pendiente]',
+    title: '¿Y si <strong>los mayores de 65 años</strong> no salen a votar?',
+    body: (c) => {
+      const A = c.vs!.cis, B = c.vs!['40db'];
+      const cis = '<a href="https://www.cis.es/documents/d/guest/es3582mar_a-pdf" target="_blank" rel="noopener">barómetro de octubre del CIS</a>';
+      const db = '<a href="https://ep00.epimg.net/infografias/encuestas40db/2026/10-barometro/2026_10_informe_voto.pdf" target="_blank" rel="noopener">encuesta de 40dB para El País</a>';
+      // the turnout drop, and the three provinces where it is largest
+      const drop = 100 * (c.base.turnout - A.turnout);
+      const most = PROV.map((p) => [p.id, c.base.prov[p.id].turnout - A.prov[p.id].turnout] as [string, number]).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([id]) => BYID[id].n);
+      // Vox's gains, province by province, grouped by whom they come from
+      const voxFrom = (R: RunResult) => {
+        const by: [string, string[]][] = [];
+        for (const p of PROV) {
+          const d = (k: string) => (R.prov[p.id].seats[k] || 0) - (c.base.prov[p.id].seats[k] || 0);
+          if (d('VOX') <= 0) continue;
+          const from = Object.keys({ ...R.prov[p.id].seats, ...c.base.prov[p.id].seats }).find((k) => k !== 'VOX' && d(k) < 0) || '';
+          const g = by.find(([k]) => k === from);
+          if (g) g[1].push(p.n); else by.push([from, [p.n]]);
+        }
+        // most seats first; on a tie, from the right of the bar (PP before PSOE)
+        return by.sort((x, y) => y[1].length - x[1].length || BLOC.indexOf(y[0] as PartyKey) - BLOC.indexOf(x[0] as PartyKey));
+      };
+      const vA = voxFrom(A), vB = voxFrom(B), dv = (R: RunResult) => (R.seats.VOX || 0) - (c.base.seats.VOX || 0);
+      const voxTxt = (R: RunResult, g: typeof vA) => `${dv(R) >= 0 ? 'Sumaría' : 'Perdería'} ${Math.abs(dv(R))} ${Math.abs(dv(R)) === 1 ? 'escaño' : 'escaños'}: ` +
+        (g.length === 2 ? (x: string[]) => x.join(', y ') : listEs)(g.map(([k, ps]) => `en ${listEs(ps)}${k ? ', a costa ' + de(k) : ''}`)) + '.';
+      const same = JSON.stringify(vA) === JSON.stringify(vB) && dv(A) === dv(B);
+      // PSOE and PP, with each source
+      const d = (R: RunResult, k: string) => (R.seats[k] || 0) - (c.base.seats[k] || 0);
+      const n = (x: number) => `${Math.abs(x)} ${Math.abs(x) === 1 ? 'escaño' : 'escaños'}`;
+      const mv = (x: number, pl: boolean, unit = true) => (x > 0 ? (pl ? 'ganarían ' : 'ganaría ') : x < 0 ? (pl ? 'perderían ' : 'perdería ') : '') + (x ? (unit ? n(x) : Math.abs(x)) : (pl ? 'se quedarían igual' : 'se quedaría igual'));
+      const [pA, ppA, pB, ppB] = [d(A, 'PSOE'), d(A, 'PP'), d(B, 'PSOE'), d(B, 'PP')];
+      const bTxt = pB < 0 && ppB < 0 ? `y ambos perderían: el PSOE ${n(pB)} y el PP ${Math.abs(ppB)}` : `: el PSOE ${mv(pB, false)} y el PP ${mv(ppB, false, false)}`;
+      const r0 = (c.base.seats.PP || 0) + (c.base.seats.VOX || 0), rs = [A, B].map((R) => (R.seats.PP || 0) + (R.seats.VOX || 0));
+      const lo = Math.min(...rs), hi = Math.max(...rs);
+      return [
+        `Son mayoría —3 de cada 10 votantes— y son quienes más votan —el 93% vs. el 87% de los jóvenes en el 23J—, según el ${cis}.`,
+        `En este escenario suponemos que uno de cada cinco se queda en casa el 29N. La participación bajaría ${aprox(drop)}, más en las provincias más envejecidas como ${listEs(most)}.`,
+        '¿Y a quién le sale mejor?',
+        'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
+        '¿Cuánto mejor?',
+        'Em ... pues depende de a quién se pregunte.',
+        same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
+        `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—: los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}. ` +
+          `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno, ${bTxt}.`,
+        `Con una encuesta o con la otra, PP y Vox pasarían de ${r0} a ${lo === hi ? lo : `entre ${lo} y ${hi}`} escaños` +
+          (lo >= MAJORITY ? (r0 >= MAJORITY ? ', y ampliarían su mayoría absoluta.' : ', y lograrían la mayoría absoluta.') : '.')
+      ];
+    },
     st: () => mayores(0.2, OLD_RATIO),
     versions: [
       { key: 'cis', name: 'el CIS', source: '<a href="https://www.cis.es/documents/d/guest/es3582mar_a-pdf" target="_blank" rel="noopener">CIS, barómetro de octubre de 2026</a>',
@@ -275,6 +322,12 @@ function mayores(drop = 0.2, ratio: Record<string, number> = OLD_RATIO): Partial
 
 // ── helpers for the texts ───────────────────────────────────────────────────────────────────────
 const MAJORITY = 176;
+/** 3,9 → «casi cuatro puntos»; 4,0 → «cuatro puntos»; 4,2 → «algo más de cuatro puntos» */
+const WORDS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez'];
+function aprox(x: number): string {
+  const r = Math.round(x), w = r === 1 ? 'un punto' : `${WORDS[r] ?? r} puntos`;
+  return Math.abs(x - r) < 0.05 ? w : x < r ? 'casi ' + w : 'algo más de ' + w;
+}
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 /** 240000 → «240.000», to the thousand */
 const thousands = (x: number) => String(Math.round(x / 1000) * 1000).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
