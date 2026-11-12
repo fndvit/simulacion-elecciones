@@ -104,7 +104,7 @@ const LIST: Escenario[] = [
       const n = (x: number) => `${Math.abs(x)} ${Math.abs(x) === 1 ? 'escaño' : 'escaños'}`;
       const mv = (x: number, pl: boolean, unit = true) => (x > 0 ? (pl ? 'ganarían ' : 'ganaría ') : x < 0 ? (pl ? 'perderían ' : 'perdería ') : '') + (x ? (unit ? n(x) : Math.abs(x)) : (pl ? 'se quedarían igual' : 'se quedaría igual'));
       const [pA, ppA, pB, ppB] = [d(A, 'PSOE'), d(A, 'PP'), d(B, 'PSOE'), d(B, 'PP')];
-      const bTxt = pB < 0 && ppB < 0 ? `y ambos perderían: el PSOE ${n(pB)} y el PP ${Math.abs(ppB)}` : `: el PSOE ${mv(pB, false)} y el PP ${mv(ppB, false, false)}`;
+      const bTxt = pB < 0 && ppB < 0 ? `, y ambos perderían. El PSOE perdería ${n(pB)} y el PP ${Math.abs(ppB)}` : `. El PSOE ${mv(pB, false)} y el PP ${mv(ppB, false, false)}`;
       const r0 = (c.base.seats.PP || 0) + (c.base.seats.VOX || 0), rs = [A, B].map((R) => (R.seats.PP || 0) + (R.seats.VOX || 0));
       const lo = Math.min(...rs), hi = Math.max(...rs);
       return [
@@ -118,8 +118,8 @@ const LIST: Escenario[] = [
         '¿Y quién pierde?',
         'Em ... pues depende de a quién se pregunte.',
         CAMBIOS,
-        `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—: los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}.`,
-          `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno, ${bTxt}.`,
+        `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—. Los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}.`,
+          `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno${bTxt}.`,
         DATOS,
         `Con una encuesta o con la otra, PP y Vox pasarían de ${r0} a ${lo === hi ? lo : `entre ${lo} y ${hi}`} escaños` +
           (lo >= MAJORITY ? (r0 >= MAJORITY ? ', y ampliarían su mayoría absoluta.' : ', y lograrían la mayoría absoluta.') : '.')
