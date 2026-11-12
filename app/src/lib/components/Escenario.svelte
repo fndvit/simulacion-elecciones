@@ -53,15 +53,19 @@
   {:else}
     <!-- the adjustments of each source, one under the other -->
     <div class="w vstack">
-      {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]))}{/each}
+      {#each vs as v (v.key)}{@render supBox('Los supuestos según ' + v.name, simOf(v.st), v.entries, !!allV[v.key], () => (allV[v.key] = !allV[v.key]), true)}{/each}
     </div>
   {/if}
 {/snippet}
 
-{#snippet supBox(head: string, href: string, list: typeof entries, open: boolean, toggle: () => void)}
-  <div class="supuestos">
+<!-- compact: folded, only the start of the first adjustment, in two lines (the boxes of a scenario with two sources) -->
+{#snippet supBox(head: string, href: string, list: typeof entries, open: boolean, toggle: () => void, compact = false)}
+  <div class="supuestos" class:compact>
     <div class="shead">{head}</div>
     <a class="tosim" {href} aria-label="Abrir en el simulador"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d={FORK} /></svg><span class="lbl">Abrir en el simulador</span></a>
+    {#if compact && !open && list.length > 1}
+      <div class="stext sclamp">{@html list[0].html}</div>
+    {:else}
     <ol class="slist">
       {#each list.length > FOLD && !open ? list.slice(0, SHOW) : list as x (x.key)}
         <li>
@@ -72,7 +76,8 @@
         </li>
       {/each}
     </ol>
-    {#if list.length > FOLD}
+    {/if}
+    {#if list.length > FOLD || (compact && list.length > 1)}
       <button type="button" class="more-sup" aria-expanded={open} onclick={toggle}>
         {open ? 'Ver menos' : `Ver los ${list.length} supuestos`}
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class:flip={open}><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -149,6 +154,10 @@
   .tosim { transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .stack { display: flex; flex-direction: column; gap: 14px; }
   /* the adjustments of each source, side by side */
-  .vstack { display: flex; flex-direction: column; gap: 12px; }
+  .vstack { display: flex; flex-direction: column; gap: 10px; }
+  .supuestos.compact { gap: 8px; padding: 12px 16px; }
+  .supuestos.compact .tosim { top: 8px; right: 8px; }
+  .sclamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding-right: 36px; }
+  .supuestos.compact .more-sup { padding: 5px 10px 5px 14px; }
   .mirror { margin-top: var(--s2); }
 </style>
