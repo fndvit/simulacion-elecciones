@@ -72,7 +72,7 @@ function sinUltimoEscano(P: string, max = 3): Partial<Scenario> {
 const LIST: Escenario[] = [
   {
     slug: 'mayores',
-    date: '2026-11-09',
+    date: '2026-11-16',
     // TEXT PENDING (Xaquín)
     title: '¿Y si <strong>los mayores de 65 años</strong> no salen a votar?',
     body: (c) => {
