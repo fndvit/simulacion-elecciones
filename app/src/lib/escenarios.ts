@@ -112,7 +112,7 @@ const LIST: Escenario[] = [
         `En este escenario suponemos que uno de cada cinco se queda en casa el 29N. La participación bajaría ${aprox(drop)}, más en las provincias más envejecidas como ${listEs(most)}.`,
         SUPUESTOS,
         '¿Y a quién le sale mejor?',
-        'A Vox, que tiene un electorado más joven y mucho menos apoyo entre los mayores de 65.',
+        'A Vox, que tiene <a href="https://elpais.com/espana/2025-09-14/quienes-son-los-nuevos-votantes-de-vox-datos-por-edad-sexo-y-clase-social.html" target="_blank" rel="noopener">un electorado más joven</a> y mucho menos apoyo entre los mayores de 65.',
         same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
         BARRAS,
         '¿Y quién pierde?',
