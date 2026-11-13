@@ -110,19 +110,19 @@ const LIST: Escenario[] = [
       return [
         `Son muchos —3 de cada 10 votantes— y son quienes más votan —el 93% vs. el 87% de los menores de 65 en el 23J—, según el ${cis}.`,
         `En este escenario suponemos que uno de cada cinco se queda en casa el 29N. La participación bajaría ${aprox(drop)}, más en las provincias más envejecidas como ${listEs(most)}.`,
-        SUPUESTOS,
-        '¿Y a quién le sale mejor?',
+        '<strong>¿Y a quién le sale mejor?</strong>',
         'A Vox, que tiene <a href="https://elpais.com/espana/2025-09-14/quienes-son-los-nuevos-votantes-de-vox-datos-por-edad-sexo-y-clase-social.html" target="_blank" rel="noopener">un electorado más joven</a> y mucho menos apoyo entre los mayores de 65.',
         same ? voxTxt(A, vA) : `Según el CIS, ${voxTxt(A, vA).replace(/^S/, 's').replace(/^P/, 'p')} Según 40dB, ${voxTxt(B, vB).replace(/^S/, 's').replace(/^P/, 'p')}`,
         BARRAS,
-        '¿Y quién pierde?',
+        '<strong>¿Y quién pierde?</strong>',
         'Em ... pues depende de a quién se pregunte.',
         CAMBIOS,
         `Según el CIS, los mayores votan mucho más al PSOE que el resto —el 51 % de los que dicen a quién votarían, frente al 34 % del total—. Los socialistas ${mv(pA, true)} y el PP ${mv(ppA, false, false)}.`,
           `Según la ${db}, en cambio, PSOE y PP empatan entre los mayores, con un 28,2 % cada uno${bTxt}.`,
         DATOS,
         `Con una encuesta o con la otra, PP y Vox pasarían de ${r0} a ${lo === hi ? lo : `entre ${lo} y ${hi}`} escaños` +
-          (lo >= MAJORITY ? (r0 >= MAJORITY ? ', y ampliarían su mayoría absoluta.' : ', y lograrían la mayoría absoluta.') : '.')
+          (lo >= MAJORITY ? (r0 >= MAJORITY ? ', y ampliarían su mayoría absoluta.' : ', y lograrían la mayoría absoluta.') : '.'),
+        SUPUESTOS
       ];
     },
     st: () => mayores(0.2, OLD_RATIO),

@@ -20,12 +20,14 @@
   let { e }: { e: Escenario } = $props();
   const st = $derived(scenarioOf(e));
   const cur = $derived(run(st));
-  const entries = $derived(historyEntries(st));
+  // only the adjustments that move seats on their own (all of them still travel to the simulator)
+  const sup = (x: typeof st) => historyEntries(x, { boldProv: true }).filter((h) => h.impact.length);
+  const entries = $derived(sup(st));
   // the texts may be written from the data
   // a scenario answered with two sources: each with its adjustments, result and step-by-step
   const vs = $derived((e.versions || []).map((v) => {
     const s = { ...blank(), ...JSON.parse(JSON.stringify(v.st())) };
-    return { ...v, st: s, cur: run(s), entries: historyEntries(s) };
+    return { ...v, st: s, cur: run(s), entries: sup(s) };
   }));
   const ctx = $derived<Ctx>({ st, cur, base: BASE, today: DATA.today, vs: Object.fromEntries(vs.map((v) => [v.key, v.cur])) });
   const title = $derived(typeof e.title === 'function' ? e.title(ctx) : e.title);

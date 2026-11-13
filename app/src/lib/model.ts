@@ -205,8 +205,10 @@ function impactOf(st: Scenario): [string, number][] {
   for (const k of new Set([...Object.keys(r.seats), ...Object.keys(BASE.seats)])) { const x = (r.seats[k] || 0) - (BASE.seats[k] || 0); if (x) d.push([k, x]); }
   return d.sort((a, b) => b[1] - a[1]);
 }
-export function historyEntries(st: Scenario): HistoryEntry[] {
+/** boldProv: province names in bold (the escenarios' «supuestos» box) */
+export function historyEntries(st: Scenario, { boldProv = false } = {}): HistoryEntry[] {
   const out: HistoryEntry[] = [];
+  const pn = (id: string) => (boldProv ? `<strong>${esc(BYID[id].n)}</strong>` : esc(BYID[id].n));
   const pc = (q: number) => Math.round(q * 100) + ' %';
   const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]);
   const distTxt = (d?: Record<string, number>, s?: Record<string, number>, down = false) => {
@@ -223,13 +225,13 @@ export function historyEntries(st: Scenario): HistoryEntry[] {
   for (const [P, v] of Object.entries(st.nat)) if (v)
     out.push({ key: 'n' + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en toda España`, impact: impactOf({ ...blank(), nat: { [P]: v } }), undo: (s) => { delete s.nat[P]; } });
   for (const [id, o] of Object.entries(st.prov)) for (const [P, v] of Object.entries(o || {})) if (v)
-    out.push({ key: 'p' + id + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en ${esc(BYID[id].n)}`, impact: impactOf({ ...blank(), prov: { [id]: { [P]: v } } }), undo: (s) => { delete s.prov[id][P]; } });
+    out.push({ key: 'p' + id + P, html: `<strong>${nm(P)}</strong> ${v > 0 ? 'gana' : 'pierde'} ${d1(v)} puntos en ${pn(id)}`, impact: impactOf({ ...blank(), prov: { [id]: { [P]: v } } }), undo: (s) => { delete s.prov[id][P]; } });
   if (st.turnNat)
     out.push({ key: 'tn', html: `La participación ${st.turnNat > 0 ? 'sube' : 'baja'} ${d1(st.turnNat)} puntos en toda España${distTxt(st.distNat, st.shareNat, st.turnNat < 0)}`, impact: impactOf({ ...blank(), turnNat: st.turnNat, distNat: { ...st.distNat }, shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { s.turnNat = 0; } });
   for (const [id, v] of Object.entries(st.turnProv)) if (v)
-    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${esc(BYID[id].n)}${distTxt(st.distProv[id] || st.distNat, st.shareProv?.[id] || st.shareNat, v + st.turnNat < 0)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)), shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { delete s.turnProv[id]; } });
+    out.push({ key: 't' + id, html: `La participación ${v > 0 ? 'sube' : 'baja'} ${d1(v)} puntos en ${pn(id)}${distTxt(st.distProv[id] || st.distNat, st.shareProv?.[id] || st.shareNat, v + st.turnNat < 0)}`, impact: impactOf({ ...blank(), turnProv: { [id]: v }, distNat: { ...st.distNat }, distProv: JSON.parse(JSON.stringify(st.distProv)), shareNat: { ...st.shareNat }, shareProv: JSON.parse(JSON.stringify(st.shareProv || {})) }), undo: (s) => { delete s.turnProv[id]; } });
   // a province's own split of the newcomers, where its turnout was not moved on its own
   for (const id of Object.keys(st.shareProv || {})) if (!st.turnProv[id] && st.turnNat)
-    out.push({ key: 's' + id, html: `En ${esc(BYID[id].n)}${distTxt(undefined, st.shareProv[id]).replace(/^; d/, ', d')}`, impact: [], undo: (s) => { delete s.shareProv[id]; } });
+    out.push({ key: 's' + id, html: `En ${pn(id)}${distTxt(undefined, st.shareProv[id]).replace(/^; d/, ', d')}`, impact: [], undo: (s) => { delete s.shareProv[id]; } });
   return out;
 }
