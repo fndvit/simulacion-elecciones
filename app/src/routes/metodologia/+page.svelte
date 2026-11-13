@@ -14,7 +14,7 @@
   // ── weights of one poll ───────────────────────────────────────────────
   const weights = [
     { k: 'Recencia', f: `0,5 ^ (días / ${dec(DATA.halfLife, 0)})`, d: `El peso se reduce a la mitad cada ${dec(DATA.halfLife, 0)} días, contados desde la fecha de la encuesta: el centro de su trabajo de campo.` },
-    { k: 'Muestra', f: '√(min(n, 3.000) ÷ 1.000)', d: 'Más entrevistas, más peso, con tope en 3.000. Si la muestra no se publica se supone n = 800.' },
+    { k: 'Muestra', f: '√(min(n, 5.000) ÷ 1.000)', d: 'Más entrevistas, más peso, con tope en 5.000 (hasta el 13 de noviembre de 2026, 3.000). Si la muestra no se publica se supone n = 800.' },
     { k: 'Valoración', f: '0,6 – 1,4', d: 'Multiplicador según el acierto de la empresa en las generales de 2023 (tabla abajo). Sin historial: 0,85.' },
     { k: 'Frecuencia', f: '1 ÷ √k', d: 'k = encuestas de la misma empresa con fecha en los últimos 30 días: quien publica mucho reparte su peso.' }
   ];
@@ -172,13 +172,12 @@
     </p>
     <h3>Sumar, Frente Amplio y Compromís</h3>
     <p>
-      La mayoría de los sondeos todavía publica una sola cifra para el espacio de Sumar. Las encuestas que dan Compromís por
+      Hasta hace poco, la mayoría de sondeos todavía publicaba una sola cifra para el espacio de Sumar. Las encuestas que daban Compromís por
       separado fijan su peso dentro de ese espacio: de media, el <strong>{dec(DATA.compSplit * 100, 0)} %</strong>. Con esa proporción
-      se divide la cifra conjunta entre Frente Amplio y Compromís en todas las encuestas.
+      se dividía la cifra conjunta entre Frente Amplio y Compromís en todas las encuestas.
     </p>
     <p>
-      Este supuesto de nuestro modelo seguramente cambie a medida que más encuestas publiquen por separado a Frente Amplio,
-      Compromís y el resto de partidos de este espacio.
+      Este supuesto cambió a medida que más encuestas publicaron por separado a Frente Amplio, Compromís y el resto de partidos de este espacio.
     </p>
   </div>
 
@@ -196,6 +195,10 @@
         {#each weights as w}<tr><td class="k">{w.k}</td><td class="mono nowrap">{w.f}</td><td>{w.d}</td></tr>{/each}
       </tbody>
     </table></ScrollX>
+    <p>
+      El <strong>13 de noviembre de 2026</strong> subimos el tope de la muestra de 3.000 a <strong>5.000 entrevistas</strong>, que es el que usa
+      <a href="https://abcnews.com/538/trump-approval-polling-average-works/story?id=117999010" target="_blank" rel="noopener">FiveThirtyEight en su metodología</a>. ¿Por qué un tope? Más allá de unos miles de entrevistas, lo que hace fallar a una encuesta no es el tamaño de la muestra sino su método y su sesgo, y sin él una sola macroencuesta del CIS, con más de 45 mil entrevistas, pesaría más que muchas encuestas juntas.
+    </p>
     <p>
       Para cada partido, la media es el promedio de sus estimaciones con esos pesos, ya corregidas del sesgo de cada empresa (ver abajo).
       La línea del gráfico de la proyección repite el cálculo semana a semana con lo que se sabía en cada fecha. La tabla de
