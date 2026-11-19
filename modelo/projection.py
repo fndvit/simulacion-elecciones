@@ -5,16 +5,24 @@ import polls as PL
 CENSUS_2026 = 38728356
 SEATS_2026_CHANGES = {'28': 38, '11': 8}
 W_ELEC = {'g2023': 0.6, 'g2019n': 0.25, 'g2019a': 0.15}
-CAT = {'08','17','25','43'}; AND = {'04','11','14','18','21','23','29','41'}; VAL = {'03','12','46'}
-# parties that do not stand somewhere on 29N (structural zero in the projection)
+CAT = {'08','17','25','43'}; AND = {'04','11','14','18','21','23','29','41'}; VAL = {'03','12','46'}; CAN = {'35','38'}
+# parties that do not stand somewhere on 29N (structural zero in the projection): their national poll figure belongs
+# to the provinces where they do stand (lists as proclaimed in BOE-A-2026-23103, 3 Nov 2026)
 # Podemos: no list in Catalonia; its candidates go on ERC's lists (pact of 12 Oct 2026). Polls already count
-# that vote inside ERC, so Podemos's national figure belongs to the provinces where it does stand.
+# that vote inside ERC.
+# Comunitat Valenciana: Frente Amplio and Podemos run inside Compromís: Front Valencià (COMPROMIS-EUPV-PODEM-ERPV).
+# The polls' Compromís column is that joint list («Valencian Front»), so it already holds their Valencian voters;
+# folding them in again would count them twice (fixed 19 Nov 2026).
+# Illes Balears: Podemos runs as independents on AraMés-Front Ampli, which the polls count as Frente Amplio.
+# Teruel, Ceuta and Melilla: no Frente Amplio list; Melilla: no Podemos list either.
 # Aliança Catalana: does not stand anywhere (announced 5 Oct 2026)
-NOT_RUNNING = {'PODEMOS': CAT, 'AC': CAT}
-# joint lists on 29N: the source party's projected vote there goes to the list (source, list, provinces)
-CAN = {'35','38'}
-LISTS = [('PODEMOS', 'COMP', VAL),      # Compromís-Front Valencià (Compromís, Podemos, EUPV…); Podemos heads Alicante
-         ('FA', 'UPC', CAN), ('PODEMOS', 'UPC', CAN)]   # Unidad del Pueblo Canario (Nueva Canarias, Podemos, IU, Sumar)
+# Canarias: Podemos runs inside Unidad del Pueblo Canario; the polls' Podemos column never includes it (UPC is
+# counted with Frente Amplio, see LISTS)
+NOT_RUNNING = {'PODEMOS': CAT | VAL | CAN | {'07', '52'}, 'FA': VAL | {'44', '51', '52'}, 'AC': CAT}
+# joint lists on 29N with no column in the polls: the member's projected vote there goes to the list (source, list, provinces)
+# Unidad del Pueblo Canario (NC-BC, Podemos, IU, Sumar): Wikipedia's Frente Amplio column includes FA's territorial allies
+# (UPC, AraMés): e.g. Sondaxe 15 Nov, FA 8 + UPC 1 + AraMés 1 = 10 seats in that column (checked 19 Nov 2026)
+LISTS = [('FA', 'UPC', CAN)]
 AA_W = {'11':1.6,'41':1.2,'29':1.0,'18':1.0,'14':0.9,'21':0.9,'23':0.8,'04':0.6}
 PARTIES = ['PP','PSOE','VOX','FA','COMP','PODEMOS','SALF','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN','AA','AC','UPC']
 
