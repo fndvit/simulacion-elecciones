@@ -55,7 +55,7 @@
 
   // ── sources ───────────────────────────────────────────────────────────
   const sources = [
-    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en inglés (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en español y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election', d: 'Cada día' },
+    { q: 'Encuestas', s: 'Recopilación de sondeos publicados de Wikipedia en inglés (empresas demoscópicas, medios y CIS), comprobada con la de Wikipedia en español y aprobada por el equipo; licencia CC BY-SA 4.0', u: 'https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Spanish_general_election', d: 'Cada día hasta el 24 nov. 2026' },
     { q: 'Transferencias de voto', s: 'Microdatos del barómetro mensual del CIS (recuerdo de voto e intención de voto)', u: 'https://www.cis.es', d: 'Cada mes' },
     { q: 'Resultados electorales', s: 'Ministerio del Interior, infoelectoral: generales de abril y noviembre de 2019 y julio de 2023, por circunscripción', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
     { q: 'Quién se suma al cambiar la participación', s: 'Ministerio del Interior, infoelectoral: generales de julio de 2023, por mesa electoral', u: 'https://infoelectoral.interior.gob.es', d: 'Fijo' },
@@ -410,6 +410,11 @@
   <!-- ── daily update ──────────────────────────────────────────────────── -->
   <div class="prose well">
     <h2>Actualización diaria y <strong>verificación</strong></h2>
+    <p>
+      <strong>Desde el 24 de noviembre de 2026 los datos están congelados.</strong> La ley prohíbe publicar encuestas en los cinco días
+      anteriores a las elecciones, así que no se añaden encuestas nuevas ni se recalcula la media: la proyección es la del
+      {longDate(DATA.today)} hasta el 29 de noviembre. Lo que sigue describe cómo se actualizaba hasta entonces.
+    </p>
     <p>
       Todo el proceso se ejecuta automáticamente en dos partes cada mañana a través de GitHub Actions. La primera descarga y valida las
       encuestas y, si hay novedades, las propone para su aprobación. La segunda recalcula la media y la proyección con las encuestas

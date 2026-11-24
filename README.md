@@ -14,6 +14,8 @@
 
 ## Actualización diaria (GitHub Actions)
 
+> **Congelada desde el 24 de noviembre de 2026** (veda de encuestas antes del 29N): el workflow no tiene programación ni se lanza con push, sus tres trabajos llevan `if: false` y `modelo/polls.py` fija la fecha en el 24 de noviembre (`FROZEN`). Para reactivarla, deshaz ese commit.
+
 `.github/workflows/actualizar-encuestas.yml` se ejecuta cada día a las 07:17 UTC (08:17 en Madrid en invierno, 09:17 en verano) y también a mano con «Run workflow». **Ninguna encuesta llega a la web sin que una persona la apruebe.**
 
 1. **Revisar** (trabajo `revisar`):

@@ -1,7 +1,9 @@
 import csv, math, os, re, datetime as dt, json, statistics as st
 D = os.path.join(os.path.dirname(__file__), '..', 'datos')
-# the date the average is computed for: today (or SIM_TODAY=YYYY-MM-DD to reproduce a past run)
-TODAY = dt.date.fromisoformat(os.environ['SIM_TODAY']) if os.environ.get('SIM_TODAY') else dt.date.today()
+# the date the average is computed for. Frozen at 2026-11-24: no polls may be published in the five days before
+# the 29N election, so the data stay as on that day (SIM_TODAY=YYYY-MM-DD still reproduces any other run)
+FROZEN = dt.date(2026, 11, 24)
+TODAY = dt.date.fromisoformat(os.environ['SIM_TODAY']) if os.environ.get('SIM_TODAY') else FROZEN
 PARTIES = ['PP','PSOE','VOX','SUMAR','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN','AA','PODEMOS','SALF','AC']
 RES23 = {'PSOE':31.68,'PP':33.06,'VOX':12.38,'SUMAR':12.33}
 HALF_LIFE = 14.0       # days: weight halves every two weeks (campaign-period decay)
