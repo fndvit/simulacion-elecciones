@@ -14,7 +14,7 @@
   // ── weights of one poll ───────────────────────────────────────────────
   const weights = [
     { k: 'Recencia', f: `0,5 ^ (días / ${dec(DATA.halfLife, 0)})`, d: `El peso se reduce a la mitad cada ${dec(DATA.halfLife, 0)} días, contados desde la fecha de la encuesta: el centro de su trabajo de campo.` },
-    { k: 'Muestra', f: '√(min(n, 3.000) ÷ 1.000)', d: 'Más entrevistas, más peso, con tope en 3.000. Si la muestra no se publica se supone n = 800.' },
+    { k: 'Muestra', f: '√(min(n, 5.000) ÷ 1.000)', d: 'Más entrevistas, más peso, con tope en 5.000 (hasta el 13 de noviembre de 2026, 3.000). Si la muestra no se publica se supone n = 800.' },
     { k: 'Valoración', f: '0,6 – 1,4', d: 'Multiplicador según el acierto de la empresa en las generales de 2023 (tabla abajo). Sin historial: 0,85.' },
     { k: 'Frecuencia', f: '1 ÷ √k', d: 'k = encuestas de la misma empresa con fecha en los últimos 30 días: quien publica mucho reparte su peso.' }
   ];
@@ -172,13 +172,12 @@
     </p>
     <h3>Sumar, Frente Amplio y Compromís</h3>
     <p>
-      La mayoría de los sondeos todavía publica una sola cifra para el espacio de Sumar. Las encuestas que dan Compromís por
+      Hasta hace poco, la mayoría de sondeos todavía publicaba una sola cifra para el espacio de Sumar. Las encuestas que daban Compromís por
       separado fijan su peso dentro de ese espacio: de media, el <strong>{dec(DATA.compSplit * 100, 0)} %</strong>. Con esa proporción
-      se divide la cifra conjunta entre Frente Amplio y Compromís en todas las encuestas.
+      se dividía la cifra conjunta entre Frente Amplio y Compromís en todas las encuestas.
     </p>
     <p>
-      Este supuesto de nuestro modelo seguramente cambie a medida que más encuestas publiquen por separado a Frente Amplio,
-      Compromís y el resto de partidos de este espacio.
+      Este supuesto cambió a medida que más encuestas publicaron por separado a Frente Amplio, Compromís y el resto de partidos de este espacio.
     </p>
   </div>
 
@@ -196,6 +195,10 @@
         {#each weights as w}<tr><td class="k">{w.k}</td><td class="mono nowrap">{w.f}</td><td>{w.d}</td></tr>{/each}
       </tbody>
     </table></ScrollX>
+    <p>
+      El <strong>13 de noviembre de 2026</strong> subimos el tope de la muestra de 3.000 a <strong>5.000 entrevistas</strong>, que es el que usa
+      <a href="https://abcnews.com/538/trump-approval-polling-average-works/story?id=117999010" target="_blank" rel="noopener">FiveThirtyEight en su metodología</a>. ¿Por qué un tope? Más allá de unos miles de entrevistas, lo que hace fallar a una encuesta no es el tamaño de la muestra sino su método y su sesgo, y sin él una sola macroencuesta del CIS, con más de 45 mil entrevistas, pesaría más que muchas encuestas juntas.
+    </p>
     <p>
       Para cada partido, la media es el promedio de sus estimaciones con esos pesos, ya corregidas del sesgo de cada empresa (ver abajo).
       La línea del gráfico de la proyección repite el cálculo semana a semana con lo que se sabía en cada fecha. La tabla de
@@ -286,6 +289,11 @@
       Donde un partido no se presenta, su voto allí es cero y su media nacional se reparte entre las provincias en las que sí concurre.
       Es el caso de <strong>Podemos en Cataluña</strong>: no tiene lista propia y sus candidatos van en las listas de ERC (<a href="https://www.elespanol.com/espana/politica/20261012/montero-rufian-pactan-podemos-no-presentara-cataluna-erc-pedira-voto-resto-espana/1003744417179_0.html" target="_blank" rel="noopener">acuerdo del 12 de octubre de 2026</a>);
       las encuestas ya cuentan ese voto dentro de ERC.
+      Lo mismo pasa en la <strong>Comunitat Valenciana</strong>: Frente Amplio y Podemos no tienen lista propia y van dentro de
+      Compromís: Front Valencià, con Esquerra Unida y ERPV (<a href="https://www.eldiario.es/comunitat-valenciana/politica/maria-teresa-perez-encabezara-lista-compromis-front-valencia-alicante-29n_1_13600710.html" target="_blank" rel="noopener">en Alicante la encabeza Podemos</a>). Las encuestas dan esa lista conjunta en la columna de Compromís,
+      así que ya cuenta a sus votantes valencianos. En <strong>Illes Balears</strong>, Podemos va como independiente en la lista de AraMés-Front Ampli, que las encuestas
+      cuentan como Frente Amplio. Y no hay lista de Frente Amplio en Teruel, Ceuta ni Melilla, ni de Podemos en Melilla. Todo ello según las
+      <a href="https://www.boe.es/buscar/doc.php?id=BOE-A-2026-23103" target="_blank" rel="noopener">candidaturas proclamadas</a> que publicó el BOE el 3 de noviembre de 2026.
     </p>
     <p>
       <strong>Aliança Catalana</strong> no se presenta a estas elecciones (<a href="https://www.eldebate.com/espana/cataluna/20261005/alianca-catalana-no-presentara-elecciones-generales-cuando-hagan-cataluna-me-avisais_466273.html" target="_blank" rel="noopener">lo anunció el 5 de octubre de 2026</a>) y no entra en la proyección.
@@ -295,10 +303,23 @@
       es mínimo.
     </p>
     <p>
-      Donde varios partidos van en una <strong>lista conjunta</strong>, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno. En la
-      Comunitat Valenciana, Podemos va dentro de <strong>Compromís</strong> (<a href="https://www.eldiario.es/comunitat-valenciana/politica/maria-teresa-perez-encabezara-lista-compromis-front-valencia-alicante-29n_1_13600710.html" target="_blank" rel="noopener">Compromís-Front Valencià; en Alicante la lista la encabeza Podemos</a>). En Canarias,
-      Frente Amplio y Podemos van en <a href="https://www.eldiario.es/canariasahora/politica/acuerdo-historico-izquierda-canaria-suma-confluencia-llamara-unidad-pueblo-canario_1_13589265.html" target="_blank" rel="noopener"><strong>Unidad del Pueblo Canario</strong></a>, con Nueva Canarias e IU; el voto propio de Nueva Canarias, que no tiene
+      Donde varios partidos van en una <strong>lista conjunta</strong> sin columna propia en las encuestas, sus votos proyectados se suman a esa lista y salen de la media nacional de cada uno.
+      En Canarias, Frente Amplio y Podemos van en <a href="https://www.eldiario.es/canariasahora/politica/acuerdo-historico-izquierda-canaria-suma-confluencia-llamara-unidad-pueblo-canario_1_13589265.html" target="_blank" rel="noopener"><strong>Unidad del Pueblo Canario</strong></a>, con Nueva Canarias e IU. Las encuestas no le dan columna propia:
+      la tabla de la Wikipedia en inglés, de la que tomamos las cifras, la cuenta dentro de Frente Amplio, junto a sus otros aliados
+      territoriales (en Sondaxe, por ejemplo, los diez escaños de esa columna son ocho de Frente Amplio, uno de Unidad del Pueblo Canario y uno de Ara Més).
+      Por eso el voto proyectado de Frente Amplio en Canarias pasa a esa lista y sale de su media nacional; el de Podemos, que las encuestas
+      cuentan aparte, es cero allí y su media se reparte entre las provincias en las que concurre. El voto propio de Nueva Canarias, que no tiene
       historial separado en nuestros datos, queda en «otros», así que esa lista puede estar algo infravalorada.
+    </p>
+    <p>
+      El <strong>19 de noviembre de 2026</strong> corregimos un <strong>error</strong> en las listas conjuntas, del que nos avisó una lectora avizora,
+      y ajustamos la proyección a las <a href="https://www.boe.es/buscar/doc.php?id=BOE-A-2026-23103" target="_blank" rel="noopener">candidaturas proclamadas en el BOE</a>.
+      Hasta entonces, la proyección daba a Frente Amplio una lista propia en las tres provincias valencianas, en Teruel, Ceuta y Melilla,
+      y a Podemos otra en Illes Balears y Melilla, que no existen. Además, sumábamos a Compromís el voto valenciano de Podemos, que las encuestas
+      ya cuentan dentro de Compromís: lo contábamos dos veces. También pasábamos a Unidad del Pueblo Canario el voto de Podemos en Canarias, que las encuestas
+      cuentan fuera de esa lista. Ese día, con las listas reales, Compromís perdía un escaño y el PSOE y Frente Amplio ganaban uno cada uno;
+      Vox perdía uno. En Aragón (con Chunta Aragonesista) y en Illes Balears (con Més), las encuestas cuentan
+      la lista entera como Frente Amplio, pero el voto propio del socio no tiene historial en nuestros datos: el reparto por provincias puede quedarse algo corto allí.
     </p>
     <h3>El ajuste</h3>
     <p>

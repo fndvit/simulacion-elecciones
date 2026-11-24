@@ -6,6 +6,7 @@ PARTIES = ['PP','PSOE','VOX','SUMAR','ERC','JUNTS','BILDU','PNV','BNG','CC','UPN
 RES23 = {'PSOE':31.68,'PP':33.06,'VOX':12.38,'SUMAR':12.33}
 HALF_LIFE = 14.0       # days: weight halves every two weeks (campaign-period decay)
 HE_WINDOW = 21         # days either side used to build the house-effect comparison average
+SAMPLE_CAP = 5000      # interviews: beyond this, a bigger sample adds no weight (538's default cap; 3000 until 13 Nov 2026)
 HE_SHRINK = 4          # pseudo-polls of shrinkage toward zero house effect
 UNRATED = 0.85
 AC_TO = {'JUNTS': 0.23, 'VOX': 0.22}   # CEO 2nd wave 2026 as reported by Ara (the CEO does not publish the table; other outlets differ)
@@ -135,7 +136,7 @@ def average(rows, at=TODAY, he=None, use_rating=True):
     for r in rows:
         age = mid_age(r, at)
         w_rec = 0.5 ** (age / HALF_LIFE)
-        n = min(r['n'] or 800, 3000)
+        n = min(r['n'] or 800, SAMPLE_CAP)
         w_n = math.sqrt(n / 1000)
         w_r = rating_for(r['firm'], rw)[0] if use_rating else 1
         w_f = 1 / math.sqrt(max(1, recent.get(fk(r['firm']), 1)))
@@ -162,7 +163,7 @@ def house_effects(rows):
         for p in PARTIES:
             x = r['v'][p]
             if x is None: continue
-            items = [(o['v'][p], 0.5 ** (abs((md(o) - md(r)).days) / 7) * math.sqrt(min(o['n'] or 800, 3000) / 1000))
+            items = [(o['v'][p], 0.5 ** (abs((md(o) - md(r)).days) / 7) * math.sqrt(min(o['n'] or 800, SAMPLE_CAP) / 1000))
                      for o in rows if o['firm'] != r['firm'] and o['v'][p] is not None and abs((md(o) - md(r)).days) <= HE_WINDOW]
             if len(items) < 3: continue
             res.setdefault(r['firm'], {}).setdefault(p, []).append(x - wavg(items))
